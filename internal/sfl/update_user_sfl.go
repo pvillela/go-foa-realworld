@@ -10,6 +10,6 @@ import (
 type UpdateUserSflS struct {
 }
 
-// UpdateUserSfl is the type of a function that takes an rpc.UpdateUserIn as input
+// UpdateUserSfl is the type of a function that takes an rpc.UserUpdateIn as input
 // and returns a model.User.
-type UpdateUserSfl = func(userInfo rpc.UpdateUserIn) model.User
+type UpdateUserSfl = func(userInfo rpc.UserUpdateIn) model.User

@@ -9,6 +9,6 @@ import (
 type GetCommentsSflS struct {
 }
 
-// AddCommentSfl is the type of a function that takes a slug as input
+// CommentAddSfl is the type of a function that takes a slug as input
 // and returns a model.Comments.
 type GetCommentsSfl = func(slug string) model.Comments

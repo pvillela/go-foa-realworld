@@ -10,6 +10,6 @@ import (
 type RegisterSflS struct {
 }
 
-// RegisterSfl is the type of a function that takes an rpc.RegisterIn as input
+// RegisterSfl is the type of a function that takes an rpc.UserRegisterIn as input
 // and returns a model.User.
-type RegisterSfl = func(in rpc.RegisterIn) model.User
+type RegisterSfl = func(in rpc.UserRegisterIn) model.User

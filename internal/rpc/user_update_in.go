@@ -1,6 +1,6 @@
 package rpc
 
-type UpdateUserIn struct {
+type UserUpdateIn struct {
 	User struct {
 		Email string
 		Bio   string

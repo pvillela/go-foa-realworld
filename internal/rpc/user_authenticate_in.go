@@ -1,8 +1,7 @@
 package rpc
 
-type RegisterIn struct {
+type UserAuthenticateIn struct {
 	User struct {
-		Username string
 		Email    string
 		Password string
 	}
