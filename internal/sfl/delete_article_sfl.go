@@ -1,4 +1,4 @@
-package fn
+package sfl
 
 // DeleteArticleSflS contains the dependencies required for the construction of a
 // DeleteArticleSfl. It represents the deletion of an article.

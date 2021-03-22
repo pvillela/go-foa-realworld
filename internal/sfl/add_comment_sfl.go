@@ -1,4 +1,4 @@
-package fn
+package sfl
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/model"

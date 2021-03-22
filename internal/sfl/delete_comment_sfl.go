@@ -1,4 +1,4 @@
-package fn
+package sfl
 
 // DeleteCommentSflS contains the dependencies required for the construction of a
 // DeleteCommentSfl. It represents the deletion of a comment to an article.
