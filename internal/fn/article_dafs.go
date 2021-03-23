@@ -7,11 +7,11 @@ import (
 	"time"
 )
 
-type ArticleDafS struct {
+type ArticleDafs struct {
 	Store *sync.Map
 }
 
-func (s ArticleDafS) Create(article model.Article) (*model.Article, error) {
+func (s ArticleDafs) Create(article model.Article) (*model.Article, error) {
 	if _, err := s.GetBySlug(article.Slug); err == nil {
 		return nil, ErrDuplicateArticle
 	}
@@ -20,7 +20,7 @@ func (s ArticleDafS) Create(article model.Article) (*model.Article, error) {
 	return &article, nil
 }
 
-func (s ArticleDafS) GetBySlug(slug string) (*model.Article, error) {
+func (s ArticleDafs) GetBySlug(slug string) (*model.Article, error) {
 	value, ok := s.Store.Load(slug)
 	if !ok {
 		return nil, ErrArticleNotFound
@@ -34,7 +34,7 @@ func (s ArticleDafS) GetBySlug(slug string) (*model.Article, error) {
 	return &article, nil
 }
 
-func (s ArticleDafS) Update(article model.Article) (*model.Article, error) {
+func (s ArticleDafs) Update(article model.Article) (*model.Article, error) {
 	if _, err := s.GetBySlug(article.Slug); err != nil {
 		return nil, ErrArticleNotFound
 	}
@@ -43,4 +43,10 @@ func (s ArticleDafS) Update(article model.Article) (*model.Article, error) {
 	s.Store.Store(article.Slug, article)
 
 	return &article, nil
+}
+
+func (s ArticleDafs) Delete(slug string) error {
+	s.Store.Delete(slug)
+
+	return nil
 }

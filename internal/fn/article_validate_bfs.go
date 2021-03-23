@@ -2,10 +2,14 @@ package fn
 
 import "github.com/pvillela/go-foa-realworld/internal/model"
 
-func ArticleValidateBeforeCreateBf(article model.Article) error {
+type ArticleValidateBeforeCreateBf struct{}
+
+func (ArticleValidateBeforeCreateBf) Invoke(article model.Article) error {
 	return nil
 }
 
-func ArticleValidateBeforeUpdateBf(article model.Article) error {
+type ArticleValidateBeforeUpdateBf struct{}
+
+func (ArticleValidateBeforeUpdateBf) Invoke(article model.Article) error {
 	return nil
 }

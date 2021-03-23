@@ -4,6 +4,6 @@ import (
 	"github.com/gosimple/slug"
 )
 
-func SlugBf(title string) string {
+func SlugSup(title string) string {
 	return slug.Make(title)
 }

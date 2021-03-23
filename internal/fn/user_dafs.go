@@ -6,11 +6,11 @@ import (
 	"sync"
 )
 
-type UserDafS struct {
+type UserDafs struct {
 	Store *sync.Map
 }
 
-func (s UserDafS) GetByName(userName string) (*model.User, error) {
+func (s UserDafs) GetByName(userName string) (*model.User, error) {
 	value, ok := s.Store.Load(userName)
 	if !ok {
 		return nil, ErrUserNotFound
