@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/fn"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -16,7 +16,7 @@ type ArticleCreateIn struct {
 
 func (in *ArticleCreateIn) ToArticle() model.Article {
 	return model.Article{
-		Slug:        fn.SlugSup((*in).Article.Title),
+		Slug:        fs.SlugSup((*in).Article.Title),
 		Title:       (*in).Article.Title,
 		Description: (*in).Article.Description,
 		Body:        (*in).Article.Body,

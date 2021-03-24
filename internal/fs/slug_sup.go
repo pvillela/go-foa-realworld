@@ -1,4 +1,4 @@
-package fn
+package fs
 
 import (
 	"github.com/gosimple/slug"

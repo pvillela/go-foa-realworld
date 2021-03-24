@@ -1,23 +1,28 @@
 package sfl
 
-import "github.com/pvillela/go-foa-realworld/internal/model"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/ft"
+)
 
-// ArticleDeleteSflS contains the dependencies required for the construction of a
-// ArticleDeleteSflT. It represents the deletion of an article.
+// ArticleFavoriteSfl is the stereotype instance for the service flow that
+// deletes an article.
 type ArticleDeleteSfl struct {
-	GetArticleAndCheckOwnerFl func(slug string, username string) (*model.Article, error)
+	GetArticleAndCheckOwnerFl ft.ArticleGetAndCheckOwnerFlT
 	ArticleDeleteDaf          func(slug string) error
 }
 
-// ArticleDeleteSflT is the type of a function that takes a slug as input and
-// returns noting.
-type ArticleDeleteSflT = func(slug string)
+// ArticleDeleteSflT is the function type instantiated by ArticleDeleteSfl.
+type ArticleDeleteSflT = func(username, slug string) error
 
-func (s ArticleDeleteSfl) core(username string, slug string) error {
+func (s ArticleDeleteSfl) invoke(username string, slug string) error {
 	_, err := s.GetArticleAndCheckOwnerFl(username, slug)
 	if err != nil {
 		return err
 	}
 
 	return s.ArticleDeleteDaf(slug)
+}
+
+func (s ArticleDeleteSfl) Make() ArticleDeleteSflT {
+	return s.invoke
 }

@@ -1,13 +1,13 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/fn"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleUpdateSfl contains the dependencies required for the construction of a
-// ArticleUpdateSflT. It represents the updating of an article.
+// ArticleUpdateSfl is the stereotype instance for the service flow that
+// updates an article.
 type ArticleUpdateSfl struct {
 	GetArticleAndCheckOwnerFl     func(slug string, username string) (*model.Article, error)
 	ArticleValidateBeforeUpdateBf func(model.Article) error
@@ -17,9 +17,8 @@ type ArticleUpdateSfl struct {
 	ArticleCreateDaf              func(article model.Article) (*model.Article, error)
 }
 
-// ArticleUpdateSflT is the type of a function that takes an rpc.ArticleUpdateIn as input and
-// returns a model.Article.
-type ArticleUpdateSflT = func(articleIn rpc.ArticleUpdateIn) model.Article
+// ArticleUpdateSflT is the function type instantiated by ArticleUpdateSfl.
+type ArticleUpdateSflT = func(username, slug string, in rpc.ArticleUpdateIn) (*rpc.ArticleOut, error)
 
 func (s ArticleUpdateSfl) core(
 	username string,
@@ -42,7 +41,7 @@ func (s ArticleUpdateSfl) core(
 		return nil, nil, err
 	}
 
-	newSlug := fn.SlugSup(article.Title)
+	newSlug := fs.SlugSup(article.Title)
 	article.Slug = newSlug
 
 	var savedArticle *model.Article
@@ -54,7 +53,7 @@ func (s ArticleUpdateSfl) core(
 		}
 	} else {
 		if _, err := s.ArticleGetBySlugDaf(newSlug); err == nil {
-			return nil, nil, fn.ErrDuplicateArticle
+			return nil, nil, fs.ErrDuplicateArticle
 		}
 		savedArticle, err = s.ArticleCreateDaf(*article)
 		if err != nil {
@@ -65,7 +64,7 @@ func (s ArticleUpdateSfl) core(
 	return user, savedArticle, nil
 }
 
-func (s ArticleUpdateSfl) Invoke(username string, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
+func (s ArticleUpdateSfl) invoke(username string, slug string, in rpc.ArticleUpdateIn) (*rpc.ArticleOut, error) {
 	fieldsToUpdate := make(map[model.ArticleUpdatableField]interface{}, 3)
 	if v := in.Article.Title; v != "" {
 		fieldsToUpdate[model.Title] = v
@@ -78,10 +77,13 @@ func (s ArticleUpdateSfl) Invoke(username string, slug string, in rpc.ArticleUpd
 	}
 
 	user, article, err := s.core(username, slug, fieldsToUpdate)
-	articleOut := rpc.ArticleOut{}
 	if err != nil {
-		return articleOut, err
+		return nil, err
 	}
-	articleOut = rpc.ArticleOutFromModel(article, user)
-	return articleOut, err
+	articleOut := rpc.ArticleOutFromModel(user, article)
+	return &articleOut, err
+}
+
+func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
+	return s.invoke
 }

@@ -1,12 +1,28 @@
 package sfl
 
-import "github.com/pvillela/go-foa-realworld/internal/model"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/ft"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
+)
 
-// FavoriteArticleSflS contains the dependencies required for the construction of a
-// FavoriteArticleSflS. It represents the designation of an article as a favorite.
-type FavoriteArticleSflS struct {
+// ArticleFavoriteSfl is the stereotype instance for the service flow that
+// designates an article as a favorite.
+type ArticleFavoriteSfl struct {
+	ArticleFavoriteFl ft.ArticleFavoriteFlT
 }
 
-// FavoriteArticleSfl is the type of a function that takes a slug as input and
-// returns a model.Article.
-type FavoriteArticleSfl = func(slug string) model.Article
+// ArticleFavoriteSflT is the function type instantiated by ArticleFavoriteSfl.
+type ArticleFavoriteSflT = func(username string, slug string) (*rpc.ArticleOut, error)
+
+func (s ArticleFavoriteSfl) invoke(username string, slug string) (*rpc.ArticleOut, error) {
+	user, article, err := s.ArticleFavoriteFl(username, slug, true)
+	if err != nil {
+		return nil, err
+	}
+	articleOut := rpc.ArticleOutFromModel(user, article)
+	return &articleOut, err
+}
+
+func (s ArticleFavoriteSfl) Make() ArticleFavoriteSflT {
+	return s.invoke
+}

@@ -4,11 +4,11 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
+const dateLayout = "2006-01-02T15:04:05.999Z"
+
 type ArticleOut struct {
 	Article ArticleOut0
 }
-
-const dateLayout = "2006-01-02T15:04:05.999Z"
 
 type ArticleOut0 struct {
 	Slug           string   `json:"slug"`
@@ -23,7 +23,12 @@ type ArticleOut0 struct {
 	Author         Profile  `json:"author"`
 }
 
-func ArticleOutFromModel(article *model.Article, user *model.User) ArticleOut {
+type ArticlesOut struct {
+	Articles      []ArticleOut
+	ArticlesCount int
+}
+
+func ArticleOutFromModel(user *model.User, article *model.Article) ArticleOut {
 	isFollowingAuthor := false
 	favorite := false
 	if user != nil {
@@ -55,4 +60,14 @@ func ArticleOutFromModel(article *model.Article, user *model.User) ArticleOut {
 			FavoritesCount: len(article.FavoritedBy),
 		},
 	}
+}
+
+func ArticlesOutFromModel(user *model.User, articles []model.Article) ArticlesOut {
+	outs := []ArticleOut{} // return at least an empty array (not nil)
+
+	for _, article := range articles {
+		outs = append(outs, ArticleOutFromModel(user, &article))
+	}
+
+	return ArticlesOut{outs, len(outs)}
 }
