@@ -13,3 +13,5 @@ type ArticleUpdateDafT = func(article model.Article) (*model.Article, error)
 type ArticleDeleteDafT = func(slug string) error
 
 type ArticleGetByAuthorsOrderedByMostRecentDafT = func(usernames []string) ([]model.Article, error)
+
+type ArticleGetRecentFilteredDafT = func(filters []model.ArticleFilter) ([]model.Article, error)

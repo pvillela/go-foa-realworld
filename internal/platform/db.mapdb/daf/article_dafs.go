@@ -91,3 +91,30 @@ func (s ArticleDafs) getByAuthorsOrderedByMostRecent(usernames []string) ([]mode
 func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() ft.ArticleGetByAuthorsOrderedByMostRecentDafT {
 	return s.getByAuthorsOrderedByMostRecent
 }
+
+func (s ArticleDafs) getRecentFiltered(filters []model.ArticleFilter) ([]model.Article, error) {
+	var recentArticles []model.Article
+
+	s.Store.Range(func(key, value interface{}) bool {
+		article, ok := value.(model.Article)
+		if !ok {
+			// not an article (shouldn't happen) -> skip
+			return true // log this but continue
+		}
+
+		for _, funcToApply := range filters {
+			if !funcToApply(article) { // "AND filter" : if one of the filter is at false, skip the article
+				return true
+			}
+		}
+
+		recentArticles = append(recentArticles, article)
+		return true
+	})
+
+	return recentArticles, nil
+}
+
+func (s ArticleDafs) MakeGetRecentFiltered() ft.ArticleGetRecentFilteredDafT {
+	return s.getRecentFiltered
+}

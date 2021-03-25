@@ -49,9 +49,11 @@ func (article Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface
 	}
 }
 
-type ArticleFilter func(Article) bool
+//TODO: move to BF -- article_filter_bfs.go
+type ArticleFilter = func(Article) bool
 
-func ArticleHasTag(tag string) ArticleFilter {
+//TODO: move to BF -- article_filter_bfs.go
+func ArticleTagFilterOf(tag string) ArticleFilter {
 	return func(article Article) bool {
 		for _, articleTag := range article.TagList {
 			if articleTag == tag {
@@ -62,13 +64,15 @@ func ArticleHasTag(tag string) ArticleFilter {
 	}
 }
 
-func ArticleHasAuthor(authorName string) ArticleFilter {
+//TODO: move to BF -- article_filter_bfs.go
+func ArticleAuthorFilterOf(authorName string) ArticleFilter {
 	return func(article Article) bool {
 		return article.Author.Name == authorName
 	}
 }
 
-func ArticleIsFavoritedBy(username string) ArticleFilter {
+//TODO: move to BF -- article_filter_bfs.go
+func ArticleFavoritedFilterOf(username string) ArticleFilter {
 	return func(article Article) bool {
 		if username == "" {
 			return false
