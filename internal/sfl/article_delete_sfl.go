@@ -1,13 +1,13 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 )
 
 // ArticleFavoriteSfl is the stereotype instance for the service flow that
 // deletes an article.
 type ArticleDeleteSfl struct {
-	GetArticleAndCheckOwnerFl ft.ArticleGetAndCheckOwnerFlT
+	GetArticleAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT
 	ArticleDeleteDaf          func(slug string) error
 }
 

@@ -1,7 +1,7 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -10,8 +10,8 @@ import (
 // queries for all articles authored by other users followed by
 // the current user, with optional limit and offset pagination parameters.
 type ArticlesFeedSfl struct {
-	UserGetByNameDaf                          ft.UserGetByNameDafT
-	ArticleGetByAuthorsOrderedByMostRecentDaf ft.ArticleGetByAuthorsOrderedByMostRecentDafT
+	UserGetByNameDaf                          fs.UserGetByNameDafT
+	ArticleGetByAuthorsOrderedByMostRecentDaf fs.ArticleGetByAuthorsOrderedByMostRecentDafT
 }
 
 func (s ArticlesFeedSfl) core(username string, limit, offset int) (*model.User, []model.Article, error) {

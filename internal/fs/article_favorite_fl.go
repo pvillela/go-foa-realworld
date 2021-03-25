@@ -1,17 +1,19 @@
 package fs
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // ArticleFavoriteFl is the stereotype instance for the flow that
 // designates an article as a favorite or not.
 type ArticleFavoriteFl struct {
-	UserGetByNameDaf    ft.UserGetByNameDafT
-	ArticleGetBySlugDaf ft.ArticleGetBySlugDafT
-	ArticleUpdateDaf    ft.ArticleUpdateDafT
+	UserGetByNameDaf    UserGetByNameDafT
+	ArticleGetBySlugDaf ArticleGetBySlugDafT
+	ArticleUpdateDaf    ArticleUpdateDafT
 }
+
+// ArticleFavoriteFlT is the function type instantiated by fs.ArticleFavoriteFl.
+type ArticleFavoriteFlT = func(username, slug string, favorite bool) (*model.User, *model.Article, error)
 
 func (s ArticleFavoriteFl) invoke(username, slug string, favorite bool) (*model.User, *model.Article, error) {
 	user, err := s.UserGetByNameDaf(username)
@@ -34,6 +36,6 @@ func (s ArticleFavoriteFl) invoke(username, slug string, favorite bool) (*model.
 	return user, updatedArticle, nil
 }
 
-func (s ArticleFavoriteFl) Make() ft.ArticleFavoriteFlT {
+func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
 	return s.invoke
 }

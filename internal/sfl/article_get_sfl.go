@@ -1,7 +1,7 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -9,8 +9,8 @@ import (
 // ArticleGetSfl is the stereotype instance for the service flow that
 // retrieves an article.
 type ArticleGetSfl struct {
-	UserGetByNameDaf    ft.UserGetByNameDafT
-	ArticleGetBySlugDaf ft.ArticleGetBySlugDafT
+	UserGetByNameDaf    fs.UserGetByNameDafT
+	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
 }
 
 // ArticleGetSflT is the function type instantiated by ArticleGetSfl.

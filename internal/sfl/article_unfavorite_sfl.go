@@ -1,14 +1,14 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleUnfavoriteSfl is the stereotype instance for the service flow that
 // designates an article as a favorite.
 type ArticleUnfavoriteSfl struct {
-	ArticleFavoriteFl ft.ArticleFavoriteFlT
+	ArticleFavoriteFl fs.ArticleFavoriteFlT
 }
 
 // ArticleUnfavoriteSflT is the function type instantiated by ArticleUnfavoriteSfl.

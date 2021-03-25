@@ -3,7 +3,6 @@ package daf
 import (
 	"errors"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"github.com/pvillela/go-foa-realworld/internal/ft"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"sync"
 	"time"
@@ -22,7 +21,7 @@ func (s ArticleDafs) create(article model.Article) (*model.Article, error) {
 	return &article, nil
 }
 
-func (s ArticleDafs) MakeCreate() ft.ArticleCreateDafT {
+func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 	return s.create
 }
 
@@ -40,7 +39,7 @@ func (s ArticleDafs) getBySlug(slug string) (*model.Article, error) {
 	return &article, nil
 }
 
-func (s ArticleDafs) MakeGetBySlug() ft.ArticleGetBySlugDafT {
+func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 	return s.getBySlug
 }
 
@@ -55,7 +54,7 @@ func (s ArticleDafs) update(article model.Article) (*model.Article, error) {
 	return &article, nil
 }
 
-func (s ArticleDafs) MakeUpdate() ft.ArticleUpdateDafT {
+func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
 	return s.update
 }
 
@@ -65,7 +64,7 @@ func (s ArticleDafs) delete(slug string) error {
 	return nil
 }
 
-func (s ArticleDafs) MakeDelete() ft.ArticleDeleteDafT {
+func (s ArticleDafs) MakeDelete() fs.ArticleDeleteDafT {
 	return s.delete
 }
 
@@ -88,7 +87,7 @@ func (s ArticleDafs) getByAuthorsOrderedByMostRecent(usernames []string) ([]mode
 	return toReturn, nil
 }
 
-func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() ft.ArticleGetByAuthorsOrderedByMostRecentDafT {
+func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() fs.ArticleGetByAuthorsOrderedByMostRecentDafT {
 	return s.getByAuthorsOrderedByMostRecent
 }
 
@@ -115,6 +114,6 @@ func (s ArticleDafs) getRecentFiltered(filters []model.ArticleFilter) ([]model.A
 	return recentArticles, nil
 }
 
-func (s ArticleDafs) MakeGetRecentFiltered() ft.ArticleGetRecentFilteredDafT {
+func (s ArticleDafs) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
 	return s.getRecentFiltered
 }

@@ -1,7 +1,6 @@
 package fs
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -11,6 +10,9 @@ type ArticleGetAndCheckOwnerFl struct {
 	ArticleGetBySlugDaf func(slug string) (*model.Article, error)
 	CheckArticleOwnerBf func(article model.Article, username string) error
 }
+
+// ArticleGetAndCheckOwnerFlT is the function type instantiated by fs.ArticleGetAndCheckOwnerFl.
+type ArticleGetAndCheckOwnerFlT = func(username, slug string) (*model.Article, error)
 
 func (s ArticleGetAndCheckOwnerFl) invoke(slug string, username string) (*model.Article, error) {
 	article, err := s.ArticleGetBySlugDaf(slug)
@@ -25,6 +27,6 @@ func (s ArticleGetAndCheckOwnerFl) invoke(slug string, username string) (*model.
 	return article, err
 }
 
-func (s ArticleGetAndCheckOwnerFl) Make() ft.ArticleGetAndCheckOwnerFlT {
+func (s ArticleGetAndCheckOwnerFl) Make() ArticleGetAndCheckOwnerFlT {
 	return s.invoke
 }

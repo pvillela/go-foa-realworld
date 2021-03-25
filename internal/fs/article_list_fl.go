@@ -1,14 +1,16 @@
 package fs
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 type ArticleListFl struct {
-	UserGetByNameDaf                          ft.UserGetByNameDafT
-	ArticleGetByAuthorsOrderedByMostRecentDaf ft.ArticleGetByAuthorsOrderedByMostRecentDafT
+	UserGetByNameDaf                          UserGetByNameDafT
+	ArticleGetByAuthorsOrderedByMostRecentDaf ArticleGetByAuthorsOrderedByMostRecentDafT
 }
+
+// ArticleListFlT is the function type instantiated by fs.ArticleListFl.
+type ArticleListFlT = func(username string, limit, offset int) (*model.User, []model.Article, error)
 
 func (s ArticleListFl) invoke(username string, limit, offset int) (*model.User, []model.Article, error) {
 	if limit < 0 {
@@ -31,6 +33,6 @@ func (s ArticleListFl) invoke(username string, limit, offset int) (*model.User, 
 	return user, model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), nil
 }
 
-func (s ArticleListFl) Make() ft.ArticleListFlT {
+func (s ArticleListFl) Make() ArticleListFlT {
 	return s.invoke
 }

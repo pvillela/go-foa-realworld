@@ -1,7 +1,7 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/ft"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -9,8 +9,8 @@ import (
 // ArticlesListSfl is the stereotype instance for the service flow that
 // retrieve recent articles based on a set of query parameters.
 type ArticlesListSfl struct {
-	UserGetByNameDaf            ft.UserGetByNameDafT
-	ArticleGetRecentFilteredDaf ft.ArticleGetRecentFilteredDafT
+	UserGetByNameDaf            fs.UserGetByNameDafT
+	ArticleGetRecentFilteredDaf fs.ArticleGetRecentFilteredDafT
 }
 
 // ArticlesListSflT is the function type instantiated by ArticlesListSfl.

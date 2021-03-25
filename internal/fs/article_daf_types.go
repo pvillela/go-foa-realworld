@@ -1,4 +1,4 @@
-package ft
+package fs
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
