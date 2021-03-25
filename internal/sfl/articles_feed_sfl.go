@@ -14,35 +14,33 @@ type ArticlesFeedSfl struct {
 	ArticleGetByAuthorsOrderedByMostRecentDaf fs.ArticleGetByAuthorsOrderedByMostRecentDafT
 }
 
-func (s ArticlesFeedSfl) core(username string, limit, offset int) (*model.User, []model.Article, error) {
-	if limit < 0 {
-		return nil, []model.Article{}, nil
-	}
-
-	var user *model.User
-	if username != "" {
-		var err error
-		user, err = s.UserGetByNameDaf(username)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-	articles, err := s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return user, model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), nil
-}
-
 // ArticlesFeedSflT is the function type instantiated by ArticlesFeedSfl.
 type ArticlesFeedSflT = func(username string, limit int, offset int) (*rpc.ArticlesOut, error)
 
-func (s ArticlesFeedSfl) invoke(username string, limit, offset int) (*rpc.ArticlesOut, error) {
-	user, articles, err := s.core(username, limit, offset)
-	if err != nil {
-		return nil, err
+func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
+	return func(username string, limit, offset int) (*rpc.ArticlesOut, error) {
+		var user *model.User
+		var articles []model.Article
+		var err error
+
+		if limit > 0 {
+			if username != "" {
+				user, err = s.UserGetByNameDaf(username)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			articles, err = s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
+
+		articlesOut := rpc.ArticlesOutFromModel(user, articles)
+
+		return &articlesOut, err
 	}
-	articlesOut := rpc.ArticlesOutFromModel(user, articles)
-	return &articlesOut, err
 }

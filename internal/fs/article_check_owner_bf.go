@@ -9,13 +9,11 @@ type ArticleCheckOwnerBf struct{}
 
 type ArticleCheckOwnerBfT = func(article model.Article, username string) error
 
-func (ArticleCheckOwnerBf) invoke(article model.Article, username string) error {
-	if article.Author.Name != username {
-		return errors.New("article not owned by user")
+func (ArticleCheckOwnerBf) Make() ArticleCheckOwnerBfT {
+	return func(article model.Article, username string) error {
+		if article.Author.Name != username {
+			return errors.New("article not owned by user")
+		}
+		return nil
 	}
-	return nil
-}
-
-func (s ArticleCheckOwnerBf) Make() ArticleCheckOwnerBfT {
-	return s.invoke
 }

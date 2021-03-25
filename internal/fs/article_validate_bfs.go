@@ -8,22 +8,18 @@ type ArticleValidateBeforeCreateBf struct{}
 
 type ArticleValidateBeforeCreateBfT = func(article model.Article) error
 
-func (ArticleValidateBeforeCreateBf) invoke(article model.Article) error {
-	return nil
-}
-
 func (s ArticleValidateBeforeCreateBf) Make() ArticleValidateBeforeCreateBfT {
-	return s.invoke
+	return func(article model.Article) error {
+		return nil
+	}
 }
 
 type ArticleValidateBeforeUpdateBf struct{}
 
 type ArticleValidateBeforeUpdateBfT = func(article model.Article) error
 
-func (ArticleValidateBeforeUpdateBf) invoke(article model.Article) error {
-	return nil
-}
-
 func (s ArticleValidateBeforeUpdateBf) Make() ArticleValidateBeforeUpdateBfT {
-	return s.invoke
+	return func(article model.Article) error {
+		return nil
+	}
 }
