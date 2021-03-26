@@ -53,7 +53,7 @@ func (self ArticleOut) FromModel(user *model.User, article *model.Article) Artic
 		Body:           article.Body,
 		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-		Author:         ProfileFromModel(article.Author, isFollowingAuthor),
+		Author:         Profile{}.FromModel(article.Author, isFollowingAuthor),
 		TagList:        article.TagList,
 		Favorited:      favorite,
 		FavoritesCount: len(article.FavoritedBy),

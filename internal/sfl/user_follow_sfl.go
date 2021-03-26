@@ -11,5 +11,5 @@ type FollowUserSflS struct {
 }
 
 // FollowUserSfl is the type of a function that takes the current username and a followed
-// username and returns a model.Profile.
-type FollowUserSfl = func(currentUsername string, followedUsername string) rpc.Profile
+// username and returns a model.ProfileOut.
+type FollowUserSfl = func(currentUsername string, followedUsername string) rpc.ProfileOut

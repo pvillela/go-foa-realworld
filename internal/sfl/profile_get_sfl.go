@@ -10,5 +10,5 @@ type GetProfileSflS struct {
 }
 
 // GetProfileSfl is the type of a function that takes a string corresponding to a
-// username and returns a model.Profile.
-type GetProfileSfl = func(username string) rpc.Profile
+// username and returns a model.ProfileOut.
+type GetProfileSfl = func(username string) rpc.ProfileOut

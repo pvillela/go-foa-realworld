@@ -11,5 +11,5 @@ type UnfollowUserSflS struct {
 }
 
 // UnfollowUserSfl is the type of a function that takes the current username and a followed
-// username and returns a model.Profile.
-type UnfollowUserSfl = func(currentUsername string, followedUsername string) rpc.Profile
+// username and returns a model.ProfileOut.
+type UnfollowUserSfl = func(currentUsername string, followedUsername string) rpc.ProfileOut
