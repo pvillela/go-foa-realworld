@@ -9,6 +9,6 @@ import (
 type GetCommentsSflS struct {
 }
 
-// CommentAddSfl is the type of a function that takes a slug as input
+// CommentAddSflT is the type of a function that takes a slug as input
 // and returns a model.Comments.
 type GetCommentsSfl = func(slug string) rpc.CommentsOut

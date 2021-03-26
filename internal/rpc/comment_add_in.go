@@ -1,6 +1,7 @@
 package rpc
 
 type CommentAddIn struct {
+	Slug    string
 	Comment CommentAddIn0
 }
 
