@@ -7,7 +7,7 @@ import (
 const dateLayout = "2006-01-02T15:04:05.999Z"
 
 type ArticleOut struct {
-	Article ArticleOut0
+	Article *ArticleOut0
 }
 
 type ArticleOut0 struct {
@@ -28,7 +28,7 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
-func ArticleOutFromModel(user *model.User, article *model.Article) ArticleOut {
+func (self ArticleOut) FromModel(user *model.User, article *model.Article) ArticleOut {
 	isFollowingAuthor := false
 	favorite := false
 	if user != nil {
@@ -46,28 +46,31 @@ func ArticleOutFromModel(user *model.User, article *model.Article) ArticleOut {
 		}
 	}
 
-	return ArticleOut{
-		Article: ArticleOut0{
-			Slug:           article.Slug,
-			Title:          article.Title,
-			Description:    article.Description,
-			Body:           article.Body,
-			CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
-			UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-			Author:         ProfileFromModel(article.Author, isFollowingAuthor),
-			TagList:        article.TagList,
-			Favorited:      favorite,
-			FavoritesCount: len(article.FavoritedBy),
-		},
+	self.Article = &ArticleOut0{
+		Slug:           article.Slug,
+		Title:          article.Title,
+		Description:    article.Description,
+		Body:           article.Body,
+		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
+		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
+		Author:         ProfileFromModel(article.Author, isFollowingAuthor),
+		TagList:        article.TagList,
+		Favorited:      favorite,
+		FavoritesCount: len(article.FavoritedBy),
 	}
+
+	return self
 }
 
-func ArticlesOutFromModel(user *model.User, articles []model.Article) ArticlesOut {
+func (self ArticlesOut) FromModel(user *model.User, articles []model.Article) ArticlesOut {
 	outs := []ArticleOut{} // return at least an empty array (not nil)
 
 	for _, article := range articles {
-		outs = append(outs, ArticleOutFromModel(user, &article))
+		outs = append(outs, ArticleOut{}.FromModel(user, &article))
 	}
 
-	return ArticlesOut{outs, len(outs)}
+	self.Articles = outs
+	self.ArticlesCount = len(outs)
+
+	return self
 }

@@ -1,7 +1,9 @@
 package rpc
 
 type CommentAddIn struct {
-	Comment struct {
-		Body string
-	}
+	Comment CommentAddIn0
+}
+
+type CommentAddIn0 struct {
+	Body string
 }

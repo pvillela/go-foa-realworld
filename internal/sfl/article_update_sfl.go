@@ -69,7 +69,7 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 			}
 		}
 
-		articleOut := rpc.ArticleOutFromModel(user, savedArticle)
+		articleOut := rpc.ArticleOut{}.FromModel(user, savedArticle)
 		return &articleOut, err
 	}
 }

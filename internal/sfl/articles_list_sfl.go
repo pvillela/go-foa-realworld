@@ -38,24 +38,38 @@ func (s ArticlesListSfl) core(username string, limit, offset int, filters []mode
 	return user, model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), nil
 }
 
-func (s ArticlesListSfl) invoke(username string, in rpc.ArticlesListIn) (*rpc.ArticlesOut, error) {
-	tagFilter := model.ArticleTagFilterOf(in.Tag)
-	authorFilter := model.ArticleAuthorFilterOf(in.Author)
-	favoritedFilter := model.ArticleFavoritedFilterOf(in.Favorited)
-	limit := in.Limit
-	offset := in.Offset
-
-	filters := []model.ArticleFilter{tagFilter, authorFilter, favoritedFilter}
-
-	user, articles, err := s.core(username, limit, offset, filters)
-	if err != nil {
-		return nil, err
-	}
-
-	articlesOut := rpc.ArticlesOutFromModel(user, articles)
-	return &articlesOut, err
-}
-
 func (s ArticlesListSfl) Make() ArticlesListSflT {
-	return s.invoke
+	return func(username string, in rpc.ArticlesListIn) (*rpc.ArticlesOut, error) {
+		var user *model.User
+		var articles []model.Article
+		var err error
+
+		limit := in.Limit
+		offset := in.Offset
+
+		tagFilter := model.ArticleTagFilterOf(in.Tag)
+		authorFilter := model.ArticleAuthorFilterOf(in.Author)
+		favoritedFilter := model.ArticleFavoritedFilterOf(in.Favorited)
+		filters := []model.ArticleFilter{tagFilter, authorFilter, favoritedFilter}
+
+		if limit > 0 {
+			if username != "" {
+				user, err = s.UserGetByNameDaf(username)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			articles, err = s.ArticleGetRecentFilteredDaf(filters)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
+
+		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
+
+		return &articlesOut, err
+	}
 }

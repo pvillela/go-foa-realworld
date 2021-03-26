@@ -1,7 +1,7 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // GetCommentsSflS contains the dependencies required for the construction of a
@@ -11,4 +11,4 @@ type GetCommentsSflS struct {
 
 // CommentAddSfl is the type of a function that takes a slug as input
 // and returns a model.Comments.
-type GetCommentsSfl = func(slug string) model.Comments
+type GetCommentsSfl = func(slug string) rpc.CommentsOut

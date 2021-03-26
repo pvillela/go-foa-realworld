@@ -32,7 +32,7 @@ func (s ArticleGetSfl) Make() ArticleGetSflT {
 			return nil, err
 		}
 
-		articleOut := rpc.ArticleOutFromModel(user, article)
+		articleOut := rpc.ArticleOut{}.FromModel(user, article)
 
 		return &articleOut, err
 	}

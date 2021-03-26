@@ -15,13 +15,16 @@ type ArticlesFeedSfl struct {
 }
 
 // ArticlesFeedSflT is the function type instantiated by ArticlesFeedSfl.
-type ArticlesFeedSflT = func(username string, limit int, offset int) (*rpc.ArticlesOut, error)
+type ArticlesFeedSflT = func(username string, in rpc.ArticlesFeedIn) (*rpc.ArticlesOut, error)
 
 func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
-	return func(username string, limit, offset int) (*rpc.ArticlesOut, error) {
+	return func(username string, in rpc.ArticlesFeedIn) (*rpc.ArticlesOut, error) {
 		var user *model.User
 		var articles []model.Article
 		var err error
+
+		limit := in.Limit
+		offset := in.Offset
 
 		if limit > 0 {
 			if username != "" {
@@ -39,7 +42,7 @@ func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 
 		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
 
-		articlesOut := rpc.ArticlesOutFromModel(user, articles)
+		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
 
 		return &articlesOut, err
 	}

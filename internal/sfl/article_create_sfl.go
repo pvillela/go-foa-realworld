@@ -26,7 +26,7 @@ func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 		if err != nil {
 			return nil, err
 		}
-		articleOut := rpc.ArticleOutFromModel(user, fullArticle)
+		articleOut := rpc.ArticleOut{}.FromModel(user, fullArticle)
 		return &articleOut, err
 	}
 }
