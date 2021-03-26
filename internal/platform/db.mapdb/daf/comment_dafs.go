@@ -46,3 +46,12 @@ func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
 		return &comment, nil
 	}
 }
+
+func (s CommentDafs) MakeDelete() fs.CommentDeleteDafT {
+	return func(id int) error {
+		if _, present := s.Store.LoadAndDelete(id); !present {
+			return fs.ErrCommentNotFound
+		}
+		return nil
+	}
+}

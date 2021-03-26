@@ -16,3 +16,11 @@ func (self CommentOut) FromModel(comment *model.Comment) CommentOut {
 type CommentsOut struct {
 	Comments []CommentOut
 }
+
+func (self CommentsOut) FromModel(comments []model.Comment) CommentsOut {
+	outs := make([]CommentOut, len(comments))
+	for i, comment := range comments {
+		outs[i] = CommentOut{}.FromModel(&comment)
+	}
+	return CommentsOut{outs}
+}

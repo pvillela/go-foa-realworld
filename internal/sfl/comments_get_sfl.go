@@ -1,14 +1,32 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// GetCommentsSflS contains the dependencies required for the construction of a
-// GetCommentsSfl. It represents the retrieval of comments of an article.
-type GetCommentsSflS struct {
+// CommentsGetSfl is the stereotype instance for the service flow that
+// retrieves the comments of an article.
+type CommentsGetSfl struct {
+	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
 }
 
-// CommentAddSflT is the type of a function that takes a slug as input
-// and returns a model.Comments.
-type GetCommentsSfl = func(slug string) rpc.CommentsOut
+// CommentsGetSflT is the function type instantiated by CommentsGetSfl.
+type CommentsGetSflT = func(username string, slug string) (*rpc.CommentsOut, error)
+
+func (s CommentsGetSfl) Make() CommentsGetSflT {
+	return func(username string, slug string) (*rpc.CommentsOut, error) {
+		article, err := s.ArticleGetBySlugDaf(slug)
+		if err != nil {
+			return nil, err
+		}
+		if article.Comments == nil {
+			article.Comments = []model.Comment{}
+		}
+
+		commentsOut := rpc.CommentsOut{}.FromModel(article.Comments)
+
+		return &commentsOut, nil
+	}
+}

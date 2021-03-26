@@ -5,9 +5,17 @@ function-oriented architecture style.
 
 ## To-dos:
 
-* Review model structs, modify them as appropriate, create any necessary corresponding rpc structs.
-* For each Sfl, add a CoreFl that does not use the external input/output structs. The Sfl calls BFs to convert to/from
-  the input/output structs. At least for now, put Sfl and CoreFl in the same file.
-* Replace Make higher-order methods with straight methods and take advantage of partial application. When needed, use a
-  Prep function to create an Aug struct that is the receiver of the straight method.
-* Consider defining an ArticleDafs interface that bundles all the DAFs for Article; similarly for other entities.
+* Complete first pass at SFLs.
+* Review model and move functionality to BFs as appropriate.
+* Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.
+* Review basic error handling, including fs/errors.go.
+* Create request adapter pattern that includes:
+    - last-resort error handling
+    - encompasses both query parameters and JSON payloads
+* Create pattern for platform-independent unmarshallers.
+* Create platform-independent unmarshallers for rpc structs.
+* Implement authentication.
+* Guerrilla-test some SFLs.
+* Implement test suite.
+* Implement DAFs with SQLite.
+* Rinse and repeat.

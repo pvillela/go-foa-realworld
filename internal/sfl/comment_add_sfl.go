@@ -2,7 +2,6 @@ package sfl
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -22,7 +21,7 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 	return func(username string, in rpc.CommentAddIn) (*rpc.CommentOut, error) {
 		var err error
 
-		commentPoster, err := s.UserGetByNameDaf(username)
+		commentAuthor, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return nil, err
 		}
@@ -32,10 +31,7 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 			return nil, err
 		}
 
-		rawComment := model.Comment{
-			Body:   in.Comment.Body,
-			Author: *commentPoster,
-		}
+		rawComment := in.ToComment(commentAuthor)
 
 		insertedComment, err := s.CommentCreateDaf(rawComment)
 		if err != nil {
