@@ -1,14 +1,43 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// GetProfileSflS contains the dependencies required for the construction of a
-// GetProfileSfl. It represents the retrieval of a user profile.
-type GetProfileSflS struct {
+// ProfileGetSfl is the stereotype instance for the service flow that
+// retrieves a user profile.
+type ProfileGetSfl struct {
+	UserGetByNameDaf fs.UserGetByNameDafT
 }
 
-// GetProfileSfl is the type of a function that takes a string corresponding to a
-// username and returns a model.ProfileOut.
-type GetProfileSfl = func(username string) rpc.ProfileOut
+// ProfileGetSflT is the function type instantiated by CommentsGetSfl.
+type ProfileGetSflT = func(username, profileName string) (*rpc.ProfileOut, error)
+
+func (s ProfileGetSfl) Make() ProfileGetSflT {
+	return func(username, profileName string) (*rpc.ProfileOut, error) {
+		var user *model.User
+
+		profileUser, err := s.UserGetByNameDaf(profileName)
+		if err != nil {
+			return nil, err
+		}
+		if profileUser == nil {
+			return nil, fs.ErrProfileNotFound
+		}
+
+		if username != "" {
+			var err error
+			user, err = s.UserGetByNameDaf(username)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		follows := user.Follows(profileName)
+		profileOut := rpc.ProfileOut{}.FromModel(user, follows)
+
+		return &profileOut, nil
+	}
+}

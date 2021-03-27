@@ -39,7 +39,7 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 		}
 
 		article.Update(fieldsToUpdate)
-		if err := s.ArticleValidateBeforeUpdateBf(*article); err != nil {
+		if err := s.ArticleValidateBeforeUpdateBf(article); err != nil {
 			return nil, err
 		}
 

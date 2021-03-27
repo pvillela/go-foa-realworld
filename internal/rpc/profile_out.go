@@ -13,7 +13,7 @@ type ProfileOut struct {
 	Profile *Profile
 }
 
-func (Profile) FromModel(user model.User, following bool) Profile {
+func (Profile) FromModel(user *model.User, follows bool) Profile {
 	var bio, image string
 	if user.Bio != nil {
 		bio = *user.Bio
@@ -26,13 +26,13 @@ func (Profile) FromModel(user model.User, following bool) Profile {
 		Username:  user.Name,
 		Bio:       bio,
 		Image:     image,
-		Following: following,
+		Following: follows,
 	}
 
 	return profile
 }
 
-func (ProfileOut) FromModel(user model.User, following bool) ProfileOut {
-	profile := Profile{}.FromModel(user, following)
+func (ProfileOut) FromModel(user *model.User, follows bool) ProfileOut {
+	profile := Profile{}.FromModel(user, follows)
 	return ProfileOut{&profile}
 }
