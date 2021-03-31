@@ -7,16 +7,19 @@ import (
 
 // User represents a user account in the system
 type User struct {
-	Name      string
-	Email     string
-	Password  string
-	Bio       *string
-	ImageLink *string
-	FollowIDs []string
-	Favorites []Article
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Name         string
+	Email        string
+	TempPassword string
+	PasswordHash string
+	PasswordSalt []byte
+	Bio          *string
+	ImageLink    *string
+	FollowIDs    []string
+	Favorites    []Article
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
+
 type UserUpdatableProperty int
 
 const (
@@ -75,13 +78,13 @@ func SetUserImageLink(input *string) func(fields *User) {
 	}
 }
 
-func SetUserPassword(input *string) func(fields *User) {
-	return func(initial *User) {
-		if input != nil {
-			initial.Password = *input
-		}
-	}
-}
+//func SetUserPassword(input *string) func(fields *User) {
+//	return func(initial *User) {
+//		if input != nil {
+//			initial.Password = *input
+//		}
+//	}
+//}
 
 func (user User) Follows(userName string) bool {
 	if user.FollowIDs == nil {

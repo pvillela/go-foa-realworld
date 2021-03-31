@@ -4,12 +4,16 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// FollowUserSflS contains the dependencies required for the construction of a
-// FollowUserSfl. It represents the action of  having the current user start following a given
-// other user.
-type FollowUserSflS struct {
+// CommentAddSfl is the stereotype instance for the service flow that
+// causes the current user start following a given other user.
+type UserFollowSfl struct {
 }
 
-// FollowUserSfl is the type of a function that takes the current username and a followed
-// username and returns a model.ProfileOut.
-type FollowUserSfl = func(currentUsername string, followedUsername string) rpc.ProfileOut
+// UserFollowSflT is the function type instantiated by UserFollowSfl.
+type UserFollowSflT = func(username string, followedUsername string) (*rpc.ProfileOut, error)
+
+func (s UserFollowSfl) Make() UserFollowSflT {
+	return func(username string, followedUsername string) (*rpc.ProfileOut, error) {
+		panic("todo")
+	}
+}

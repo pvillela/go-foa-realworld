@@ -3,9 +3,12 @@
 This is a [RealWorld Example App](https://github.com/gothinkster/realworld) backend written in Golang in a
 function-oriented architecture style.
 
+Some of the code was based on https://github.com/err0r500/go-realworld-clean.
+
 ## To-dos:
 
 * Complete first pass at SFLs.
+* Review use of pointers, clean it up.
 * Review model and move functionality to BFs as appropriate.
 * Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.
 * Review basic error handling, including fs/errors.go.
@@ -17,5 +20,7 @@ function-oriented architecture style.
 * Implement authentication.
 * Guerrilla-test some SFLs.
 * Implement test suite.
-* Implement DAFs with SQLite.
+* Implement DAFs with SQLite. The current in-memory persistence based on the implementation in
+  https://github.com/err0r500/go-realworld-clean is inherently broken as it doesn't support optimistic concurrency and
+  allows dirty writes.
 * Rinse and repeat.

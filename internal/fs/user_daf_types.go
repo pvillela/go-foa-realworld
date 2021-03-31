@@ -5,3 +5,5 @@ import (
 )
 
 type UserGetByNameDafT = func(userName string) (*model.User, error)
+
+type UserGetByEmailDafT = func(email string) (*model.User, error)

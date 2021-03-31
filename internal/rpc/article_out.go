@@ -7,10 +7,10 @@ import (
 const dateLayout = "2006-01-02T15:04:05.999Z"
 
 type ArticleOut struct {
-	Article *ArticleOut0
+	Article *articleOut0
 }
 
-type ArticleOut0 struct {
+type articleOut0 struct {
 	Slug           string   `json:"slug"`
 	Title          string   `json:"title"`
 	Description    string   `json:"description"`
@@ -46,7 +46,7 @@ func (self ArticleOut) FromModel(user *model.User, article *model.Article) Artic
 		}
 	}
 
-	self.Article = &ArticleOut0{
+	self.Article = &articleOut0{
 		Slug:           article.Slug,
 		Title:          article.Title,
 		Description:    article.Description,
