@@ -12,15 +12,16 @@ type ArticleFavoriteSfl struct {
 }
 
 // ArticleFavoriteSflT is the function type instantiated by ArticleFavoriteSfl.
-type ArticleFavoriteSflT = func(username string, slug string) (*rpc.ArticleOut, error)
+type ArticleFavoriteSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
 func (s ArticleFavoriteSfl) Make() ArticleFavoriteSflT {
-	return func(username string, slug string) (*rpc.ArticleOut, error) {
+	return func(username string, slug string) (rpc.ArticleOut, error) {
+		var zero rpc.ArticleOut
 		user, article, err := s.ArticleFavoriteFl(username, slug, true)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
-		articleOut := rpc.ArticleOut{}.FromModel(user, article)
-		return &articleOut, err
+		articleOut := rpc.ArticleOut{}.FromModel(user.Entity, article.Entity)
+		return articleOut, err
 	}
 }

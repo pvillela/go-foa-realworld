@@ -18,58 +18,63 @@ type ArticleUpdateSfl struct {
 }
 
 // ArticleUpdateSflT is the function type instantiated by ArticleUpdateSfl.
-type ArticleUpdateSflT = func(username, slug string, in rpc.ArticleUpdateIn) (*rpc.ArticleOut, error)
+type ArticleUpdateSflT = func(username, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error)
 
 func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
-	return func(username string, slug string, in rpc.ArticleUpdateIn) (*rpc.ArticleOut, error) {
+	return func(username string, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
+		var zero rpc.ArticleOut
+
+		mdbArticle, err := s.ArticleGetAndCheckOwnerFl(slug, username)
+		if err != nil {
+			return zero, err
+		}
+		article := &mdbArticle.Entity
+
 		fieldsToUpdate := make(map[model.ArticleUpdatableField]interface{}, 3)
-		if v := in.Article.Title; v != "" {
-			fieldsToUpdate[model.Title] = v
+		if v := in.Article.Title; v != nil {
+			fieldsToUpdate[model.Title] = *v
 		}
-		if v := in.Article.Description; v != "" {
-			fieldsToUpdate[model.Description] = v
+		if v := in.Article.Description; v != nil {
+			fieldsToUpdate[model.Description] = *v
 		}
-		if v := in.Article.Body; v != "" {
-			fieldsToUpdate[model.Body] = v
+		if v := in.Article.Body; v != nil {
+			fieldsToUpdate[model.Body] = *v
 		}
 
-		article, err := s.ArticleGetAndCheckOwnerFl(slug, username)
+		var newSlug string
+
+		*article, newSlug = (*article).Update(fieldsToUpdate)
+
+		if err := s.ArticleValidateBeforeUpdateBf(*article); err != nil {
+			return zero, err
+		}
+
+		mdbUser, err := s.UserGetByNameDaf(username)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
+		user := &mdbUser.Entity
 
-		article.Update(fieldsToUpdate)
-		if err := s.ArticleValidateBeforeUpdateBf(article); err != nil {
-			return nil, err
-		}
-
-		user, err := s.UserGetByNameDaf(username)
-		if err != nil {
-			return nil, err
-		}
-
-		newSlug := fs.SlugSup(article.Title)
-		article.Slug = newSlug
-
-		var savedArticle *model.Article
+		var savedMdbArticle fs.MdbArticle
+		savedArticle := &savedMdbArticle.Entity
 
 		// TODO: move some of this logic to a BF
 		if newSlug == slug {
-			savedArticle, err = s.ArticleUpdateDaf(*article)
+			savedMdbArticle, err = s.ArticleUpdateDaf(mdbArticle)
 			if err != nil {
-				return nil, err
+				return zero, err
 			}
 		} else {
 			if _, err := s.ArticleGetBySlugDaf(newSlug); err == nil {
-				return nil, fs.ErrDuplicateArticle
+				return zero, fs.ErrDuplicateArticle
 			}
-			savedArticle, err = s.ArticleCreateDaf(*article)
+			savedMdbArticle, err = s.ArticleCreateDaf(*article)
 			if err != nil {
-				return nil, err
+				return zero, err
 			}
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(user, savedArticle)
-		return &articleOut, err
+		articleOut := rpc.ArticleOut{}.FromModel(*user, *savedArticle)
+		return articleOut, err
 	}
 }

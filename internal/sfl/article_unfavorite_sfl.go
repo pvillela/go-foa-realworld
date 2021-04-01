@@ -12,15 +12,16 @@ type ArticleUnfavoriteSfl struct {
 }
 
 // ArticleUnfavoriteSflT is the function type instantiated by ArticleUnfavoriteSfl.
-type ArticleUnfavoriteSflT = func(username string, slug string) (*rpc.ArticleOut, error)
+type ArticleUnfavoriteSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
 func (s ArticleUnfavoriteSfl) Make() ArticleUnfavoriteSflT {
-	return func(username string, slug string) (*rpc.ArticleOut, error) {
+	return func(username string, slug string) (rpc.ArticleOut, error) {
+		var zero rpc.ArticleOut
 		user, article, err := s.ArticleFavoriteFl(username, slug, false)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
-		articleOut := rpc.ArticleOut{}.FromModel(user, article)
-		return &articleOut, err
+		articleOut := rpc.ArticleOut{}.FromModel(user.Entity, article.Entity)
+		return articleOut, err
 	}
 }

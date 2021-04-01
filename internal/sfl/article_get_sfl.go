@@ -2,7 +2,6 @@ package sfl
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -14,26 +13,28 @@ type ArticleGetSfl struct {
 }
 
 // ArticleGetSflT is the function type instantiated by ArticleGetSfl.
-type ArticleGetSflT = func(username string, slug string) (*rpc.ArticleOut, error)
+type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
 func (s ArticleGetSfl) Make() ArticleGetSflT {
-	return func(username string, slug string) (*rpc.ArticleOut, error) {
-		var user *model.User
+	return func(username string, slug string) (rpc.ArticleOut, error) {
+		var zero rpc.ArticleOut
+		var user fs.MdbUser
+
 		if username != "" {
 			var err error
 			user, err = s.UserGetByNameDaf(username)
 			if err != nil {
-				return nil, err
+				return zero, err
 			}
 		}
 
 		article, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(user, article)
+		articleOut := rpc.ArticleOut{}.FromModel(user.Entity, article.Entity)
 
-		return &articleOut, err
+		return articleOut, err
 	}
 }

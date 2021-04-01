@@ -24,7 +24,7 @@ func main() {
 		UpdatedAt:    time.Now().Add(10),
 	}
 
-	userOut := rpc.UserOut{}.FromModel(&user, "abc")
+	userOut := rpc.UserOut{}.FromModel(user, "abc")
 
 	bytes, err := json.Marshal(userOut)
 	str := string(bytes)

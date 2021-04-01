@@ -15,31 +15,32 @@ type ArticleCreateSfl struct {
 }
 
 // ArticleCreateSflT is the function type instantiated by ArticleCreateSfl.
-type ArticleCreateSflT = func(username string, in rpc.ArticleCreateIn) (*rpc.ArticleOut, error)
+type ArticleCreateSflT = func(username string, in rpc.ArticleCreateIn) (rpc.ArticleOut, error)
 
 func (s ArticleCreateSfl) Make() ArticleCreateSflT {
-	return func(username string, in rpc.ArticleCreateIn) (*rpc.ArticleOut, error) {
+	return func(username string, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
+		zero := rpc.ArticleOut{}
 		article := in.ToArticle()
 
-		user, err := s.UserGetByNameDaf(username)
+		mdbUser, err := s.UserGetByNameDaf(username)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
 
-		if err := s.ArticleValidateBeforeCreateBf(&article); err != nil {
-			return nil, err
+		if err := s.ArticleValidateBeforeCreateBf(article); err != nil {
+			return zero, err
 		}
 
-		fullArticle, err := s.ArticleCreateDaf(article)
+		mdbArticle, err := s.ArticleCreateDaf(article)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
 
 		if err := s.TagAddDaf(article.TagList); err != nil {
-			return nil, err
+			return zero, err
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(user, fullArticle)
-		return &articleOut, err
+		articleOut := rpc.ArticleOut{}.FromModel(mdbUser.Entity, mdbArticle.Entity)
+		return articleOut, err
 	}
 }

@@ -1,9 +1,17 @@
 package fs
 
-import "github.com/pvillela/go-foa-realworld/internal/model"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+)
 
-type CommentGetByIdDafT = func(id int) (*model.Comment, error)
+type MdbComment struct {
+	db.RecCtx
+	Entity model.Comment
+}
 
-type CommentCreateDafT = func(comment model.Comment) (*model.Comment, error)
+type CommentGetByIdDafT = func(id int) (MdbComment, error)
+
+type CommentCreateDafT = func(comment model.Comment) (MdbComment, error)
 
 type CommentDeleteDafT = func(id int) error

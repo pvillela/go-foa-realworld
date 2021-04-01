@@ -13,7 +13,7 @@ type User struct {
 	PasswordHash string
 	PasswordSalt []byte
 	Bio          *string
-	ImageLink    *string
+	ImageLink    string
 	FollowIDs    []string
 	Favorites    []Article
 	CreatedAt    time.Time
@@ -30,56 +30,39 @@ const (
 	UserPassword
 )
 
-func UpdateUser(initial *User, opts ...func(fields *User)) {
+func UpdateUser(user *User, opts ...func(fields *User)) {
 	for _, v := range opts {
-		v(initial)
+		v(user)
 	}
 }
 
-func SetUserName(input *string) func(fields *User) {
-	return func(initial *User) {
-		if input != nil {
-			initial.Name = *input
-		}
+func SetUserName(input string) func(fields *User) {
+	return func(user *User) {
+		user.Name = input
 	}
 }
 
-func SetUserEmail(input *string) func(fields *User) {
-	return func(initial *User) {
-		if input != nil {
-			initial.Email = *input
-		}
+func SetUserEmail(input string) func(fields *User) {
+	return func(user *User) {
+		user.Email = input
 	}
 }
 
-// give empty string to delete it
 func SetUserBio(input *string) func(fields *User) {
-	return func(initial *User) {
-		if input != nil {
-			if *input == "" {
-				initial.Bio = nil
-				return
-			}
-			initial.Bio = input
-		}
+	return func(user *User) {
+		user.Bio = input
 	}
 }
 
 // give empty string to delete it
-func SetUserImageLink(input *string) func(fields *User) {
-	return func(initial *User) {
-		if input != nil {
-			if *input == "" {
-				initial.ImageLink = nil
-				return
-			}
-			initial.ImageLink = input
-		}
+func SetUserImageLink(input string) func(fields *User) {
+	return func(user *User) {
+		user.ImageLink = input
 	}
 }
 
-//func SetUserPassword(input *string) func(fields *User) {
-//	return func(initial *User) {
+//func SetUserPassword(input *string) func(fields *Entity) {
+//	return func(initial *Entity) {
 //		if input != nil {
 //			initial.Password = *input
 //		}

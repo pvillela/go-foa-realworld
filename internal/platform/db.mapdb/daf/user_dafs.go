@@ -2,29 +2,33 @@ package daf
 
 import (
 	"errors"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"sync"
+	"time"
 )
 
 type UserDafs struct {
 	Store *sync.Map
 }
 
-func (s UserDafs) MakeGetByName() fs.UserGetByNameDafT {
-	return func(userName string) (*model.User, error) {
-		value, ok := s.Store.Load(userName)
-		if !ok {
-			return nil, fs.ErrUserNotFound
-		}
-
-		user, ok := value.(model.User)
-		if !ok {
-			return nil, errors.New("corrupted data, expected value of type User at key " + userName)
-		}
-
-		return &user, nil
+func (s UserDafs) getByName(username string) (*model.User, error) {
+	value, ok := s.Store.Load(username)
+	if !ok {
+		return nil, nil, fs.ErrUserNotFound
 	}
+
+	user, ok := value.(model.User)
+	if !ok {
+		return nil, nil, errors.New("corrupted data, expected value of type Entity at key " + username)
+	}
+
+	return &user, nil, nil
+}
+
+func (s UserDafs) MakeGetByName() fs.UserGetByNameDafT {
+	return s.getByName
 }
 
 func (s UserDafs) MakeGetByEmail() fs.UserGetByEmailDafT {
@@ -36,7 +40,7 @@ func (s UserDafs) MakeGetByEmail() fs.UserGetByEmailDafT {
 		s.Store.Range(func(key, value interface{}) bool {
 			user, ok := value.(model.User)
 			if !ok {
-				err = errors.New("data corrupton: expected model.User")
+				err = errors.New("data corrupton: expected model.Entity")
 				return false
 			}
 
@@ -54,5 +58,18 @@ func (s UserDafs) MakeGetByEmail() fs.UserGetByEmailDafT {
 			userRet = &foundUser
 		}
 		return userRet, nil
+	}
+}
+
+func (s UserDafs) MakeUpdate() fs.UserUpdateDafT {
+	return func(user model.User) error {
+		if user, _ := s.getByName(user.Name); user == nil {
+			return fs.ErrUserNotFound
+		}
+
+		user.UpdatedAt = time.Now()
+		s.Store.Store(user.Name, user)
+
+		return nil
 	}
 }

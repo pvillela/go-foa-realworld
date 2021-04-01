@@ -4,35 +4,34 @@ import "github.com/pvillela/go-foa-realworld/internal/model"
 
 type Profile struct {
 	Username  string
-	Bio       string
-	Image     string
+	Bio       *string
+	Image     *string
 	Following bool
 }
 
 type ProfileOut struct {
-	Profile *Profile
+	Profile Profile
 }
 
-func (Profile) FromModel(user *model.User, follows bool) Profile {
-	var bio, image string
+func (s Profile) FromModel(user model.User, follows bool) Profile {
 	if user.Bio != nil {
-		bio = *user.Bio
-	}
-	if user.ImageLink != nil {
-		image = *user.ImageLink
-	}
-
-	profile := Profile{
-		Username:  user.Name,
-		Bio:       bio,
-		Image:     image,
-		Following: follows,
+		s.Bio = user.Bio
+	} else {
+		empty := ""
+		s.Bio = &empty
 	}
 
-	return profile
+	if user.ImageLink != "" {
+		s.Image = &user.ImageLink
+	}
+
+	s.Username = user.Name
+	s.Following = follows
+
+	return s
 }
 
-func (ProfileOut) FromModel(user *model.User, follows bool) ProfileOut {
-	profile := Profile{}.FromModel(user, follows)
-	return ProfileOut{&profile}
+func (s ProfileOut) FromModel(user model.User, follows bool) ProfileOut {
+	s.Profile = Profile{}.FromModel(user, follows)
+	return s
 }

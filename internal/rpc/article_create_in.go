@@ -9,17 +9,17 @@ type ArticleCreateIn struct {
 	Article struct {
 		Title       string
 		Description string
-		Body        string
+		Body        *string
 		TagList     []string // optional
 	}
 }
 
-func (in *ArticleCreateIn) ToArticle() model.Article {
+func (in ArticleCreateIn) ToArticle() model.Article {
 	return model.Article{
-		Slug:        fs.SlugSup((*in).Article.Title),
-		Title:       (*in).Article.Title,
-		Description: (*in).Article.Description,
-		Body:        (*in).Article.Body,
-		TagList:     (*in).Article.TagList,
+		Slug:        fs.SlugSup(in.Article.Title),
+		Title:       in.Article.Title,
+		Description: in.Article.Description,
+		Body:        in.Article.Body,
+		TagList:     in.Article.TagList,
 	}
 }

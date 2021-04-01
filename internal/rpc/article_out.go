@@ -7,14 +7,14 @@ import (
 const dateLayout = "2006-01-02T15:04:05.999Z"
 
 type ArticleOut struct {
-	Article *articleOut0
+	Article articleOut0
 }
 
 type articleOut0 struct {
 	Slug           string   `json:"slug"`
 	Title          string   `json:"title"`
 	Description    string   `json:"description"`
-	Body           string   `json:"body"`
+	Body           *string  `json:"body"`
 	TagList        []string `json:"tagList"`
 	CreatedAt      string   `json:"createdAt"`
 	UpdatedAt      string   `json:"updatedAt"`
@@ -28,49 +28,48 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
-func (self ArticleOut) FromModel(user *model.User, article *model.Article) ArticleOut {
+func (s ArticleOut) FromModel(user model.User, article model.Article) ArticleOut {
 	isFollowingAuthor := false
-	favorite := false
-	if user != nil {
-		for _, userName := range user.FollowIDs {
-			if userName == article.Author.Name {
-				isFollowingAuthor = true
-				break
-			}
-		}
-		for _, favUser := range article.FavoritedBy {
-			if user.Name == favUser.Name {
-				favorite = true
-				break
-			}
+	for _, userName := range user.FollowIDs {
+		if userName == article.Author.Name {
+			isFollowingAuthor = true
+			break
 		}
 	}
 
-	self.Article = &articleOut0{
+	favorite := false
+	for _, favUser := range article.FavoritedBy {
+		if user.Name == favUser.Name {
+			favorite = true
+			break
+		}
+	}
+
+	s.Article = articleOut0{
 		Slug:           article.Slug,
 		Title:          article.Title,
 		Description:    article.Description,
 		Body:           article.Body,
 		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-		Author:         Profile{}.FromModel(&article.Author, isFollowingAuthor),
+		Author:         Profile{}.FromModel(article.Author, isFollowingAuthor),
 		TagList:        article.TagList,
 		Favorited:      favorite,
 		FavoritesCount: len(article.FavoritedBy),
 	}
 
-	return self
+	return s
 }
 
-func (self ArticlesOut) FromModel(user *model.User, articles []model.Article) ArticlesOut {
+func (s ArticlesOut) FromModel(user model.User, articles []model.Article) ArticlesOut {
 	outs := []ArticleOut{} // return at least an empty array (not nil)
 
 	for _, article := range articles {
-		outs = append(outs, ArticleOut{}.FromModel(user, &article))
+		outs = append(outs, ArticleOut{}.FromModel(user, article))
 	}
 
-	self.Articles = outs
-	self.ArticlesCount = len(outs)
+	s.Articles = outs
+	s.ArticlesCount = len(outs)
 
-	return self
+	return s
 }

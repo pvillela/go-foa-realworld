@@ -13,28 +13,31 @@ type ArticleDafs struct {
 }
 
 func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
-	return func(article model.Article) (*model.Article, error) {
+	return func(article model.Article) (fs.MdbArticle, error) {
 		if _, err := s.getBySlug(article.Slug); err == nil {
-			return nil, fs.ErrDuplicateArticle
+			return fs.MdbArticle{}, fs.ErrDuplicateArticle
 		}
 		article.CreatedAt = time.Now()
-		s.Store.Store(article.Slug, article)
-		return &article, nil
+		mdbArticle := fs.MdbArticle{
+			Entity: article,
+		}
+		s.Store.Store(article.Slug, mdbArticle)
+		return mdbArticle, nil
 	}
 }
 
-func (s ArticleDafs) getBySlug(slug string) (*model.Article, error) {
+func (s ArticleDafs) getBySlug(slug string) (fs.MdbArticle, error) {
 	value, ok := s.Store.Load(slug)
 	if !ok {
-		return nil, fs.ErrArticleNotFound
+		return fs.MdbArticle{}, fs.ErrArticleNotFound
 	}
 
-	article, ok := value.(model.Article)
+	mdbArticle, ok := value.(fs.MdbArticle)
 	if !ok {
-		return nil, errors.New("not an article stored at key")
+		return fs.MdbArticle{}, errors.New("not an article stored at key")
 	}
 
-	return &article, nil
+	return mdbArticle, nil
 }
 
 func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
@@ -42,15 +45,15 @@ func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 }
 
 func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
-	return func(article model.Article) (*model.Article, error) {
-		if _, err := s.getBySlug(article.Slug); err != nil {
-			return nil, fs.ErrArticleNotFound
+	return func(mdbArticle fs.MdbArticle) (fs.MdbArticle, error) {
+		if _, err := s.getBySlug(mdbArticle.Slug); err != nil {
+			return fs.MdbArticle{}, fs.ErrArticleNotFound
 		}
 
-		article.UpdatedAt = time.Now()
-		s.Store.Store(article.Slug, article)
+		mdbArticle.UpdatedAt = time.Now()
+		s.Store.Store(mdbArticle.Slug, mdbArticle)
 
-		return &article, nil
+		return mdbArticle, nil
 	}
 }
 

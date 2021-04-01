@@ -3,7 +3,7 @@ package rpc
 type UserUpdateIn struct {
 	User struct {
 		Email string
-		Bio   string
+		Bio   *string
 		Image string
 	}
 }

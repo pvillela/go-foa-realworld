@@ -1,17 +1,23 @@
 package fs
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type ArticleCreateDafT = func(article model.Article) (*model.Article, error)
+type MdbArticle struct {
+	db.RecCtx
+	Entity model.Article
+}
 
-type ArticleGetBySlugDafT = func(slug string) (*model.Article, error)
+type ArticleCreateDafT = func(article model.Article) (MdbArticle, error)
 
-type ArticleUpdateDafT = func(article model.Article) (*model.Article, error)
+type ArticleGetBySlugDafT = func(slug string) (MdbArticle, error)
+
+type ArticleUpdateDafT = func(mdbArticle MdbArticle) (MdbArticle, error)
 
 type ArticleDeleteDafT = func(slug string) error
 
-type ArticleGetByAuthorsOrderedByMostRecentDafT = func(usernames []string) ([]model.Article, error)
+type ArticleGetByAuthorsOrderedByMostRecentDafT = func(usernames []string) ([]MdbArticle, error)
 
-type ArticleGetRecentFilteredDafT = func(filters []model.ArticleFilter) ([]model.Article, error)
+type ArticleGetRecentFilteredDafT = func(filters []model.ArticleFilter) ([]MdbArticle, error)

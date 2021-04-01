@@ -4,17 +4,17 @@ import "github.com/pvillela/go-foa-realworld/internal/model"
 
 type CommentAddIn struct {
 	Slug    string
-	Comment CommentAddIn0
+	Comment commentAddIn0
 }
 
-type CommentAddIn0 struct {
-	Body string
+type commentAddIn0 struct {
+	Body *string
 }
 
-func (in CommentAddIn) ToComment(commentAuthor *model.User) model.Comment {
+func (in CommentAddIn) ToComment(commentAuthor model.User) model.Comment {
 	comment := model.Comment{
 		Body:   in.Comment.Body,
-		Author: *commentAuthor,
+		Author: commentAuthor,
 	}
 	return comment
 }
