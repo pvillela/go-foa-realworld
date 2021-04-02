@@ -15,10 +15,10 @@ type ArticlesFeedSfl struct {
 }
 
 // ArticlesFeedSflT is the function type instantiated by ArticlesFeedSfl.
-type ArticlesFeedSflT = func(username string, in rpc.ArticlesFeedIn) (*rpc.ArticlesOut, error)
+type ArticlesFeedSflT = func(username string, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error)
 
 func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
-	return func(username string, in rpc.ArticlesFeedIn) (*rpc.ArticlesOut, error) {
+	return func(username string, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {
 		var user *model.User
 		var articles []model.Article
 		var err error

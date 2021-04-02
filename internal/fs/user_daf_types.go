@@ -5,13 +5,15 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type MdbUser struct {
+// PwUser is a wrapper of the model.User entity
+// containing context information required for ersistence purposes.
+type PwUser struct {
 	db.RecCtx
 	Entity model.User
 }
 
-type UserGetByNameDafT = func(userName string) (MdbUser, error)
+type UserGetByNameDafT = func(userName string) (PwUser, error)
 
-type UserGetByEmailDafT = func(email string) (MdbUser, error)
+type UserGetByEmailDafT = func(email string) (PwUser, error)
 
-type UserUpdateDafT = func(mdbUser MdbUser) (MdbUser, error)
+type UserUpdateDafT = func(pwUser PwUser) (PwUser, error)

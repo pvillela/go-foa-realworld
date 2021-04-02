@@ -18,7 +18,7 @@ type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 func (s ArticleGetSfl) Make() ArticleGetSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
 		var zero rpc.ArticleOut
-		var user fs.MdbUser
+		var user fs.PwUser
 
 		if username != "" {
 			var err error

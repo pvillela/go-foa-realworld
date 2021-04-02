@@ -9,30 +9,31 @@ type ArticleFavoriteFl struct {
 }
 
 // ArticleFavoriteFlT is the function type instantiated by fs.ArticleFavoriteFl.
-type ArticleFavoriteFlT = func(username, slug string, favorite bool) (MdbUser, MdbArticle, error)
+type ArticleFavoriteFlT = func(username, slug string, favorite bool) (PwUser, PwArticle, error)
 
 func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
-	return func(username, slug string, favorite bool) (MdbUser, MdbArticle, error) {
-		var zeroUser MdbUser
-		var zeroArticle MdbArticle
+	return func(username, slug string, favorite bool) (PwUser, PwArticle, error) {
+		var zeroPwUser PwUser
+		var zeroPwArticle PwArticle
 
-		user, err := s.UserGetByNameDaf(username)
+		pwUser, err := s.UserGetByNameDaf(username)
 		if err != nil {
-			return zeroUser, zeroArticle, err
+			return zeroPwUser, zeroPwArticle, err
 		}
 
-		article, err := s.ArticleGetBySlugDaf(slug)
+		pwArticle, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
-			return zeroUser, zeroArticle, err
+			return zeroPwUser, zeroPwArticle, err
+		}
+		article := &pwArticle.Entity
+
+		*article = article.UpdateFavoritedBy(pwUser.Entity, favorite)
+
+		pwUpdatedArticle, err := s.ArticleUpdateDaf(pwArticle)
+		if err != nil {
+			return zeroPwUser, zeroPwArticle, err
 		}
 
-		article.UpdateFavoritedBy(user.Entity, favorite)
-
-		updatedArticle, err := s.ArticleUpdateDaf(article)
-		if err != nil {
-			return zeroUser, zeroArticle, err
-		}
-
-		return user, updatedArticle, nil
+		return pwUser, pwUpdatedArticle, nil
 	}
 }

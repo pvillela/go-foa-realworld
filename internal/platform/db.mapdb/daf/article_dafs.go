@@ -13,31 +13,29 @@ type ArticleDafs struct {
 }
 
 func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
-	return func(article model.Article) (fs.MdbArticle, error) {
+	return func(article model.Article) (fs.PwArticle, error) {
 		if _, err := s.getBySlug(article.Slug); err == nil {
-			return fs.MdbArticle{}, fs.ErrDuplicateArticle
+			return fs.PwArticle{}, fs.ErrDuplicateArticle
 		}
 		article.CreatedAt = time.Now()
-		mdbArticle := fs.MdbArticle{
-			Entity: article,
-		}
-		s.Store.Store(article.Slug, mdbArticle)
-		return mdbArticle, nil
+		pwArticle := fs.PwArticle{nil, article}
+		s.Store.Store(article.Slug, pwArticle)
+		return pwArticle, nil
 	}
 }
 
-func (s ArticleDafs) getBySlug(slug string) (fs.MdbArticle, error) {
+func (s ArticleDafs) getBySlug(slug string) (fs.PwArticle, error) {
 	value, ok := s.Store.Load(slug)
 	if !ok {
-		return fs.MdbArticle{}, fs.ErrArticleNotFound
+		return fs.PwArticle{}, fs.ErrArticleNotFound
 	}
 
-	mdbArticle, ok := value.(fs.MdbArticle)
+	pwArticle, ok := value.(fs.PwArticle)
 	if !ok {
-		return fs.MdbArticle{}, errors.New("not an article stored at key")
+		return fs.PwArticle{}, errors.New("not an article stored at key")
 	}
 
-	return mdbArticle, nil
+	return pwArticle, nil
 }
 
 func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
@@ -45,15 +43,16 @@ func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 }
 
 func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
-	return func(mdbArticle fs.MdbArticle) (fs.MdbArticle, error) {
-		if _, err := s.getBySlug(mdbArticle.Slug); err != nil {
-			return fs.MdbArticle{}, fs.ErrArticleNotFound
+	return func(pwArticle fs.PwArticle) (fs.PwArticle, error) {
+		article := &pwArticle.Entity
+		if _, err := s.getBySlug(article.Slug); err != nil {
+			return fs.PwArticle{}, fs.ErrArticleNotFound
 		}
 
-		mdbArticle.UpdatedAt = time.Now()
-		s.Store.Store(mdbArticle.Slug, mdbArticle)
+		article.UpdatedAt = time.Now()
+		s.Store.Store(article.Slug, pwArticle)
 
-		return mdbArticle, nil
+		return pwArticle, nil
 	}
 }
 
@@ -70,13 +69,13 @@ func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() fs.ArticleGetByAut
 		var toReturn []model.Article
 
 		s.Store.Range(func(key, value interface{}) bool {
-			article, ok := value.(model.Article)
+			pwArticle, ok := value.(fs.PwArticle)
 			if !ok {
 				return true // log this but continue
 			}
 			for _, username := range usernames {
-				if article.Author.Name == username {
-					toReturn = append(toReturn, article)
+				if pwArticle.Entity.Author.Name == username {
+					toReturn = append(toReturn, pwArticle.Entity)
 				}
 			}
 			return true
@@ -88,25 +87,25 @@ func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() fs.ArticleGetByAut
 
 func (s ArticleDafs) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
 	return func(filters []model.ArticleFilter) ([]model.Article, error) {
-		var recentArticles []model.Article
+		var toReturn []model.Article
 
 		s.Store.Range(func(key, value interface{}) bool {
-			article, ok := value.(model.Article)
+			pwArticle, ok := value.(fs.PwArticle)
 			if !ok {
-				// not an article (shouldn't happen) -> skip
+				// not an pwArticle (shouldn't happen) -> skip
 				return true // log this but continue
 			}
 
 			for _, funcToApply := range filters {
-				if !funcToApply(article) { // "AND filter" : if one of the filter is at false, skip the article
+				if !funcToApply(pwArticle.Entity) { // "AND filter" : if one of the filter is at false, skip the pwArticle
 					return true
 				}
 			}
 
-			recentArticles = append(recentArticles, article)
+			toReturn = append(toReturn, pwArticle.Entity)
 			return true
 		})
 
-		return recentArticles, nil
+		return toReturn, nil
 	}
 }

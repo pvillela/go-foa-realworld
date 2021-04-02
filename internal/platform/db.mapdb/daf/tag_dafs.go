@@ -31,7 +31,6 @@ func (s TagDafs) MakeAdd() fs.TagAddDafT {
 		for _, tag := range newTags {
 			s.Store.Store(tag, true)
 		}
-
 		return nil
 	}
 }

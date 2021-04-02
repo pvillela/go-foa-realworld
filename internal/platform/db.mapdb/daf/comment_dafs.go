@@ -13,18 +13,20 @@ type CommentDafs struct {
 }
 
 func (s CommentDafs) MakeGetById() fs.CommentGetByIdDafT {
-	return func(id int) (*model.Comment, error) {
+	return func(id int) (fs.PwComment, error) {
+		var zeroPwComment fs.PwComment
+
 		value, ok := s.Store.Load(id)
 		if !ok {
-			return nil, fs.ErrCommentNotFound
+			return zeroPwComment, fs.ErrCommentNotFound
 		}
 
-		comment, ok := value.(model.Comment)
+		pwComment, ok := value.(fs.PwComment)
 		if !ok {
-			return nil, errors.New("not an article stored at key")
+			return zeroPwComment, errors.New("not an article stored at key")
 		}
 
-		return &comment, nil
+		return pwComment, nil
 	}
 }
 
@@ -38,12 +40,13 @@ func (s CommentDafs) getNextId() int {
 }
 
 func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
-	return func(comment model.Comment) (*model.Comment, error) {
+	return func(comment model.Comment) (fs.PwComment, error) {
 		comment.ID = s.getNextId()
 		comment.CreatedAt = time.Now()
 		comment.UpdatedAt = time.Now()
-		s.Store.Store(comment.ID, comment)
-		return &comment, nil
+		pwComment := fs.PwComment{nil, comment}
+		s.Store.Store(comment.ID, pwComment)
+		return pwComment, nil
 	}
 }
 

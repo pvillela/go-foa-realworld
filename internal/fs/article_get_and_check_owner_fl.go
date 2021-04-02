@@ -8,11 +8,11 @@ type ArticleGetAndCheckOwnerFl struct {
 }
 
 // ArticleGetAndCheckOwnerFlT is the function type instantiated by fs.ArticleGetAndCheckOwnerFl.
-type ArticleGetAndCheckOwnerFlT = func(username, slug string) (MdbArticle, error)
+type ArticleGetAndCheckOwnerFlT = func(username, slug string) (PwArticle, error)
 
 func (s ArticleGetAndCheckOwnerFl) Make() ArticleGetAndCheckOwnerFlT {
-	return func(slug string, username string) (MdbArticle, error) {
-		var zero MdbArticle
+	return func(slug string, username string) (PwArticle, error) {
+		var zero PwArticle
 
 		article, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {

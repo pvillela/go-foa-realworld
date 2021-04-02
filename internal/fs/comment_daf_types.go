@@ -5,13 +5,15 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type MdbComment struct {
+// PwComment is a wrapper of the model.User entity
+// containing context information required for ersistence purposes.
+type PwComment struct {
 	db.RecCtx
 	Entity model.Comment
 }
 
-type CommentGetByIdDafT = func(id int) (MdbComment, error)
+type CommentGetByIdDafT = func(id int) (PwComment, error)
 
-type CommentCreateDafT = func(comment model.Comment) (MdbComment, error)
+type CommentCreateDafT = func(comment model.Comment) (PwComment, error)
 
 type CommentDeleteDafT = func(id int) error

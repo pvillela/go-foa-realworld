@@ -24,11 +24,11 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 	return func(username string, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
 		var zero rpc.ArticleOut
 
-		mdbArticle, err := s.ArticleGetAndCheckOwnerFl(slug, username)
+		pwArticle, err := s.ArticleGetAndCheckOwnerFl(slug, username)
 		if err != nil {
 			return zero, err
 		}
-		article := &mdbArticle.Entity
+		article := &pwArticle.Entity
 
 		fieldsToUpdate := make(map[model.ArticleUpdatableField]interface{}, 3)
 		if v := in.Article.Title; v != nil {
@@ -49,18 +49,18 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 			return zero, err
 		}
 
-		mdbUser, err := s.UserGetByNameDaf(username)
+		pwUser, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
-		user := &mdbUser.Entity
+		user := &pwUser.Entity
 
-		var savedMdbArticle fs.MdbArticle
-		savedArticle := &savedMdbArticle.Entity
+		var savedPwArticle fs.PwArticle
+		savedArticle := &savedPwArticle.Entity
 
 		// TODO: move some of this logic to a BF
 		if newSlug == slug {
-			savedMdbArticle, err = s.ArticleUpdateDaf(mdbArticle)
+			savedPwArticle, err = s.ArticleUpdateDaf(pwArticle)
 			if err != nil {
 				return zero, err
 			}
@@ -68,7 +68,7 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 			if _, err := s.ArticleGetBySlugDaf(newSlug); err == nil {
 				return zero, fs.ErrDuplicateArticle
 			}
-			savedMdbArticle, err = s.ArticleCreateDaf(*article)
+			savedPwArticle, err = s.ArticleCreateDaf(*article)
 			if err != nil {
 				return zero, err
 			}
