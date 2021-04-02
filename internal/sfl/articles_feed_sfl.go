@@ -19,31 +19,47 @@ type ArticlesFeedSflT = func(username string, in rpc.ArticlesFeedIn) (rpc.Articl
 
 func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 	return func(username string, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {
+		var zero rpc.ArticlesOut
+		var pwUser fs.PwUser
 		var user *model.User
 		var articles []model.Article
 		var err error
 
+		if username == "" {
+			return zero, fs.ErrAuthenticationFailed
+		}
+
 		limit := in.Limit
 		offset := in.Offset
 
-		if limit > 0 {
-			if username != "" {
-				user, err = s.UserGetByNameDaf(username)
-				if err != nil {
-					return nil, err
-				}
-			}
+		if limit <= 0 {
+			return rpc.ArticlesOut{
+				Articles: []rpc.ArticleOut{},
+			}, err
+		}
 
-			articles, err = s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
+		if username != "" {
+			pwUser, err = s.UserGetByNameDaf(username)
 			if err != nil {
-				return nil, err
+				return zero, err
 			}
+		}
+
+		pwUser, err = s.UserGetByNameDaf(username)
+		if err != nil {
+			return zero, err
+		}
+		user = pwUser.Entity()
+
+		articles, err = s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
+		if err != nil {
+			return zero, err
 		}
 
 		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
 
-		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
+		articlesOut := rpc.ArticlesOut{}.FromModel(*user, articles)
 
-		return &articlesOut, err
+		return articlesOut, err
 	}
 }

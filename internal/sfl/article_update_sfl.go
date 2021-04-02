@@ -28,7 +28,7 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 		if err != nil {
 			return zero, err
 		}
-		article := &pwArticle.Entity
+		article := pwArticle.Entity()
 
 		fieldsToUpdate := make(map[model.ArticleUpdatableField]interface{}, 3)
 		if v := in.Article.Title; v != nil {
@@ -53,10 +53,9 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 		if err != nil {
 			return zero, err
 		}
-		user := &pwUser.Entity
+		user := pwUser.Entity()
 
 		var savedPwArticle fs.PwArticle
-		savedArticle := &savedPwArticle.Entity
 
 		// TODO: move some of this logic to a BF
 		if newSlug == slug {
@@ -74,7 +73,7 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 			}
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(*user, *savedArticle)
+		articleOut := rpc.ArticleOut{}.FromModel(*user, *savedPwArticle.Entity())
 		return articleOut, err
 	}
 }

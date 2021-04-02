@@ -1,15 +1,15 @@
 package fs
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // PwUser is a wrapper of the model.User entity
 // containing context information required for ersistence purposes.
-type PwUser struct {
-	db.RecCtx
-	Entity model.User
+type PwUser interface {
+	Entity() *model.User
+	SetEntity(*model.User)
+	Copy(*model.User) PwUser
 }
 
 type UserGetByNameDafT = func(userName string) (PwUser, error)

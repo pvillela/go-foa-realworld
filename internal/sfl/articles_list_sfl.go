@@ -14,33 +14,12 @@ type ArticlesListSfl struct {
 }
 
 // ArticlesListSflT is the function type instantiated by ArticlesListSfl.
-type ArticlesListSflT = func(username string, in rpc.ArticlesListIn) (*rpc.ArticlesOut, error)
-
-func (s ArticlesListSfl) core(username string, limit, offset int, filters []model.ArticleFilter) (*model.User, model.ArticleCollection, error) {
-	if limit <= 0 {
-		return nil, model.ArticleCollection{}, nil
-	}
-
-	articles, err := s.ArticleGetRecentFilteredDaf(filters)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var user *model.User
-	if username != "" {
-		var err error
-		user, err = s.UserGetByNameDaf(username)
-		if err != nil {
-			return nil, nil, err
-		}
-	}
-
-	return user, model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), nil
-}
+type ArticlesListSflT = func(username string, in rpc.ArticlesListIn) (rpc.ArticlesOut, error)
 
 func (s ArticlesListSfl) Make() ArticlesListSflT {
-	return func(username string, in rpc.ArticlesListIn) (*rpc.ArticlesOut, error) {
-		var user *model.User
+	return func(username string, in rpc.ArticlesListIn) (rpc.ArticlesOut, error) {
+		var zero rpc.ArticlesOut
+		var pwUser fs.PwUser
 		var articles []model.Article
 		var err error
 
@@ -52,24 +31,30 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 		favoritedFilter := model.ArticleFavoritedFilterOf(in.Favorited)
 		filters := []model.ArticleFilter{tagFilter, authorFilter, favoritedFilter}
 
-		if limit > 0 {
-			if username != "" {
-				user, err = s.UserGetByNameDaf(username)
-				if err != nil {
-					return nil, err
-				}
-			}
+		if limit <= 0 {
+			return rpc.ArticlesOut{
+				Articles: []rpc.ArticleOut{},
+			}, err
+		}
 
-			articles, err = s.ArticleGetRecentFilteredDaf(filters)
+		user := &model.User{}
+		if username != "" {
+			pwUser, err = s.UserGetByNameDaf(username)
 			if err != nil {
-				return nil, err
+				return zero, err
 			}
+			user = pwUser.Entity()
+		}
+
+		articles, err = s.ArticleGetRecentFilteredDaf(filters)
+		if err != nil {
+			return zero, err
 		}
 
 		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
 
-		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
+		articlesOut := rpc.ArticlesOut{}.FromModel(*user, articles)
 
-		return &articlesOut, err
+		return articlesOut, err
 	}
 }

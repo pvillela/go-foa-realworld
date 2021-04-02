@@ -17,11 +17,11 @@ type ArticleFavoriteSflT = func(username string, slug string) (rpc.ArticleOut, e
 func (s ArticleFavoriteSfl) Make() ArticleFavoriteSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
 		var zero rpc.ArticleOut
-		user, article, err := s.ArticleFavoriteFl(username, slug, true)
+		pwUser, pwArticle, err := s.ArticleFavoriteFl(username, slug, true)
 		if err != nil {
 			return zero, err
 		}
-		articleOut := rpc.ArticleOut{}.FromModel(user.Entity, article.Entity)
+		articleOut := rpc.ArticleOut{}.FromModel(*pwUser.Entity(), *pwArticle.Entity())
 		return articleOut, err
 	}
 }

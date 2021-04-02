@@ -18,22 +18,22 @@ type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 func (s ArticleGetSfl) Make() ArticleGetSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
 		var zero rpc.ArticleOut
-		var user fs.PwUser
+		var pwUser fs.PwUser
 
 		if username != "" {
 			var err error
-			user, err = s.UserGetByNameDaf(username)
+			pwUser, err = s.UserGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}
 		}
 
-		article, err := s.ArticleGetBySlugDaf(slug)
+		pwArticle, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
 			return zero, err
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(user.Entity, article.Entity)
+		articleOut := rpc.ArticleOut{}.FromModel(*pwUser.Entity(), *pwArticle.Entity())
 
 		return articleOut, err
 	}

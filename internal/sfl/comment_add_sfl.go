@@ -15,36 +15,40 @@ type CommentAddSfl struct {
 }
 
 // CommentAddSflT is the function type instantiated by CommentAddSfl.
-type CommentAddSflT = func(username string, in rpc.CommentAddIn) (*rpc.CommentOut, error)
+type CommentAddSflT = func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error)
 
 func (s CommentAddSfl) Make() CommentAddSflT {
-	return func(username string, in rpc.CommentAddIn) (*rpc.CommentOut, error) {
+	return func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error) {
+		var zero rpc.CommentOut
 		var err error
 
-		commentAuthor, err := s.UserGetByNameDaf(username)
+		pwCommentAuthor, err := s.UserGetByNameDaf(username)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
+		commentAuthor := pwCommentAuthor.Entity()
 
-		article, err := s.ArticleGetBySlugDaf(in.Slug)
+		pwArticle, err := s.ArticleGetBySlugDaf(in.Slug)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
+		article := pwArticle.Entity()
 
-		rawComment := in.ToComment(commentAuthor)
+		rawComment := in.ToComment(*commentAuthor)
 
-		insertedComment, err := s.CommentCreateDaf(rawComment)
+		pwInsertedComment, err := s.CommentCreateDaf(rawComment)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
+		insertedComment := pwInsertedComment.Entity()
 
 		article.Comments = append(article.Comments, *insertedComment)
 
-		if _, err := s.ArticleUpdateDaf(*article); err != nil {
-			return nil, err
+		if _, err := s.ArticleUpdateDaf(pwArticle); err != nil {
+			return zero, err
 		}
 
-		commentOut := rpc.CommentOut{}.FromModel(insertedComment)
-		return &commentOut, err
+		commentOut := rpc.CommentOut{}.FromModel(*insertedComment)
+		return commentOut, err
 	}
 }
