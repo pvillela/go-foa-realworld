@@ -13,18 +13,18 @@ type UserDafs struct {
 	Store *sync.Map
 }
 
-func (s UserDafs) getByName(username string) (*model.User, error) {
+func (s UserDafs) getByName(username string) (fs.PwUser, error) {
 	value, ok := s.Store.Load(username)
 	if !ok {
-		return nil, nil, fs.ErrUserNotFound
+		return nil, fs.ErrUserNotFound
 	}
 
 	user, ok := value.(model.User)
 	if !ok {
-		return nil, nil, errors.New("corrupted data, expected value of type Entity at key " + username)
+		return nil, errors.New("corrupted data, expected value of type Entity at key " + username)
 	}
 
-	return &user, nil, nil
+	return &user, nil
 }
 
 func (s UserDafs) MakeGetByName() fs.UserGetByNameDafT {

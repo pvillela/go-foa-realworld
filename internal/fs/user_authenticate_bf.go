@@ -7,10 +7,10 @@ import (
 
 type UserAuthenticateBf struct{}
 
-type UserAuthenticateBfT = func(user *model.User, password string) bool
+type UserAuthenticateBfT = func(user model.User, password string) bool
 
 func (UserAuthenticateBf) Make() UserAuthenticateBfT {
-	return func(user *model.User, password string) bool {
+	return func(user model.User, password string) bool {
 		if jwt.Hash(user.PasswordSalt, password) != user.PasswordHash {
 			return false
 		}

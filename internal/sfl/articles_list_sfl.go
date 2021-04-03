@@ -19,7 +19,6 @@ type ArticlesListSflT = func(username string, in rpc.ArticlesListIn) (rpc.Articl
 func (s ArticlesListSfl) Make() ArticlesListSflT {
 	return func(username string, in rpc.ArticlesListIn) (rpc.ArticlesOut, error) {
 		var zero rpc.ArticlesOut
-		var pwUser fs.PwUser
 		var articles []model.Article
 		var err error
 
@@ -39,7 +38,7 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 
 		user := &model.User{}
 		if username != "" {
-			pwUser, err = s.UserGetByNameDaf(username)
+			pwUser, err := s.UserGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}

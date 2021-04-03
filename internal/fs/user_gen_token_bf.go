@@ -7,10 +7,10 @@ import (
 
 type UserGenTokenBf struct{}
 
-type UserGenTokenBfT = func(user *model.User) (string, error)
+type UserGenTokenBfT = func(user model.User) (string, error)
 
 func (UserGenTokenBf) Make() UserGenTokenBfT {
-	return func(user *model.User) (string, error) {
+	return func(user model.User) (string, error) {
 		return jwt.UserGenToken(user)
 	}
 }

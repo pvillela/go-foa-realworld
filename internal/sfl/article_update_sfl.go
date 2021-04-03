@@ -55,11 +55,11 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 		}
 		user := pwUser.Entity()
 
-		var savedPwArticle fs.PwArticle
+		var pwSavedArticle fs.PwArticle
 
 		// TODO: move some of this logic to a BF
 		if newSlug == slug {
-			savedPwArticle, err = s.ArticleUpdateDaf(pwArticle)
+			pwSavedArticle, err = s.ArticleUpdateDaf(pwArticle)
 			if err != nil {
 				return zero, err
 			}
@@ -67,13 +67,13 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 			if _, err := s.ArticleGetBySlugDaf(newSlug); err == nil {
 				return zero, fs.ErrDuplicateArticle
 			}
-			savedPwArticle, err = s.ArticleCreateDaf(*article)
+			pwSavedArticle, err = s.ArticleCreateDaf(*article)
 			if err != nil {
 				return zero, err
 			}
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(*user, *savedPwArticle.Entity())
+		articleOut := rpc.ArticleOut{}.FromModel(*user, *pwSavedArticle.Entity())
 		return articleOut, err
 	}
 }

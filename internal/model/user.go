@@ -80,18 +80,19 @@ func (user User) Follows(userName string) bool {
 }
 
 // UpdateFollowees will append or remove followee to current user according to follow param
-func (user *User) UpdateFollowees(followeeName string, follow bool) {
+func (s User) UpdateFollowees(followeeName string, follow bool) User {
 	if follow {
-		user.FollowIDs = append(user.FollowIDs, followeeName)
-		return
+		s.FollowIDs = append(s.FollowIDs, followeeName)
+		return s
 	}
 
-	for i := 0; i < len(user.FollowIDs); i++ {
-		if user.FollowIDs[i] == followeeName {
-			user.FollowIDs = append(user.FollowIDs[:i], user.FollowIDs[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
+	for i := 0; i < len(s.FollowIDs); i++ {
+		if s.FollowIDs[i] == followeeName {
+			s.FollowIDs = append(s.FollowIDs[:i], s.FollowIDs[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
 		}
 	}
-	if len(user.FollowIDs) == 0 {
-		user.FollowIDs = nil
+	if len(s.FollowIDs) == 0 {
+		s.FollowIDs = nil
 	}
+	return s
 }

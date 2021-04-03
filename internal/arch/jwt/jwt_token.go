@@ -22,7 +22,7 @@ func Hash(salt []byte, text string) string {
 }
 
 // UserGenToken generates a JWT token for a user
-func UserGenToken(user *model.User) (string, error) {
+func UserGenToken(user model.User) (string, error) {
 	if user.Name == "" {
 		return "", errors.New("can't generate token for empty user")
 	}

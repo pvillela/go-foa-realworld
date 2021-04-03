@@ -14,32 +14,31 @@ type UserAuthenticateSfl struct {
 }
 
 // UserAuthenticateSflT is the function type instantiated by UserAuthenticateSfl.
-type UserAuthenticateSflT = func(_username string, in rpc.UserAuthenticateIn) (*rpc.UserOut, error)
+type UserAuthenticateSflT = func(_username string, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
 func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
-	return func(_username string, in rpc.UserAuthenticateIn) (*rpc.UserOut, error) {
+	return func(_username string, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
+		var zero rpc.UserOut
+
 		email := in.User.Email
 		password := in.User.Password
 
-		user, err := s.UserGetByEmailDaf(email)
+		pwUser, err := s.UserGetByEmailDaf(email)
 		if err != nil {
-			return nil, err
+			return zero, err
+		}
+		user := pwUser.Entity()
+
+		if !s.UserAuthenticateBf(*user, password) {
+			return zero, fs.ErrAuthenticationFailed
 		}
 
-		if user == nil {
-			return nil, fs.ErrUserNotFound
-		}
-
-		if !s.UserAuthenticateBf(user, password) {
-			return nil, fs.ErrAuthenticationFailed
-		}
-
-		token, err := s.UserGenTokenBf(user)
+		token, err := s.UserGenTokenBf(*user)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
 
-		userOut := rpc.UserOut{}.FromModel(user, token)
-		return &userOut, err
+		userOut := rpc.UserOut{}.FromModel(*user, token)
+		return userOut, err
 	}
 }

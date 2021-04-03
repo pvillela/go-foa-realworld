@@ -1,13 +1,14 @@
 package sfl
 
-import "github.com/pvillela/go-foa-realworld/internal/model"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
+)
 
-// GetCurrentUserSflS contains the dependencies required for the construction of a
-// GetCurrentUserSfl. It represents the action of having the current user start following a
-// given other user.
-type GetCurrentUserSflS struct {
+// UserGetCurrentSfl is the stereotype instance for the service flow that
+// returns the current user.
+type UserGetCurrentSfl struct {
 }
 
-// GetCurrentUsersSfl is the type of a function that takes a JWT token corresponding to the
-// current user and returns that user.
-type GetCurrentUserSfl = func(token string) model.User
+// UserGetCurrentSflT is the function type instantiated by UserGetCurrentSfl.
+type UserGetCurrentSflT = func(username string) rpc.UserOut
+

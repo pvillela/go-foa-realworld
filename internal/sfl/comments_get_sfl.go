@@ -13,20 +13,24 @@ type CommentsGetSfl struct {
 }
 
 // CommentsGetSflT is the function type instantiated by CommentsGetSfl.
-type CommentsGetSflT = func(username string, slug string) (*rpc.CommentsOut, error)
+type CommentsGetSflT = func(username string, slug string) (rpc.CommentsOut, error)
 
 func (s CommentsGetSfl) Make() CommentsGetSflT {
-	return func(username string, slug string) (*rpc.CommentsOut, error) {
-		article, err := s.ArticleGetBySlugDaf(slug)
+	return func(username string, slug string) (rpc.CommentsOut, error) {
+		var zero rpc.CommentsOut
+
+		pwArticle, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
+		article := pwArticle.Entity()
+
 		if article.Comments == nil {
 			article.Comments = []model.Comment{}
 		}
 
 		commentsOut := rpc.CommentsOut{}.FromModel(article.Comments)
 
-		return &commentsOut, nil
+		return commentsOut, nil
 	}
 }

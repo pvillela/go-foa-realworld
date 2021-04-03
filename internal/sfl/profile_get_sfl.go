@@ -13,31 +13,32 @@ type ProfileGetSfl struct {
 }
 
 // ProfileGetSflT is the function type instantiated by CommentsGetSfl.
-type ProfileGetSflT = func(username, profileName string) (*rpc.ProfileOut, error)
+type ProfileGetSflT = func(username, profileName string) (rpc.ProfileOut, error)
 
 func (s ProfileGetSfl) Make() ProfileGetSflT {
-	return func(username, profileName string) (*rpc.ProfileOut, error) {
-		var user *model.User
+	return func(username, profileName string) (rpc.ProfileOut, error) {
+		var zero rpc.ProfileOut
 
 		profileUser, err := s.UserGetByNameDaf(profileName)
 		if err != nil {
-			return nil, err
+			return zero, err
 		}
 		if profileUser == nil {
-			return nil, fs.ErrProfileNotFound
+			return zero, fs.ErrProfileNotFound
 		}
 
+		user := &model.User{}
 		if username != "" {
-			var err error
-			user, err = s.UserGetByNameDaf(username)
+			pwUser, err := s.UserGetByNameDaf(username)
 			if err != nil {
-				return nil, err
+				return zero, err
 			}
+			user = pwUser.Entity()
 		}
 
 		follows := user.Follows(profileName)
-		profileOut := rpc.ProfileOut{}.FromModel(user, follows)
+		profileOut := rpc.ProfileOut{}.FromModel(*user, follows)
 
-		return &profileOut, nil
+		return profileOut, nil
 	}
 }

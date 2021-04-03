@@ -12,17 +12,15 @@ type ArticleGetAndCheckOwnerFlT = func(username, slug string) (PwArticle, error)
 
 func (s ArticleGetAndCheckOwnerFl) Make() ArticleGetAndCheckOwnerFlT {
 	return func(slug string, username string) (PwArticle, error) {
-		var zero PwArticle
-
-		article, err := s.ArticleGetBySlugDaf(slug)
+		pwArticle, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
-			return zero, err
+			return nil, err
 		}
 
-		if err := s.ArticleCheckOwnerBf(article.Entity, username); err != nil {
-			return zero, err
+		if err := s.ArticleCheckOwnerBf(*pwArticle.Entity(), username); err != nil {
+			return nil, err
 		}
 
-		return article, err
+		return pwArticle, err
 	}
 }
