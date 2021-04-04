@@ -7,9 +7,8 @@ import (
 // PwArticle is a wrapper of the model.User entity
 // containing context information required for persistence purposes.
 type PwArticle interface {
-	Entity() *model.Article
-	SetEntity(*model.Article)
-	Copy(*model.Article) PwArticle
+	Entity() model.Article
+	Updated(model.Article) PwArticle
 }
 
 type ArticleCreateDafT = func(article model.Article) (PwArticle, error)
