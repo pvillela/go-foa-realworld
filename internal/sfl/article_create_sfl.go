@@ -22,7 +22,7 @@ func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 		zero := rpc.ArticleOut{}
 		article := in.ToArticle()
 
-		pwUser, err := s.UserGetByNameDaf(username)
+		user, _, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
@@ -31,7 +31,7 @@ func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 			return zero, err
 		}
 
-		pwArticle, err := s.ArticleCreateDaf(article)
+		article, _, err = s.ArticleCreateDaf(article)
 		if err != nil {
 			return zero, err
 		}
@@ -40,7 +40,7 @@ func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 			return zero, err
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(*pwUser.Entity(), *pwArticle.Entity())
+		articleOut := rpc.ArticleOut{}.FromModel(user, article)
 		return articleOut, err
 	}
 }

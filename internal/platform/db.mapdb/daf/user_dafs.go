@@ -1,7 +1,7 @@
 package daf
 
 import (
-	"errors"
+	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -13,18 +13,18 @@ type UserDafs struct {
 	Store *sync.Map
 }
 
-func (s UserDafs) getByName(username string) (fs.PwUser, error) {
+func (s UserDafs) getByName(username string) (model.User, db.RecCtx, error) {
 	value, ok := s.Store.Load(username)
 	if !ok {
-		return nil, fs.ErrUserNotFound
+		return model.User{}, nil, fs.ErrUserNotFound
 	}
 
-	user, ok := value.(model.User)
+	pw, ok := value.(fs.PwUser)
 	if !ok {
-		return nil, errors.New("corrupted data, expected value of type Entity at key " + username)
+		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap pw"))
 	}
 
-	return &user, nil
+	return pw.Entity, pw.RecCtx, nil
 }
 
 func (s UserDafs) MakeGetByName() fs.UserGetByNameDafT {
@@ -32,44 +32,42 @@ func (s UserDafs) MakeGetByName() fs.UserGetByNameDafT {
 }
 
 func (s UserDafs) MakeGetByEmail() fs.UserGetByEmailDafT {
-	return func(email string) (*model.User, error) {
-		var err error
-		var foundUser model.User
-		var userWasFound bool
+	return func(email string) (model.User, db.RecCtx, error) {
+		var foundPw fs.PwUser
+		var pwWasFound bool
 
 		s.Store.Range(func(key, value interface{}) bool {
-			user, ok := value.(model.User)
+			pw, ok := value.(fs.PwUser)
 			if !ok {
-				err = errors.New("data corrupton: expected model.Entity")
-				return false
+				panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap pw"))
 			}
 
-			if user.Email == email {
-				foundUser = user
-				userWasFound = true
+			if pw.Entity.Email == email {
+				foundPw = pw
+				pwWasFound = true
 				return false // stop range
 			}
 
 			return true // keep iterating
 		})
 
-		var userRet *model.User
-		if userWasFound {
-			userRet = &foundUser
+		if !pwWasFound {
+			return model.User{}, nil, fs.ErrUserNotFound
 		}
-		return userRet, nil
+		return foundPw.Entity, foundPw.RecCtx, nil
 	}
 }
 
 func (s UserDafs) MakeUpdate() fs.UserUpdateDafT {
-	return func(user model.User) error {
-		if user, _ := s.getByName(user.Name); user == nil {
-			return fs.ErrUserNotFound
+	return func(user model.User, recCtx db.RecCtx) (model.User, db.RecCtx, error) {
+		if _, _, err := s.getByName(user.Name); err != nil {
+			return model.User{}, nil, err
 		}
 
 		user.UpdatedAt = time.Now()
-		s.Store.Store(user.Name, user)
+		pw := fs.PwUser{nil, user}
+		s.Store.Store(user.Name, pw)
 
-		return nil
+		return pw.Entity, pw.RecCtx, nil
 	}
 }

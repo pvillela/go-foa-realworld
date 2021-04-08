@@ -1,21 +1,22 @@
 package fs
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // PwArticle is a wrapper of the model.User entity
 // containing context information required for persistence purposes.
-type PwArticle interface {
-	Entity() model.Article
-	Updated(model.Article) PwArticle
+type PwArticle struct {
+	db.RecCtx
+	Entity model.Article
 }
 
-type ArticleCreateDafT = func(article model.Article) (PwArticle, error)
+type ArticleCreateDafT = func(article model.Article) (model.Article, db.RecCtx, error)
 
-type ArticleGetBySlugDafT = func(slug string) (PwArticle, error)
+type ArticleGetBySlugDafT = func(slug string) (model.Article, db.RecCtx, error)
 
-type ArticleUpdateDafT = func(pwArticle PwArticle) (PwArticle, error)
+type ArticleUpdateDafT = func(article model.Article, recCtx db.RecCtx) (model.Article, db.RecCtx, error)
 
 type ArticleDeleteDafT = func(slug string) error
 
