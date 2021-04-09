@@ -36,13 +36,12 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 			}, err
 		}
 
-		user := &model.User{}
+		user := model.User{}
 		if username != "" {
-			pwUser, err := s.UserGetByNameDaf(username)
+			user, _, err = s.UserGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}
-			user = pwUser.Entity()
 		}
 
 		articles, err = s.ArticleGetRecentFilteredDaf(filters)
@@ -52,7 +51,7 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 
 		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
 
-		articlesOut := rpc.ArticlesOut{}.FromModel(*user, articles)
+		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
 
 		return articlesOut, err
 	}

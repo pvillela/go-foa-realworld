@@ -21,7 +21,7 @@ func (s ArticleFavoriteSfl) Make() ArticleFavoriteSflT {
 		if err != nil {
 			return zero, err
 		}
-		articleOut := rpc.ArticleOut{}.FromModel(*pwUser.Entity(), *pwArticle.Entity())
+		articleOut := rpc.ArticleOut{}.FromModel(pwUser.Entity, pwArticle.Entity)
 		return articleOut, err
 	}
 }

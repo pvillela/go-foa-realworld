@@ -13,24 +13,23 @@ type ArticleFavoriteFlT = func(username, slug string, favorite bool) (PwUser, Pw
 
 func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
 	return func(username, slug string, favorite bool) (PwUser, PwArticle, error) {
-		pwUser, err := s.UserGetByNameDaf(username)
+		user, rcUser, err := s.UserGetByNameDaf(username)
 		if err != nil {
-			return nil, nil, err
+			return PwUser{}, PwArticle{}, err
 		}
 
-		pwArticle, err := s.ArticleGetBySlugDaf(slug)
+		article, rcArticle, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
-			return nil, nil, err
-		}
-		article := pwArticle.Entity()
-
-		*article = article.UpdateFavoritedBy(*pwUser.Entity(), favorite)
-
-		pwUpdatedArticle, err := s.ArticleUpdateDaf(pwArticle)
-		if err != nil {
-			return nil, nil, err
+			return PwUser{}, PwArticle{}, err
 		}
 
-		return pwUser, pwUpdatedArticle, nil
+		article = article.UpdateFavoritedBy(user, favorite)
+
+		article, rcArticle, err = s.ArticleUpdateDaf(article, rcArticle)
+		if err != nil {
+			return PwUser{}, PwArticle{}, err
+		}
+
+		return PwUser{rcUser, user}, PwArticle{rcArticle, article}, nil
 	}
 }

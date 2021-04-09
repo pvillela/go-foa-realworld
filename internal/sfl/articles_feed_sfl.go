@@ -20,8 +20,7 @@ type ArticlesFeedSflT = func(username string, in rpc.ArticlesFeedIn) (rpc.Articl
 func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 	return func(username string, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {
 		var zero rpc.ArticlesOut
-		var pwUser fs.PwUser
-		var user *model.User
+		var user model.User
 		var articles []model.Article
 		var err error
 
@@ -39,17 +38,16 @@ func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 		}
 
 		if username != "" {
-			pwUser, err = s.UserGetByNameDaf(username)
+			user, _, err = s.UserGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}
 		}
 
-		pwUser, err = s.UserGetByNameDaf(username)
+		user, _, err = s.UserGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
-		user = pwUser.Entity()
 
 		articles, err = s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
 		if err != nil {
@@ -57,8 +55,7 @@ func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 		}
 
 		articles = model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset)
-
-		articlesOut := rpc.ArticlesOut{}.FromModel(*user, articles)
+		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
 
 		return articlesOut, err
 	}

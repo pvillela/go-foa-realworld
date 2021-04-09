@@ -12,15 +12,15 @@ type TagsGetSfl struct {
 }
 
 // TagsGetSflT is the function type instantiated by TagsGetSfl.
-type TagsGetSflT = func() (*rpc.TagsOut, error)
+type TagsGetSflT = func() (rpc.TagsOut, error)
 
 func (s TagsGetSfl) Make() TagsGetSflT {
-	return func() (*rpc.TagsOut, error) {
+	return func() (rpc.TagsOut, error) {
 		tags, err := s.TagGetAllDaf()
 		if err != nil {
-			return nil, err
+			return rpc.TagsOut{}, err
 		}
 		tagsOut := rpc.TagsOut{}.FromModel(tags)
-		return &tagsOut, err
+		return tagsOut, err
 	}
 }

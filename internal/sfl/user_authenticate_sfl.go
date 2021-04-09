@@ -23,22 +23,21 @@ func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
 		email := in.User.Email
 		password := in.User.Password
 
-		pwUser, err := s.UserGetByEmailDaf(email)
+		user, _, err := s.UserGetByEmailDaf(email)
 		if err != nil {
 			return zero, err
 		}
-		user := pwUser.Entity()
 
-		if !s.UserAuthenticateBf(*user, password) {
+		if !s.UserAuthenticateBf(user, password) {
 			return zero, fs.ErrAuthenticationFailed
 		}
 
-		token, err := s.UserGenTokenBf(*user)
+		token, err := s.UserGenTokenBf(user)
 		if err != nil {
 			return zero, err
 		}
 
-		userOut := rpc.UserOut{}.FromModel(*user, token)
+		userOut := rpc.UserOut{}.FromModel(user, token)
 		return userOut, err
 	}
 }

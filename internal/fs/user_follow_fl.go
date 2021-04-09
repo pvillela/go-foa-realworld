@@ -1,5 +1,10 @@
 package fs
 
+import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+)
+
 // CommentAddSfl is the stereotype instance for the service flow that
 // causes the current user start following a given other user.
 type UserFollowFl struct {
@@ -8,22 +13,21 @@ type UserFollowFl struct {
 }
 
 // UserFollowFlT is the function type instantiated by UserFollowFl.
-type UserFollowFlT = func(username string, followedUsername string, follow bool) (PwUser, error)
+type UserFollowFlT = func(username string, followedUsername string, follow bool) (model.User, db.RecCtx, error)
 
 func (s UserFollowFl) Make() UserFollowFlT {
-	return func(username string, followedUsername string, follow bool) (PwUser, error) {
-		pwUser, err := s.UserGetByNameDaf(username)
+	return func(username string, followedUsername string, follow bool) (model.User, db.RecCtx, error) {
+		user, rc, err := s.UserGetByNameDaf(username)
 		if err != nil {
-			return nil, err
-		}
-		user := pwUser.Entity()
-
-		*user = user.UpdateFollowees(followedUsername, follow)
-
-		if pwUser, err = s.UserUpdateDaf(pwUser); err != nil {
-			return nil, err
+			return model.User{}, nil, err
 		}
 
-		return pwUser, nil
+		user = user.UpdateFollowees(followedUsername, follow)
+
+		if user, rc, err = s.UserUpdateDaf(user, rc); err != nil {
+			return model.User{}, nil, err
+		}
+
+		return user, rc, nil
 	}
 }

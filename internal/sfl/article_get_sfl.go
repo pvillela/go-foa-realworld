@@ -2,6 +2,7 @@ package sfl
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -18,22 +19,22 @@ type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 func (s ArticleGetSfl) Make() ArticleGetSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
 		var zero rpc.ArticleOut
-		var pwUser fs.PwUser
+		var user model.User
+		var err error
 
 		if username != "" {
-			var err error
-			pwUser, err = s.UserGetByNameDaf(username)
+			user, _, err = s.UserGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}
 		}
 
-		pwArticle, err := s.ArticleGetBySlugDaf(slug)
+		article, _, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
 			return zero, err
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(*pwUser.Entity(), *pwArticle.Entity())
+		articleOut := rpc.ArticleOut{}.FromModel(user, article)
 
 		return articleOut, err
 	}

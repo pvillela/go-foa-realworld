@@ -11,4 +11,3 @@ type UserGetCurrentSfl struct {
 
 // UserGetCurrentSflT is the function type instantiated by UserGetCurrentSfl.
 type UserGetCurrentSflT = func(username string) rpc.UserOut
-

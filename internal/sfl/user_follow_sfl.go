@@ -17,11 +17,11 @@ type UserFollowSflT = func(username string, followedUsername string) (rpc.Profil
 func (s UserFollowSfl) Make() UserFollowSflT {
 	return func(username string, followedUsername string) (rpc.ProfileOut, error) {
 		var zero rpc.ProfileOut
-		pwUser, err := s.UserFollowFl(username, followedUsername, true)
+		user, _, err := s.UserFollowFl(username, followedUsername, true)
 		if err != nil {
 			return zero, err
 		}
-		profileOut := rpc.ProfileOut{}.FromModel(*pwUser.Entity(), true)
+		profileOut := rpc.ProfileOut{}.FromModel(user, true)
 		return profileOut, err
 	}
 }

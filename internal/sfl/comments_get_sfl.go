@@ -19,11 +19,10 @@ func (s CommentsGetSfl) Make() CommentsGetSflT {
 	return func(username string, slug string) (rpc.CommentsOut, error) {
 		var zero rpc.CommentsOut
 
-		pwArticle, err := s.ArticleGetBySlugDaf(slug)
+		article, _, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
 			return zero, err
 		}
-		article := pwArticle.Entity()
 
 		if article.Comments == nil {
 			article.Comments = []model.Comment{}

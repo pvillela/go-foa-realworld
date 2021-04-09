@@ -19,11 +19,10 @@ type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) error
 
 func (s CommentDeleteSfl) Make() CommentDeleteSflT {
 	return func(username string, in rpc.CommentDeleteIn) error {
-		pwComment, err := s.CommentGetByIdDaf(in.Id)
+		comment, _, err := s.CommentGetByIdDaf(in.Id)
 		if err != nil {
 			return err
 		}
-		comment := pwComment.Entity()
 		if comment.Author.Name != username {
 			return fs.ErrUnauthorizedUser
 		}
@@ -32,15 +31,14 @@ func (s CommentDeleteSfl) Make() CommentDeleteSflT {
 			return err
 		}
 
-		pwArticle, err := s.ArticleGetBySlugdDaf(in.Slug)
+		article, rc, err := s.ArticleGetBySlugdDaf(in.Slug)
 		if err != nil {
 			return err
 		}
-		article := pwArticle.Entity()
 
-		*article = article.UpdateComments(*comment, false)
+		article = article.UpdateComments(comment, false)
 
-		if _, err := s.ArticleUpdateDaf(pwArticle); err != nil {
+		if _, _, err := s.ArticleUpdateDaf(article, rc); err != nil {
 			return err
 		}
 

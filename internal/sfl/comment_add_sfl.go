@@ -22,33 +22,30 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 		var zero rpc.CommentOut
 		var err error
 
-		pwCommentAuthor, err := s.UserGetByNameDaf(username)
+		commentAuthor, _, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
-		commentAuthor := pwCommentAuthor.Entity()
 
-		pwArticle, err := s.ArticleGetBySlugDaf(in.Slug)
+		article, rc, err := s.ArticleGetBySlugDaf(in.Slug)
 		if err != nil {
 			return zero, err
 		}
-		article := pwArticle.Entity()
 
-		rawComment := in.ToComment(*commentAuthor)
+		rawComment := in.ToComment(commentAuthor)
 
-		pwInsertedComment, err := s.CommentCreateDaf(rawComment)
+		insertedComment, _, err := s.CommentCreateDaf(rawComment)
 		if err != nil {
 			return zero, err
 		}
-		insertedComment := pwInsertedComment.Entity()
 
-		article.Comments = append(article.Comments, *insertedComment)
+		article.Comments = append(article.Comments, insertedComment)
 
-		if _, err := s.ArticleUpdateDaf(pwArticle); err != nil {
+		if _, _, err := s.ArticleUpdateDaf(article, rc); err != nil {
 			return zero, err
 		}
 
-		commentOut := rpc.CommentOut{}.FromModel(*insertedComment)
+		commentOut := rpc.CommentOut{}.FromModel(insertedComment)
 		return commentOut, err
 	}
 }

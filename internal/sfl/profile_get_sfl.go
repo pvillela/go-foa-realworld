@@ -2,7 +2,6 @@ package sfl
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -19,25 +18,21 @@ func (s ProfileGetSfl) Make() ProfileGetSflT {
 	return func(username, profileName string) (rpc.ProfileOut, error) {
 		var zero rpc.ProfileOut
 
-		profileUser, err := s.UserGetByNameDaf(profileName)
+		profileUser, _, err := s.UserGetByNameDaf(profileName)
 		if err != nil {
 			return zero, err
 		}
-		if profileUser == nil {
-			return zero, fs.ErrProfileNotFound
-		}
 
-		user := &model.User{}
+		var follows bool
 		if username != "" {
-			pwUser, err := s.UserGetByNameDaf(username)
+			user, _, err := s.UserGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}
-			user = pwUser.Entity()
+			follows = user.Follows(profileName)
 		}
 
-		follows := user.Follows(profileName)
-		profileOut := rpc.ProfileOut{}.FromModel(*user, follows)
+		profileOut := rpc.ProfileOut{}.FromModel(profileUser, follows)
 
 		return profileOut, nil
 	}
