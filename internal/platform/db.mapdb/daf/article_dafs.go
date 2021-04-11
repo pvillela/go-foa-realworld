@@ -12,7 +12,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"sync"
-	"time"
 )
 
 type ArticleDafs struct {
@@ -20,14 +19,13 @@ type ArticleDafs struct {
 }
 
 func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
-	return func(article model.Article) (model.Article, db.RecCtx, error) {
-		if _, _, err := s.getBySlug(article.Slug); err == nil {
-			return model.Article{}, nil, fs.ErrDuplicateArticle
-		}
-		article.CreatedAt = time.Now()
+	return func(article model.Article) (db.RecCtx, error) {
 		pw := fs.PwArticle{nil, article}
-		s.Store.Store(article.Slug, pw)
-		return pw.Entity, pw.RecCtx, nil
+		_, loaded := s.Store.LoadOrStore(article.Slug, pw)
+		if loaded {
+			return nil, fs.ErrDuplicateArticle
+		}
+		return pw.RecCtx, nil
 	}
 }
 
@@ -50,16 +48,15 @@ func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 }
 
 func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
-	return func(article model.Article, recCtx db.RecCtx) (model.Article, db.RecCtx, error) {
+	return func(article model.Article, recCtx db.RecCtx) (db.RecCtx, error) {
 		if _, _, err := s.getBySlug(article.Slug); err != nil {
-			return model.Article{}, nil, fs.ErrArticleNotFound
+			return nil, fs.ErrArticleNotFound
 		}
 
-		article.UpdatedAt = time.Now()
 		pw := fs.PwArticle{nil, article}
 		s.Store.Store(article.Slug, pw)
 
-		return pw.Entity, pw.RecCtx, nil
+		return pw.RecCtx, nil
 	}
 }
 

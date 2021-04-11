@@ -12,7 +12,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"sync"
-	"time"
 )
 
 type UserDafs struct {
@@ -65,15 +64,26 @@ func (s UserDafs) MakeGetByEmail() fs.UserGetByEmailDafT {
 }
 
 func (s UserDafs) MakeUpdate() fs.UserUpdateDafT {
-	return func(user model.User, recCtx db.RecCtx) (model.User, db.RecCtx, error) {
+	return func(user model.User, recCtx db.RecCtx) (db.RecCtx, error) {
 		if _, _, err := s.getByName(user.Name); err != nil {
-			return model.User{}, nil, err
+			return nil, err
 		}
 
-		user.UpdatedAt = time.Now()
 		pw := fs.PwUser{nil, user}
 		s.Store.Store(user.Name, pw)
 
-		return pw.Entity, pw.RecCtx, nil
+		return pw.RecCtx, nil
+	}
+}
+
+func (s UserDafs) MakeCreate() fs.UserCreateDafT {
+	return func(user model.User) (db.RecCtx, error) {
+		pwUser := fs.PwUser{nil, user}
+		_, loaded := s.Store.LoadOrStore(user.Name, pwUser)
+		if loaded {
+			return nil, fs.ErrDuplicateUser
+		}
+
+		return pwUser.RecCtx, nil
 	}
 }

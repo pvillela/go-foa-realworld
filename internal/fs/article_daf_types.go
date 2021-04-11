@@ -18,11 +18,11 @@ type PwArticle struct {
 	Entity model.Article
 }
 
-type ArticleCreateDafT = func(article model.Article) (model.Article, db.RecCtx, error)
+type ArticleCreateDafT = func(article model.Article) (db.RecCtx, error)
 
 type ArticleGetBySlugDafT = func(slug string) (model.Article, db.RecCtx, error)
 
-type ArticleUpdateDafT = func(article model.Article, recCtx db.RecCtx) (model.Article, db.RecCtx, error)
+type ArticleUpdateDafT = func(article model.Article, recCtx db.RecCtx) (db.RecCtx, error)
 
 type ArticleDeleteDafT = func(slug string) error
 

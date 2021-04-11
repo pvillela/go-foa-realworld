@@ -7,34 +7,56 @@
 package model
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/jwt"
 	"sort"
 	"time"
 )
 
 // User represents a user account in the system
 type User struct {
-	Name         string
-	Email        string
-	TempPassword string
-	PasswordHash string
-	PasswordSalt []byte
-	Bio          *string
-	ImageLink    string
-	FollowIDs    []string
-	Favorites    []Article
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	Name           string
+	Email          string
+	IsTempPassword bool
+	PasswordHash   string
+	PasswordSalt   []byte
+	Bio            *string
+	ImageLink      string
+	FollowIDs      []string
+	Favorites      []Article
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
-type UserUpdatableProperty int
+type UserUpdatableField int
 
 const (
-	UserEmail UserUpdatableProperty = iota
-	UserName
+	UserName UserUpdatableField = iota
+	UserEmail
+	UserPassword
 	UserBio
 	UserImageLink
-	UserPassword
 )
+
+func (s User) Update(fieldsToUpdate map[UserUpdatableField]interface{}) User {
+	for k, v := range fieldsToUpdate {
+		switch k {
+		case UserName:
+			s.Name = v.(string)
+		case UserEmail:
+			s.Email = v.(string)
+		case UserPassword:
+			password := v.(string)
+			passwordHash := jwt.Hash(s.PasswordSalt, password)
+			s.PasswordHash = passwordHash
+		case UserBio:
+			s.Bio = v.(*string)
+		case UserImageLink:
+			s.ImageLink = v.(string)
+		}
+	}
+	s.UpdatedAt = time.Now()
+	return s
+}
 
 func UpdateUser(user *User, opts ...func(fields *User)) {
 	for _, v := range opts {

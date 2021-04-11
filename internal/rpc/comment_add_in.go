@@ -6,7 +6,10 @@
 
 package rpc
 
-import "github.com/pvillela/go-foa-realworld/internal/model"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
+)
 
 type CommentAddIn struct {
 	Slug    string
@@ -19,8 +22,11 @@ type commentAddIn0 struct {
 
 func (in CommentAddIn) ToComment(commentAuthor model.User) model.Comment {
 	comment := model.Comment{
-		Body:   in.Comment.Body,
-		Author: commentAuthor,
+		ID:        0,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Body:      in.Comment.Body,
+		Author:    commentAuthor,
 	}
 	return comment
 }

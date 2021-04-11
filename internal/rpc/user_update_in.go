@@ -8,8 +8,10 @@ package rpc
 
 type UserUpdateIn struct {
 	User struct {
-		Email string
-		Bio   *string
-		Image string
+		Username *string
+		Email    *string
+		Password *string
+		Bio      *string
+		Image    *string
 	}
 }

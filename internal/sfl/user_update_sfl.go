@@ -7,15 +7,60 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// UpdateUserSflS contains the dependencies required for the construction of a
-// UpdateUserSfl. It represents the action of updating user information.
-type UpdateUserSflS struct {
+// UserUpdateSfl is the stereotype instance for the service flow that
+// It represents the action of registering a user.
+type UserUpdateSfl struct {
+	UserGetByNameDaf fs.UserGetByNameDafT
+	UserUpdateDaf    fs.UserUpdateDafT
+	UserGenTokenBf   fs.UserGenTokenBfT
 }
 
-// UpdateUserSfl is the type of a function that takes an rpc.UserUpdateIn as input
+// UserUpdateSflT is the type of a function that takes an rpc.UserUpdateIn as input
 // and returns a model.User.
-type UpdateUserSfl = func(userInfo rpc.UserUpdateIn) model.User
+type UserUpdateSflT = func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error)
+
+func (s UserUpdateSfl) Make() UserUpdateSflT {
+	return func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error) {
+		user, rc, err := s.UserGetByNameDaf(username)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
+
+		fieldsToUpdate := make(map[model.UserUpdatableField]interface{}, 5)
+		if v := in.User.Username; v != nil {
+			fieldsToUpdate[model.UserName] = *v
+		}
+		if v := in.User.Email; v != nil {
+			fieldsToUpdate[model.UserEmail] = *v
+		}
+		if v := in.User.Password; v != nil {
+			fieldsToUpdate[model.UserPassword] = *v
+		}
+		if v := in.User.Bio; v != nil {
+			fieldsToUpdate[model.UserBio] = v
+		}
+		if v := in.User.Image; v != nil {
+			fieldsToUpdate[model.UserImageLink] = *v
+		}
+
+		user = user.Update(fieldsToUpdate)
+
+		_, err = s.UserUpdateDaf(user, rc)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
+
+		token, err := s.UserGenTokenBf(user)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
+
+		userOut := rpc.UserOut{}.FromModel(user, token)
+		return userOut, err
+	}
+}

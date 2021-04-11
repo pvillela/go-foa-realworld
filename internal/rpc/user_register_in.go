@@ -6,10 +6,41 @@
 
 package rpc
 
+import (
+	"crypto/rand"
+	"github.com/pvillela/go-foa-realworld/internal/arch/jwt"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
+)
+
 type UserRegisterIn struct {
 	User struct {
 		Username string
 		Email    string
 		Password string
 	}
+}
+
+func (s UserRegisterIn) ToUser() model.User {
+	c := 16
+	salt := make([]byte, c)
+	_, err := rand.Read(salt)
+	if err != nil {
+		panic(err) // should never happen
+	}
+	passwordHash := jwt.Hash(salt, s.User.Password)
+	user := model.User{
+		Name:           s.User.Username,
+		Email:          s.User.Email,
+		IsTempPassword: false,
+		PasswordHash:   passwordHash,
+		PasswordSalt:   salt,
+		Bio:            nil,
+		ImageLink:      "",
+		FollowIDs:      nil,
+		Favorites:      nil,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
+	return user
 }

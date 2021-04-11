@@ -7,15 +7,27 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// UnfollowUserSflS contains the dependencies required for the construction of a
-// UnfollowUserSfl. It represents the action of having the current user stop following a given
-// other user.
-type UnfollowUserSflS struct {
+// CommentAddSfl is the stereotype instance for the service flow that
+// causes the current user start following a given other user.
+type UserUnfollowSfl struct {
+	UserFollowFl fs.UserFollowFlT
 }
 
-// UnfollowUserSfl is the type of a function that takes the current username and a followed
-// username and returns a model.ProfileOut.
-type UnfollowUserSfl = func(currentUsername string, followedUsername string) rpc.ProfileOut
+// UserUnfollowSflT is the function type instantiated by UserUnfollowSfl.
+type UserUnfollowSflT = func(username string, followedUsername string) (rpc.ProfileOut, error)
+
+func (s UserUnfollowSfl) Make() UserUnfollowSflT {
+	return func(username string, followedUsername string) (rpc.ProfileOut, error) {
+		var zero rpc.ProfileOut
+		user, _, err := s.UserFollowFl(username, followedUsername, false)
+		if err != nil {
+			return zero, err
+		}
+		profileOut := rpc.ProfileOut{}.FromModel(user, false)
+		return profileOut, err
+	}
+}

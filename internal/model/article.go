@@ -35,28 +35,29 @@ type Comment struct {
 type ArticleUpdatableField int
 
 const (
-	Title ArticleUpdatableField = iota
-	Description
-	Body
-	TagList
+	ArticleTitle ArticleUpdatableField = iota
+	ArticleDescription
+	ArticleBody
+	ArticleTagList
 )
 
-func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (Article, string) {
-	article := s
+func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (article Article, slug string) {
+	article = s
 	for k, v := range fieldsToUpdate {
 		switch k {
-		case Title:
+		case ArticleTitle:
 			article.Title = v.(string)
-		case Description:
+		case ArticleDescription:
 			article.Description = v.(string)
-		case Body:
+		case ArticleBody:
 			article.Body = v.(*string)
-		case TagList:
+		case ArticleTagList:
 			article.TagList = v.([]string)
 		}
 	}
 	newSlug := fs.SlugSup(article.Title)
 	article.Slug = newSlug
+	article.UpdatedAt = time.Now()
 	return article, newSlug
 }
 

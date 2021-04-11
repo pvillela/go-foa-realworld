@@ -9,6 +9,7 @@ package rpc
 import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
 )
 
 type ArticleCreateIn struct {
@@ -20,12 +21,17 @@ type ArticleCreateIn struct {
 	}
 }
 
-func (in ArticleCreateIn) ToArticle() model.Article {
+func (in ArticleCreateIn) ToArticle(author model.User) model.Article {
 	return model.Article{
 		Slug:        fs.SlugSup(in.Article.Title),
 		Title:       in.Article.Title,
 		Description: in.Article.Description,
 		Body:        in.Article.Body,
 		TagList:     in.Article.TagList,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		FavoritedBy: nil,
+		Author:      author,
+		Comments:    nil,
 	}
 }

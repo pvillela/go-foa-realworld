@@ -21,6 +21,7 @@ type ArticleUpdateSfl struct {
 	ArticleUpdateDaf              fs.ArticleUpdateDafT
 	ArticleGetBySlugDaf           fs.ArticleGetBySlugDafT
 	ArticleCreateDaf              fs.ArticleCreateDafT
+	ArticleDeleteDaf              fs.ArticleDeleteDafT
 }
 
 // ArticleUpdateSflT is the function type instantiated by ArticleUpdateSfl.
@@ -30,20 +31,20 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 	return func(username string, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
 		var zero rpc.ArticleOut
 
-		article, rcArticle, err := s.ArticleGetAndCheckOwnerFl(slug, username)
+		article, rc, err := s.ArticleGetAndCheckOwnerFl(slug, username)
 		if err != nil {
 			return zero, err
 		}
 
 		fieldsToUpdate := make(map[model.ArticleUpdatableField]interface{}, 3)
 		if v := in.Article.Title; v != nil {
-			fieldsToUpdate[model.Title] = *v
+			fieldsToUpdate[model.ArticleTitle] = *v
 		}
 		if v := in.Article.Description; v != nil {
-			fieldsToUpdate[model.Description] = *v
+			fieldsToUpdate[model.ArticleDescription] = *v
 		}
 		if v := in.Article.Body; v != nil {
-			fieldsToUpdate[model.Body] = *v
+			fieldsToUpdate[model.ArticleBody] = v
 		}
 
 		var newSlug string
@@ -60,23 +61,23 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 		}
 
 		// TODO: move some of this logic to a BF
-		var savedArticle model.Article
 		if newSlug == slug {
-			savedArticle, _, err = s.ArticleUpdateDaf(article, rcArticle)
+			_, err = s.ArticleUpdateDaf(article, rc)
 			if err != nil {
 				return zero, err
 			}
 		} else {
-			if _, _, err := s.ArticleGetBySlugDaf(newSlug); err == nil {
-				return zero, fs.ErrDuplicateArticle
+			_, err = s.ArticleCreateDaf(article)
+			if err != nil {
+				return zero, err
 			}
-			savedArticle, _, err = s.ArticleCreateDaf(article)
+			err = s.ArticleDeleteDaf(slug)
 			if err != nil {
 				return zero, err
 			}
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(user, savedArticle)
+		articleOut := rpc.ArticleOut{}.FromModel(user, article)
 		return articleOut, err
 	}
 }

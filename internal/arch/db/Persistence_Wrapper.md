@@ -11,7 +11,9 @@ model with persistence frameworks:
 // a parameter or return this type, together with domain entity types.
 // This type is parameterized to provide type safety, i.e., to prevent passing a RecCtx[U]
 // on a call that involves entity type V.
-type RecCtx[T any] interface{}
+type RecCtx[T any] struct {
+    Rc interface{}
+}
 
 // Example A1 -- DAF signature
 func PersonUpdateDaf(person Person, rc RecCtx) (Person, RecCTx, error)
@@ -27,20 +29,20 @@ person, recCtx, err = PersonUpdateDaf(person, recCtx)
 **Pw[T]**
 
 ```go
-// PW wraps a domain entity and RecCtx together.  It can be returned or accepted by a 
+// Pw wraps a domain entity and RecCtx together.  It can be returned or accepted by a
 // DAF as an alternative to using RecCtx and the entity type separately.  This is most
 // useful when there are multiple entity objects involved as inputs or outputs of a DAF.
 // The type parameter T can either be a domain entity type or the pointer type thereof,
 // depending on whether the DAF returns / receives by value or by pointer.
 type Pw[T any] struct {
-RecCtx
-Entity T
+    RecCtx[T]
+    Entity T
 }
 
 // Helper method
 func (s Pw[T]) Copy(t T) Pw[T] {
-s.Entity = t
-return s
+    s.Entity = t
+    return s
 }
 
 // Example B1 -- prefer the style of Example 1 above
@@ -77,8 +79,8 @@ instead of a struct or separate entity and the database record context. This alt
 
 ```go
 type Pw[T any] interface {
-Entity() T // equivalent to the Entity field in the above struct
-Copy(t T) Pw[T] // creates a new instance with the same RecCtx and t as the T part
+    Entity() T // equivalent to the Entity field in the above struct
+    Copy(t T) Pw[T] // creates a new instance with the same RecCtx and t as the T part
 }
 ```
 

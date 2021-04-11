@@ -21,4 +21,5 @@ const (
 	ErrUnauthorizedUser     Err = "user not authorized to take this action"
 	ErrAuthenticationFailed Err = "user authentication failed"
 	ErrNotAuthenticated     Err = "user not authenticated"
+	ErrDuplicateUser        Err = "user with this name already exists"
 )

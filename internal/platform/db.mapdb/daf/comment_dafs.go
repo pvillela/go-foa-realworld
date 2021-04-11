@@ -12,7 +12,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"sync"
-	"time"
 )
 
 type CommentDafs struct {
@@ -47,11 +46,13 @@ func (s CommentDafs) getNextId() int {
 func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
 	return func(comment model.Comment) (model.Comment, db.RecCtx, error) {
 		comment.ID = s.getNextId()
-		comment.CreatedAt = time.Now()
-		comment.UpdatedAt = time.Now()
 		pw := fs.PwComment{nil, comment}
-		s.Store.Store(comment.ID, pw)
-		return pw.Entity, nil, nil
+		_, loaded := s.Store.LoadOrStore(comment.ID, pw)
+		if loaded {
+			return model.Comment{}, nil, fs.ErrDuplicateArticle
+		}
+
+		return pw.Entity, pw.RecCtx, nil
 	}
 }
 
