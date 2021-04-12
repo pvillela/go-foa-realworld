@@ -26,18 +26,19 @@ type ArticleCreateSflT = func(username string, in rpc.ArticleCreateIn) (rpc.Arti
 func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 	return func(username string, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
 		zero := rpc.ArticleOut{}
-		article := in.ToArticle()
 
 		user, _, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
 
+		article := in.ToArticle(user)
+
 		if err := s.ArticleValidateBeforeCreateBf(article); err != nil {
 			return zero, err
 		}
 
-		article, _, err = s.ArticleCreateDaf(article)
+		_, err = s.ArticleCreateDaf(article)
 		if err != nil {
 			return zero, err
 		}

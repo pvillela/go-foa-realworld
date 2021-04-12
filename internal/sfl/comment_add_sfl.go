@@ -38,7 +38,7 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 			return zero, err
 		}
 
-		rawComment := in.ToComment(commentAuthor)
+		rawComment := in.ToComment(article.Uuid, commentAuthor)
 
 		insertedComment, _, err := s.CommentCreateDaf(rawComment)
 		if err != nil {
@@ -47,7 +47,7 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 
 		article.Comments = append(article.Comments, insertedComment)
 
-		if _, _, err := s.ArticleUpdateDaf(article, rc); err != nil {
+		if _, err := s.ArticleUpdateDaf(article, rc); err != nil {
 			return zero, err
 		}
 

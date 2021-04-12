@@ -8,12 +8,12 @@ package model
 
 import (
 	"github.com/google/uuid"
-	"github.com/pvillela/go-foa-realworld/internal/arch/slugutil"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"time"
 )
 
 type Article struct {
-	Uuid        string
+	Uuid        util.Uuid
 	Slug        string
 	Title       string
 	Description string
@@ -27,7 +27,7 @@ type Article struct {
 }
 
 type Comment struct {
-	ArticleUuid string
+	ArticleUuid util.Uuid
 	ID          int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
@@ -53,8 +53,8 @@ func (Article) Create(
 ) Article {
 	now := time.Now()
 	article := Article{
-		Uuid:        uuid.NewString(),     // make sure this is unique index in database
-		Slug:        slugutil.Slug(title), // make sure this is unique index in database
+		Uuid:        util.Uuid(uuid.NewString()), // make sure this is unique index in database
+		Slug:        util.Slug(title),            // make sure this is unique index in database
 		Title:       title,
 		Description: description,
 		Body:        body,
@@ -82,7 +82,7 @@ func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (a
 			article.TagList = v.([]string)
 		}
 	}
-	newSlug := slugutil.Slug(article.Title)
+	newSlug := util.Slug(article.Title)
 	article.Slug = newSlug
 	article.UpdatedAt = time.Now()
 	return article, newSlug
@@ -221,7 +221,7 @@ func (s Article) UpdateFavoritedBy(user User, add bool) Article {
 }
 
 func (Comment) Create(
-	articleUuid string,
+	articleUuid util.Uuid,
 	body *string,
 	author User,
 ) Comment {

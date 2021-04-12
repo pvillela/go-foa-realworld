@@ -7,6 +7,7 @@
 package rpc
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -19,6 +20,9 @@ type commentAddIn0 struct {
 	Body *string // mandatory
 }
 
-func (in CommentAddIn) ToComment(commentAuthor model.User) model.Comment {
-	return model.Comment{}.Create(in.Comment.Body, commentAuthor)
+// ToComment
+// TODO: move this directly to the SFL because we have to read the article based on the slug
+//   to get the uuid.
+func (in CommentAddIn) ToComment(articleUuid util.Uuid, commentAuthor model.User) model.Comment {
+	return model.Comment{}.Create(articleUuid, in.Comment.Body, commentAuthor)
 }

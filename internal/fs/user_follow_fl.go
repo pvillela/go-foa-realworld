@@ -30,7 +30,7 @@ func (s UserFollowFl) Make() UserFollowFlT {
 
 		user = user.UpdateFollowees(followedUsername, follow)
 
-		if user, rc, err = s.UserUpdateDaf(user, rc); err != nil {
+		if rc, err = s.UserUpdateDaf(user, rc); err != nil {
 			return model.User{}, nil, err
 		}
 

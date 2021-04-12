@@ -23,7 +23,7 @@ func main() {
 		PasswordHash:   "xhxh",
 		PasswordSalt:   nil,
 		Bio:            &bio,
-		ImageLink:      nil,
+		ImageLink:      "",
 		FollowIDs:      nil,
 		Favorites:      nil,
 		CreatedAt:      time.Now(),

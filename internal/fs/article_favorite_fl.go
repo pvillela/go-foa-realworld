@@ -31,7 +31,7 @@ func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
 
 		article = article.UpdateFavoritedBy(user, favorite)
 
-		article, rcArticle, err = s.ArticleUpdateDaf(article, rcArticle)
+		rcArticle, err = s.ArticleUpdateDaf(article, rcArticle)
 		if err != nil {
 			return PwUser{}, PwArticle{}, err
 		}

@@ -28,21 +28,16 @@ func (s ArticleListFl) Make() ArticleListFlT {
 
 		var user model.User
 		if username != "" {
-			pwUser, err := s.UserGetByNameDaf(username)
+			var err error
+			user, _, err = s.UserGetByNameDaf(username)
 			if err != nil {
 				return zeroUser, nil, err
 			}
-			user = pwUser.Entity
 		}
 
-		pwArticles, err := s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
+		articles, err := s.ArticleGetByAuthorsOrderedByMostRecentDaf(user.FollowIDs)
 		if err != nil {
 			return zeroUser, nil, err
-		}
-
-		articles := make([]model.Article, len(pwArticles))
-		for i := 0; i < len(pwArticles); i++ {
-			articles[i] = pwArticles[i].Entity
 		}
 
 		return user, model.ArticleCollection(articles).ApplyLimitAndOffset(limit, offset), nil

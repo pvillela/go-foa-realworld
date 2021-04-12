@@ -44,7 +44,7 @@ func (s CommentDeleteSfl) Make() CommentDeleteSflT {
 
 		article = article.UpdateComments(comment, false)
 
-		if _, _, err := s.ArticleUpdateDaf(article, rc); err != nil {
+		if _, err := s.ArticleUpdateDaf(article, rc); err != nil {
 			return err
 		}
 

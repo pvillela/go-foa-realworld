@@ -22,7 +22,7 @@ type ArticleDeleteSflT = func(username, slug string) error
 
 func (s ArticleDeleteSfl) Make() ArticleDeleteSflT {
 	return func(username string, slug string) error {
-		_, err := s.ArticleGetAndCheckOwnerFl(username, slug)
+		_, _, err := s.ArticleGetAndCheckOwnerFl(username, slug)
 		if err != nil {
 			return err
 		}

@@ -4,7 +4,7 @@
  *  that can be found in the LICENSE file.
  */
 
-package slugutil
+package util
 
 import "github.com/gosimple/slug"
 
