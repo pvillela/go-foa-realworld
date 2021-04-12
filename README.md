@@ -7,7 +7,8 @@ Some of the code was based on https://github.com/err0r500/go-realworld-clean.
 
 ## To-dos:
 
-* Complete first pass at SFLs. v Review use of pointers, clean it up.
+v Complete first pass at SFLs.
+v Review use of pointers, clean it up.
 * Review model in terms of relationships and how they should be represented.
 * Review model and move functionality to BFs as appropriate.
 * Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.

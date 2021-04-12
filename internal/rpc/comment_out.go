@@ -14,9 +14,8 @@ type CommentOut struct {
 	Comment model.Comment
 }
 
-func (s CommentOut) FromModel(comment model.Comment) CommentOut {
-	s.Comment = comment
-	return s
+func (CommentOut) FromModel(comment model.Comment) CommentOut {
+	return CommentOut{comment}
 }
 
 type CommentsOut struct {

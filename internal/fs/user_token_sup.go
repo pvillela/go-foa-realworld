@@ -4,31 +4,20 @@
  *  that can be found in the LICENSE file.
  */
 
-package jwt
+package fs
 
 import (
 	"errors"
-	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"time"
 
 	jwtgo "github.com/dgrijalva/jwt-go"
-	"crypto/sha256"
 )
 
-var tokenTimeToLive = time.Hour * 2
+const tokenTimeToLive = time.Hour * 2
 
-func Hash(salt []byte, text string) string {
-	h := sha256.New()
-	bytes := make([]byte, len(salt)+len(text))
-	bytes = append(bytes, salt...)
-	bytes = append(bytes, []byte(text)...)
-	h.Write(bytes)
-	return fmt.Sprintf("%x", h.Sum(nil))
-}
-
-// UserGenToken generates a JWT token for a user
-func UserGenToken(user model.User) (string, error) {
+// UserGenTokenSup generates a JWT token for a user
+func UserGenTokenSup(user model.User) (string, error) {
 	if user.Name == "" {
 		return "", errors.New("can't generate token for empty user")
 	}
@@ -37,7 +26,7 @@ func UserGenToken(user model.User) (string, error) {
 		SignedString(user.PasswordSalt)
 }
 
-func UserGetNameFromToken(user model.User, tokenStr string) (string, error) {
+func UserGetNameFromTokenSup(user model.User, tokenStr string) (string, error) {
 	token, err := jwtgo.Parse(
 		tokenStr,
 		func(token *jwtgo.Token) (interface{}, error) {

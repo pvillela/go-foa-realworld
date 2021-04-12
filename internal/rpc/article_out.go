@@ -34,7 +34,7 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
-func (s ArticleOut) FromModel(user model.User, article model.Article) ArticleOut {
+func (ArticleOut) FromModel(user model.User, article model.Article) ArticleOut {
 	isFollowingAuthor := false
 	for _, userName := range user.FollowIDs {
 		if userName == article.Author.Name {
@@ -51,7 +51,7 @@ func (s ArticleOut) FromModel(user model.User, article model.Article) ArticleOut
 		}
 	}
 
-	s.Article = articleOut0{
+	articleOut0 := articleOut0{
 		Slug:           article.Slug,
 		Title:          article.Title,
 		Description:    article.Description,
@@ -64,18 +64,15 @@ func (s ArticleOut) FromModel(user model.User, article model.Article) ArticleOut
 		FavoritesCount: len(article.FavoritedBy),
 	}
 
-	return s
+	return ArticleOut{articleOut0}
 }
 
-func (s ArticlesOut) FromModel(user model.User, articles []model.Article) ArticlesOut {
+func (ArticlesOut) FromModel(user model.User, articles []model.Article) ArticlesOut {
 	outs := []ArticleOut{} // return at least an empty array (not nil)
 
 	for _, article := range articles {
 		outs = append(outs, ArticleOut{}.FromModel(user, article))
 	}
 
-	s.Articles = outs
-	s.ArticlesCount = len(outs)
-
-	return s
+	return ArticlesOut{outs, len(outs)}
 }

@@ -7,31 +7,29 @@
 package rpc
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"time"
 )
 
 type ArticleCreateIn struct {
 	Article struct {
 		Title       string
 		Description string
-		Body        *string
-		TagList     []string // optional
+		Body        *string   // mandatory
+		TagList     *[]string // optional
 	}
 }
 
 func (in ArticleCreateIn) ToArticle(author model.User) model.Article {
-	return model.Article{
-		Slug:        fs.SlugSup(in.Article.Title),
-		Title:       in.Article.Title,
-		Description: in.Article.Description,
-		Body:        in.Article.Body,
-		TagList:     in.Article.TagList,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		FavoritedBy: nil,
-		Author:      author,
-		Comments:    nil,
+	tagList := in.Article.TagList
+	if tagList == nil {
+		tagList = new([]string)
 	}
+
+	return model.Article{}.Create(
+		in.Article.Title,
+		in.Article.Description,
+		in.Article.Body,
+		*tagList,
+		author,
+	)
 }

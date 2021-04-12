@@ -4,12 +4,10 @@
  *  that can be found in the LICENSE file.
  */
 
-package fs
+package slugutil
 
-import (
-	"github.com/gosimple/slug"
-)
+import "github.com/gosimple/slug"
 
-func SlugSup(title string) string {
+func Slug(title string) string {
 	return slug.Make(title)
 }

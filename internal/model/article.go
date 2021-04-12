@@ -7,11 +7,13 @@
 package model
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/google/uuid"
+	"github.com/pvillela/go-foa-realworld/internal/arch/slugutil"
 	"time"
 )
 
 type Article struct {
+	Uuid        string
 	Slug        string
 	Title       string
 	Description string
@@ -25,11 +27,12 @@ type Article struct {
 }
 
 type Comment struct {
-	ID        int
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Body      *string
-	Author    User
+	ArticleUuid string
+	ID          int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Body        *string
+	Author      User
 }
 
 type ArticleUpdatableField int
@@ -40,6 +43,30 @@ const (
 	ArticleBody
 	ArticleTagList
 )
+
+func (Article) Create(
+	title string,
+	description string,
+	body *string,
+	tagList []string,
+	author User,
+) Article {
+	now := time.Now()
+	article := Article{
+		Uuid:        uuid.NewString(),     // make sure this is unique index in database
+		Slug:        slugutil.Slug(title), // make sure this is unique index in database
+		Title:       title,
+		Description: description,
+		Body:        body,
+		TagList:     tagList,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		FavoritedBy: nil,
+		Author:      author,
+		Comments:    nil,
+	}
+	return article
+}
 
 func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (article Article, slug string) {
 	article = s
@@ -55,7 +82,7 @@ func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (a
 			article.TagList = v.([]string)
 		}
 	}
-	newSlug := fs.SlugSup(article.Title)
+	newSlug := slugutil.Slug(article.Title)
 	article.Slug = newSlug
 	article.UpdatedAt = time.Now()
 	return article, newSlug
@@ -191,4 +218,21 @@ func (s Article) UpdateFavoritedBy(user User, add bool) Article {
 
 	return s
 
+}
+
+func (Comment) Create(
+	articleUuid string,
+	body *string,
+	author User,
+) Comment {
+	now := time.Now()
+	comment := Comment{
+		ArticleUuid: articleUuid,
+		ID:          0,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		Body:        body,
+		Author:      author,
+	}
+	return comment
 }

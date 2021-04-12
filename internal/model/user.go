@@ -7,7 +7,8 @@
 package model
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/jwt"
+	"crypto/rand"
+	"github.com/pvillela/go-foa-realworld/internal/arch/crypto"
 	"sort"
 	"time"
 )
@@ -37,6 +38,35 @@ const (
 	UserImageLink
 )
 
+func (User) Create(
+	username string,
+	email string,
+	password string,
+) User {
+	now := time.Now()
+	c := 16
+	salt := make([]byte, c)
+	_, err := rand.Read(salt)
+	if err != nil {
+		panic(err) // should never happen
+	}
+	passwordHash := crypto.Hash(salt, password)
+
+	return User{
+		Name:           username,
+		Email:          email,
+		IsTempPassword: false,
+		PasswordHash:   passwordHash,
+		PasswordSalt:   salt,
+		Bio:            nil,
+		ImageLink:      "",
+		FollowIDs:      nil,
+		Favorites:      nil,
+		CreatedAt:      now,
+		UpdatedAt:      now,
+	}
+}
+
 func (s User) Update(fieldsToUpdate map[UserUpdatableField]interface{}) User {
 	for k, v := range fieldsToUpdate {
 		switch k {
@@ -46,7 +76,7 @@ func (s User) Update(fieldsToUpdate map[UserUpdatableField]interface{}) User {
 			s.Email = v.(string)
 		case UserPassword:
 			password := v.(string)
-			passwordHash := jwt.Hash(s.PasswordSalt, password)
+			passwordHash := crypto.Hash(s.PasswordSalt, password)
 			s.PasswordHash = passwordHash
 		case UserBio:
 			s.Bio = v.(*string)
