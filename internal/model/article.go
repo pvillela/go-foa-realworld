@@ -7,7 +7,6 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"time"
 )
@@ -53,8 +52,8 @@ func (Article) Create(
 ) Article {
 	now := time.Now()
 	article := Article{
-		Uuid:        util.Uuid(uuid.NewString()), // make sure this is unique index in database
-		Slug:        util.Slug(title),            // make sure this is unique index in database
+		Uuid:        util.NewUuid(),   // make sure this is unique index in database
+		Slug:        util.Slug(title), // make sure this is unique index in database
 		Title:       title,
 		Description: description,
 		Body:        body,

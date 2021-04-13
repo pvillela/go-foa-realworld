@@ -6,10 +6,8 @@
 
 package util
 
-import "github.com/google/uuid"
-
-type Uuid string
-
-func NewUuid() Uuid {
-	return Uuid(uuid.NewString())
+func PanicOnError(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
