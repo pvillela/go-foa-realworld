@@ -9,13 +9,14 @@ package daf
 import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"sync"
 )
 
 type CommentDafs struct {
-	Store *sync.Map
+	CommentDb mapdb.MapDb
 }
 
 func (s CommentDafs) MakeGetById() fs.CommentGetByIdDafT {
@@ -49,7 +50,7 @@ func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
 		pw := fs.PwComment{nil, comment}
 		_, loaded := s.Store.LoadOrStore(comment.ID, pw)
 		if loaded {
-			return model.Comment{}, nil, fs.ErrDuplicateArticle
+			return model.Comment{}, nil, fs.ErrDuplicateArticleSlug
 		}
 
 		return pw.Entity, pw.RecCtx, nil

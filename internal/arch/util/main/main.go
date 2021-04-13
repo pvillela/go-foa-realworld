@@ -12,7 +12,7 @@ var (
 var err util.Err
 
 func bar() {
-	err = ErrDuplicateKey.Make(true, "foo")
+	err = ErrDuplicateKey.MakeWithSt(true, "foo")
 }
 
 func foo() {
@@ -22,9 +22,9 @@ func foo() {
 type errW util.Err
 
 func main() {
-	fmt.Println(ErrDuplicateKey.Make(false))
-	fmt.Println(ErrDuplicateKey.Make(false, "foo"))
-	fmt.Println(ErrDuplicateKey.Make(false, "foo", "bar"))
+	fmt.Println(ErrDuplicateKey.MakeWithSt(false))
+	fmt.Println(ErrDuplicateKey.MakeWithSt(false, "foo"))
+	fmt.Println(ErrDuplicateKey.MakeWithSt(false, "foo", "bar"))
 	foo()
 	fmt.Printf("%+v\n", errW(err))
 	fmt.Println("-------------------------------------------------")

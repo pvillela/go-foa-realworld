@@ -6,6 +6,7 @@ import (
 )
 
 const maxStackTraceBytes = 10_000
+const withStackTraceDefault = true
 
 var NilErrKind = ErrKind{}
 
@@ -35,7 +36,11 @@ func NewErrKind(msg string) ErrKind {
 	return ErrKind{msg: msg}
 }
 
-func (s ErrKind) Make(withStackTrace bool, args ...interface{}) Err {
+func (s ErrKind) Make(args ...interface{}) Err {
+	return s.MakeWithSt(withStackTraceDefault, args...)
+}
+
+func (s ErrKind) MakeWithSt(withStackTrace bool, args ...interface{}) Err {
 	err := Err{ErrKind: s}
 	err.args = args
 	if withStackTrace {

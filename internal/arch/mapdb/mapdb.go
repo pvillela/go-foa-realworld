@@ -11,8 +11,6 @@ import (
 	"sync"
 )
 
-const ist = false
-
 type MapDb struct {
 	store *sync.Map
 }
@@ -40,7 +38,7 @@ func BeginTxn() Txn {
 
 func EndTxn(txn Txn) error {
 	if txn.token != globalTxnToken {
-		return ErrInvalidTransaction.Make(ist, txn.token, globalTxnToken)
+		return ErrInvalidTransaction.Make(txn.token, globalTxnToken)
 	}
 	globalTxnLock.Unlock()
 	return nil
@@ -48,11 +46,11 @@ func EndTxn(txn Txn) error {
 
 func (s MapDb) Create(key Any, value Any, txn Txn) error {
 	if txn.token != globalTxnToken {
-		return ErrInvalidTransaction.Make(ist, txn.token, globalTxnToken)
+		return ErrInvalidTransaction.Make(txn.token, globalTxnToken)
 	}
 	_, loaded := s.store.LoadOrStore(key, value)
 	if loaded {
-		return ErrDuplicateKey.Make(ist, key)
+		return ErrDuplicateKey.Make(key)
 	}
 	return nil
 }
@@ -60,14 +58,14 @@ func (s MapDb) Create(key Any, value Any, txn Txn) error {
 func (s MapDb) Read(key Any) (Any, error) {
 	value, loaded := s.store.Load(key)
 	if loaded {
-		return nil, ErrRecordNotFound.Make(ist, key)
+		return nil, ErrRecordNotFound.Make(key)
 	}
 	return value, nil
 }
 
 func (s MapDb) Update(key Any, value Any, txn Txn) error {
 	if txn.token != globalTxnToken {
-		return ErrInvalidTransaction.Make(ist, txn.token, globalTxnToken)
+		return ErrInvalidTransaction.Make(txn.token, globalTxnToken)
 	}
 
 	_, err := s.Read(key) // make sure record exists
@@ -81,7 +79,7 @@ func (s MapDb) Update(key Any, value Any, txn Txn) error {
 
 func (s MapDb) Delete(key Any, txn Txn) error {
 	if txn.token != globalTxnToken {
-		return ErrInvalidTransaction.Make(ist, txn.token, globalTxnToken)
+		return ErrInvalidTransaction.Make(txn.token, globalTxnToken)
 	}
 
 	_, err := s.Read(key) // make sure record exists
@@ -91,4 +89,8 @@ func (s MapDb) Delete(key Any, txn Txn) error {
 
 	s.store.Delete(key)
 	return nil
+}
+
+func (s MapDb) Range(f func(key, value interface{}) bool) {
+	s.store.Range(f)
 }

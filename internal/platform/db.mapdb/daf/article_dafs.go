@@ -9,33 +9,50 @@ package daf
 import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"sync"
 )
 
 type ArticleDafs struct {
-	Store *sync.Map
+	ArticleDb mapdb.MapDb
 }
 
 func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
-	return func(article model.Article) (db.RecCtx, error) {
+	return func(article model.Article, txn mapdb.Txn) (db.RecCtx, error) {
+		_, _, err := s.getBySlug(article.Slug)
+		if err == nil {
+			return nil, fs.ErrDuplicateArticleSlug.Make(article.Slug)
+		}
+		if util.ErrKindOf(err) != mapdb.ErrRecordNotFound {
+			return nil, err
+		}
+
 		pw := fs.PwArticle{nil, article}
-		_, loaded := s.Store.LoadOrStore(article.Slug, pw)
-		if loaded {
-			return nil, fs.ErrDuplicateArticle
+		err = s.ArticleDb.Create(article.Uuid, pw, txn)
+		if err != nil {
+			return nil, err
 		}
 		return pw.RecCtx, nil
 	}
 }
 
 func (s ArticleDafs) getBySlug(slug string) (model.Article, db.RecCtx, error) {
-	value, ok := s.Store.Load(slug)
-	if !ok {
-		return model.Article{}, nil, fs.ErrArticleNotFound
+	var iVal interface{}
+	var found bool
+	s.ArticleDb.Range(func(key, value interface{}) bool {
+		if key == slug {
+			iVal = value
+			found = true
+			return false
+		}
+		return true
+	})
+	if !found {
+		return model.Article{}, nil, fs.ErrArticleSlugNotFound.Make(slug)
 	}
-
-	pw, ok := value.(fs.PwArticle)
+	pw, ok := iVal.(fs.PwArticle)
 	if !ok {
 		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
 	}
@@ -48,21 +65,40 @@ func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 }
 
 func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
-	return func(article model.Article, recCtx db.RecCtx) (db.RecCtx, error) {
-		if _, _, err := s.getBySlug(article.Slug); err != nil {
-			return nil, fs.ErrArticleNotFound
+	return func(article model.Article, recCtx db.RecCtx, txn mapdb.Txn) (db.RecCtx, error) {
+		value, err := s.ArticleDb.Read(article.Uuid)
+		if err != nil {
+			return nil, err
+		}
+		pw, ok := value.(fs.PwArticle)
+		if !ok {
+			panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
+		}
+		if pw.Entity.Slug != article.Slug {
+			return nil, fs.ErrDuplicateArticleSlug.Make(article.Slug)
 		}
 
-		pw := fs.PwArticle{nil, article}
-		s.Store.Store(article.Slug, pw)
+		pw.Entity = article
+		err = s.ArticleDb.Update(article.Uuid, pw, txn)
+		if err != nil {
+			return nil, err
+		}
 
 		return pw.RecCtx, nil
 	}
 }
 
 func (s ArticleDafs) MakeDelete() fs.ArticleDeleteDafT {
-	return func(slug string) error {
-		s.Store.Delete(slug)
+	return func(slug string, txn mapdb.Txn) error {
+		article, _, err := s.getBySlug(slug)
+		if err != nil {
+			return err
+		}
+
+		err = s.ArticleDb.Delete(article.Uuid, txn)
+		if err != nil {
+			return err
+		}
 
 		return nil
 	}
@@ -72,7 +108,7 @@ func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() fs.ArticleGetByAut
 	return func(usernames []string) ([]model.Article, error) {
 		var toReturn []model.Article
 
-		s.Store.Range(func(key, value interface{}) bool {
+		s.ArticleDb.Range(func(key, value interface{}) bool {
 			pw, ok := value.(fs.PwArticle)
 			if !ok {
 				panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
@@ -93,7 +129,7 @@ func (s ArticleDafs) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
 	return func(filters []model.ArticleFilter) ([]model.Article, error) {
 		var toReturn []model.Article
 
-		s.Store.Range(func(key, value interface{}) bool {
+		s.ArticleDb.Range(func(key, value interface{}) bool {
 			pw, ok := value.(fs.PwArticle)
 			if !ok {
 				panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))

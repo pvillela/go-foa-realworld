@@ -8,6 +8,7 @@ package fs
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -18,13 +19,13 @@ type PwArticle struct {
 	Entity model.Article
 }
 
-type ArticleCreateDafT = func(article model.Article) (db.RecCtx, error)
+type ArticleCreateDafT = func(article model.Article, txn mapdb.Txn) (db.RecCtx, error)
 
 type ArticleGetBySlugDafT = func(slug string) (model.Article, db.RecCtx, error)
 
-type ArticleUpdateDafT = func(article model.Article, recCtx db.RecCtx) (db.RecCtx, error)
+type ArticleUpdateDafT = func(article model.Article, recCtx db.RecCtx, txn mapdb.Txn) (db.RecCtx, error)
 
-type ArticleDeleteDafT = func(slug string) error
+type ArticleDeleteDafT = func(slug string, txn mapdb.Txn) error
 
 type ArticleGetByAuthorsOrderedByMostRecentDafT = func(usernames []string) ([]model.Article, error)
 

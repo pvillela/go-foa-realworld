@@ -6,20 +6,16 @@
 
 package fs
 
-type Err string
+import "github.com/pvillela/go-foa-realworld/internal/arch/util"
 
-func (e Err) Error() string {
-	return string(e)
-}
-
-const (
-	ErrDuplicateArticle     Err = "duplicate article slug"
-	ErrArticleNotFound      Err = "article not found"
-	ErrCommentNotFound      Err = "comment not found"
-	ErrProfileNotFound      Err = "profile not found"
-	ErrUserNotFound         Err = "user not found"
-	ErrUnauthorizedUser     Err = "user not authorized to take this action"
-	ErrAuthenticationFailed Err = "user authentication failed"
-	ErrNotAuthenticated     Err = "user not authenticated"
-	ErrDuplicateUser        Err = "user with this name already exists"
+var (
+	ErrDuplicateArticleSlug = util.NewErrKind("duplicate article slug \"%v\"")
+	ErrArticleSlugNotFound  = util.NewErrKind("article slug \"%v\" not found")
+	ErrCommentNotFound      = util.NewErrKind("comment not found")
+	ErrProfileNotFound      = util.NewErrKind("profile not found")
+	ErrUserNotFound         = util.NewErrKind("user not found")
+	ErrUnauthorizedUser     = util.NewErrKind("user not authorized to take this action")
+	ErrAuthenticationFailed = util.NewErrKind("user authentication failed")
+	ErrNotAuthenticated     = util.NewErrKind("user not authenticated")
+	ErrDuplicateUser        = util.NewErrKind("user with this name already exists")
 )
