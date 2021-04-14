@@ -23,9 +23,11 @@ type User struct {
 	Bio            *string
 	ImageLink      string
 	FollowIDs      []string
-	Favorites      []Article
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+
+	// TODO: remove permanently
+	//Favorites      []Article
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type UserUpdatableField int
@@ -61,9 +63,9 @@ func (User) Create(
 		Bio:            nil,
 		ImageLink:      "",
 		FollowIDs:      nil,
-		Favorites:      nil,
-		CreatedAt:      now,
-		UpdatedAt:      now,
+		//Favorites:      nil,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 }
 

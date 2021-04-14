@@ -28,18 +28,39 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 		var articles []model.Article
 		var err error
 
-		limit := in.Limit
-		offset := in.Offset
+		// TODO: move all of the contiguous logic to the DAF. The DAF should take care
+		//   of the filtering logic.  All the SFL should do is pass the pointer values to the DAF.
+		limit := 20
+		if in.Limit != nil {
+			limit = *in.Limit
+			if limit < 0 {
+				limit = 0
+			}
+		}
+		offset := 0
+		if in.Offset != nil {
+			offset = *in.Offset
+			if offset < 0 {
+				offset = 0
+			}
+		}
+		filters := make([]model.ArticleFilter, 3)
+		if in.Tag != nil {
+			tagFilter := model.ArticleTagFilterOf(*in.Tag)
+			filters = append(filters, tagFilter)
+		}
+		if in.Author != nil {
+			authorFilter := model.ArticleAuthorFilterOf(*in.Author)
+			filters = append(filters, authorFilter)
+		}
+		if in.Favorited != nil {
+			favoritedFilter := model.ArticleFavoritedFilterOf(*in.Favorited)
+			filters = append(filters, favoritedFilter)
+		}
 
-		tagFilter := model.ArticleTagFilterOf(in.Tag)
-		authorFilter := model.ArticleAuthorFilterOf(in.Author)
-		favoritedFilter := model.ArticleFavoritedFilterOf(in.Favorited)
-		filters := []model.ArticleFilter{tagFilter, authorFilter, favoritedFilter}
-
+		// TODO: Move this to the DAF
 		if limit <= 0 {
-			return rpc.ArticlesOut{
-				Articles: []rpc.ArticleOut{},
-			}, err
+			return rpc.ArticlesOut{Articles: []rpc.ArticleOut{}}, err
 		}
 
 		user := model.User{}
@@ -50,6 +71,7 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 			}
 		}
 
+		// TODO: the DAF should take discrete parameters and set-up the filters internally.
 		articles, err = s.ArticleGetRecentFilteredDaf(filters)
 		if err != nil {
 			return zero, err

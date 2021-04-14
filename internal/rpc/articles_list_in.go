@@ -7,9 +7,10 @@
 package rpc
 
 type ArticlesListIn struct {
-	Tag       string
-	Author    string
-	Favorited string
-	Limit     int
-	Offset    int
+	// All fields are optional
+	Tag       *string
+	Author    *string
+	Favorited *string
+	Limit     *int // default 20
+	Offset    *int // default 0
 }

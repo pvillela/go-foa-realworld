@@ -25,9 +25,9 @@ func main() {
 		Bio:            &bio,
 		ImageLink:      "",
 		FollowIDs:      nil,
-		Favorites:      nil,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now().Add(10),
+		//Favorites:      nil,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now().Add(10),
 	}
 
 	userOut := rpc.UserOut{}.FromModel(user, "abc")

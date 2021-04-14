@@ -87,10 +87,10 @@ func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (a
 	return article, newSlug
 }
 
-//TODO: move to BF -- article_filter_bfs.go
+//TODO: move all filtering stuff to ArticleGetRecentFilteredDaf
+
 type ArticleFilter = func(Article) bool
 
-//TODO: move to BF -- article_filter_bfs.go
 func ArticleTagFilterOf(tag string) ArticleFilter {
 	return func(article Article) bool {
 		for _, articleTag := range article.TagList {
@@ -102,14 +102,12 @@ func ArticleTagFilterOf(tag string) ArticleFilter {
 	}
 }
 
-//TODO: move to BF -- article_filter_bfs.go
 func ArticleAuthorFilterOf(authorName string) ArticleFilter {
 	return func(article Article) bool {
 		return article.Author.Name == authorName
 	}
 }
 
-//TODO: move to BF -- article_filter_bfs.go
 func ArticleFavoritedFilterOf(username string) ArticleFilter {
 	return func(article Article) bool {
 		if username == "" {
@@ -123,6 +121,8 @@ func ArticleFavoritedFilterOf(username string) ArticleFilter {
 		return false
 	}
 }
+
+//TODO: move all limit and offset stuff to article_dafs.go
 
 type ArticleCollection []Article
 
