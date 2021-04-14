@@ -8,6 +8,8 @@ package fs
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -18,8 +20,8 @@ type PwComment struct {
 	Entity model.Comment
 }
 
-type CommentGetByIdDafT = func(id int) (model.Comment, db.RecCtx, error)
+type CommentGetByIdDafT = func(articleUuid util.Uuid, id int) (model.Comment, db.RecCtx, error)
 
-type CommentCreateDafT = func(comment model.Comment) (model.Comment, db.RecCtx, error)
+type CommentCreateDafT = func(comment model.Comment, txn mapdb.Txn) (model.Comment, db.RecCtx, error)
 
-type CommentDeleteDafT = func(id int) error
+type CommentDeleteDafT = func(articleUuid util.Uuid, id int, txn mapdb.Txn) error

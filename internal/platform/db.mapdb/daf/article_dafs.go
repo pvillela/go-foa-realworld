@@ -23,7 +23,7 @@ func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 	return func(article model.Article, txn mapdb.Txn) (db.RecCtx, error) {
 		_, _, err := s.getBySlug(article.Slug)
 		if err == nil {
-			return nil, fs.ErrDuplicateArticleSlug.Make(article.Slug)
+			return nil, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
 		}
 		if util.ErrKindOf(err) != mapdb.ErrRecordNotFound {
 			return nil, err
@@ -50,7 +50,7 @@ func (s ArticleDafs) getBySlug(slug string) (model.Article, db.RecCtx, error) {
 		return true
 	})
 	if !found {
-		return model.Article{}, nil, fs.ErrArticleSlugNotFound.Make(slug)
+		return model.Article{}, nil, fs.ErrArticleSlugNotFound.Make(nil, slug)
 	}
 	pw, ok := iVal.(fs.PwArticle)
 	if !ok {
@@ -66,22 +66,23 @@ func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 
 func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
 	return func(article model.Article, recCtx db.RecCtx, txn mapdb.Txn) (db.RecCtx, error) {
+		// Even though mapdb.Update checks for the existence of the key, have to read here to check slug
 		value, err := s.ArticleDb.Read(article.Uuid)
 		if err != nil {
-			return nil, err
+			return nil, fs.ErrArticleNotFound.Make(err, article.Uuid)
 		}
 		pw, ok := value.(fs.PwArticle)
 		if !ok {
 			panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
 		}
 		if pw.Entity.Slug != article.Slug {
-			return nil, fs.ErrDuplicateArticleSlug.Make(article.Slug)
+			return nil, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
 		}
 
 		pw.Entity = article
 		err = s.ArticleDb.Update(article.Uuid, pw, txn)
 		if err != nil {
-			return nil, err
+			return nil, err // given preceding code, this can only be txn.invalidTokenError()
 		}
 
 		return pw.RecCtx, nil
@@ -97,7 +98,7 @@ func (s ArticleDafs) MakeDelete() fs.ArticleDeleteDafT {
 
 		err = s.ArticleDb.Delete(article.Uuid, txn)
 		if err != nil {
-			return err
+			return fs.ErrArticleNotFound.Make(err, article.Uuid)
 		}
 
 		return nil

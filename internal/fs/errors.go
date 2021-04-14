@@ -11,7 +11,8 @@ import "github.com/pvillela/go-foa-realworld/internal/arch/util"
 var (
 	ErrDuplicateArticleSlug = util.NewErrKind("duplicate article slug \"%v\"")
 	ErrArticleSlugNotFound  = util.NewErrKind("article slug \"%v\" not found")
-	ErrCommentNotFound      = util.NewErrKind("comment not found")
+	ErrArticleNotFound      = util.NewErrKind("article not found for Uuid %v")
+	ErrCommentNotFound      = util.NewErrKind("comment not found for articleUuid %v and id %")
 	ErrProfileNotFound      = util.NewErrKind("profile not found")
 	ErrUserNotFound         = util.NewErrKind("user not found")
 	ErrUnauthorizedUser     = util.NewErrKind("user not authorized to take this action")

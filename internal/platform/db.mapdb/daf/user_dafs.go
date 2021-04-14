@@ -9,13 +9,13 @@ package daf
 import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"sync"
 )
 
 type UserDafs struct {
-	Store *sync.Map
+	UserDb mapdb.MapDb
 }
 
 func (s UserDafs) getByName(username string) (model.User, db.RecCtx, error) {

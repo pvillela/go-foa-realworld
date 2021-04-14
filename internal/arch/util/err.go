@@ -11,17 +11,18 @@ const withStackTraceDefault = true
 var NilErrKind = ErrKind{}
 
 type ErrKind struct {
-	msg string
+	msg *string // uses pointer to ensure uniqueness of each ErrKind instance even if with the same message
 }
 
 type Err struct {
 	ErrKind
 	args       []interface{}
 	stackTrace string
+	cause      error
 }
 
 func (e Err) Error() string {
-	return fmt.Sprintf(e.msg, e.args...)
+	return fmt.Sprintf(*e.msg, e.args...)
 }
 
 func ErrKindOf(err error) ErrKind {
@@ -33,14 +34,16 @@ func ErrKindOf(err error) ErrKind {
 }
 
 func NewErrKind(msg string) ErrKind {
-	return ErrKind{msg: msg}
+	str := new(string)
+	*str = msg
+	return ErrKind{msg: str}
 }
 
-func (s ErrKind) Make(args ...interface{}) Err {
-	return s.MakeWithSt(withStackTraceDefault, args...)
+func (s ErrKind) Make(cause error, args ...interface{}) Err {
+	return s.MakeWithSt(withStackTraceDefault, cause, args...)
 }
 
-func (s ErrKind) MakeWithSt(withStackTrace bool, args ...interface{}) Err {
+func (s ErrKind) MakeWithSt(withStackTrace bool, cause error, args ...interface{}) Err {
 	err := Err{ErrKind: s}
 	err.args = args
 	if withStackTrace {

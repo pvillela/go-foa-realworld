@@ -10,20 +10,30 @@ import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"sync"
+	"strconv"
+	"strings"
 )
 
 type CommentDafs struct {
 	CommentDb mapdb.MapDb
 }
 
-func (s CommentDafs) MakeGetById() fs.CommentGetByIdDafT {
-	return func(id int) (model.Comment, db.RecCtx, error) {
-		value, ok := s.Store.Load(id)
-		if !ok {
-			return model.Comment{}, nil, fs.ErrCommentNotFound
+func commentKey(comment model.Comment) string {
+	return commentKey0(comment.ArticleUuid, comment.ID)
+}
+
+func commentKey0(articleUuid util.Uuid, id int) string {
+	return string(articleUuid) + "-" + strconv.Itoa(id)
+}
+
+func (s CommentDafs) MakeGetByKey() fs.CommentGetByIdDafT {
+	return func(articleUuid util.Uuid, id int) (model.Comment, db.RecCtx, error) {
+		value, err := s.CommentDb.Read(commentKey0(articleUuid, id))
+		if err != nil {
+			return model.Comment{}, nil, fs.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
 
 		pw, ok := value.(fs.PwComment)
@@ -35,22 +45,24 @@ func (s CommentDafs) MakeGetById() fs.CommentGetByIdDafT {
 	}
 }
 
-func (s CommentDafs) getNextId() int {
-	nextId := 0
-	s.Store.Range(func(key, value interface{}) bool {
-		nextId++
-		return true
+func (s CommentDafs) nextId(articleUuid util.Uuid) int {
+	nextId := 1
+	s.CommentDb.Range(func(key, value interface{}) bool {
+		if strings.HasPrefix(key.(string), string(articleUuid)) {
+			nextId++
+		}
+		return false
 	})
 	return nextId
 }
 
 func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
-	return func(comment model.Comment) (model.Comment, db.RecCtx, error) {
-		comment.ID = s.getNextId()
+	return func(comment model.Comment, txn mapdb.Txn) (model.Comment, db.RecCtx, error) {
+		comment.ID = s.nextId(comment.ArticleUuid)
 		pw := fs.PwComment{nil, comment}
-		_, loaded := s.Store.LoadOrStore(comment.ID, pw)
-		if loaded {
-			return model.Comment{}, nil, fs.ErrDuplicateArticleSlug
+		err := s.CommentDb.Create(commentKey(comment), pw, txn)
+		if err != nil {
+			return model.Comment{}, nil, err // can only be an invalid txn token due to first line above
 		}
 
 		return pw.Entity, pw.RecCtx, nil
@@ -58,10 +70,11 @@ func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
 }
 
 func (s CommentDafs) MakeDelete() fs.CommentDeleteDafT {
-	return func(id int) error {
-		if _, present := s.Store.LoadAndDelete(id); !present {
-			return fs.ErrCommentNotFound
+	return func(articleUuid util.Uuid, id int, txn mapdb.Txn) error {
+		err := s.CommentDb.Delete(commentKey0(articleUuid, id), txn)
+		if util.ErrKindOf(err) == mapdb.ErrRecordNotFound {
+			return fs.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
-		return nil
+		return err
 	}
 }
