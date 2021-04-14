@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -14,6 +15,7 @@ import (
 // ArticleCreateSfl is the stereotype instance for the service flow that
 // creates an article.
 type ArticleCreateSfl struct {
+	BeginTxn                      func(context string) db.Txn
 	UserGetByNameDaf              fs.UserGetByNameDafT
 	ArticleValidateBeforeCreateBf fs.ArticleValidateBeforeCreateBfT
 	ArticleCreateDaf              fs.ArticleCreateDafT
@@ -25,6 +27,9 @@ type ArticleCreateSflT = func(username string, in rpc.ArticleCreateIn) (rpc.Arti
 
 func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 	return func(username string, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		zero := rpc.ArticleOut{}
 
 		user, _, err := s.UserGetByNameDaf(username)
@@ -38,7 +43,7 @@ func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 			return zero, err
 		}
 
-		_, err = s.ArticleCreateDaf(article)
+		_, err = s.ArticleCreateDaf(article, txn)
 		if err != nil {
 			return zero, err
 		}

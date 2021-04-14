@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -14,6 +15,7 @@ import (
 // CommentAddSfl is the stereotype instance for the service flow that
 // adds a comment to an article.
 type CommentAddSfl struct {
+	BeginTxn            func(context string) db.Txn
 	UserGetByNameDaf    fs.UserGetByNameDafT
 	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
 	CommentCreateDaf    fs.CommentCreateDafT
@@ -25,6 +27,9 @@ type CommentAddSflT = func(username string, in rpc.CommentAddIn) (rpc.CommentOut
 
 func (s CommentAddSfl) Make() CommentAddSflT {
 	return func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		var zero rpc.CommentOut
 		var err error
 
@@ -40,14 +45,14 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 
 		rawComment := in.ToComment(article.Uuid, commentAuthor)
 
-		insertedComment, _, err := s.CommentCreateDaf(rawComment)
+		insertedComment, _, err := s.CommentCreateDaf(rawComment, txn)
 		if err != nil {
 			return zero, err
 		}
 
 		article.Comments = append(article.Comments, insertedComment)
 
-		if _, err := s.ArticleUpdateDaf(article, rc); err != nil {
+		if _, err := s.ArticleUpdateDaf(article, rc, txn); err != nil {
 			return zero, err
 		}
 

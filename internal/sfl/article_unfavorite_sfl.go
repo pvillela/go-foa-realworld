@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -14,6 +15,7 @@ import (
 // ArticleUnfavoriteSfl is the stereotype instance for the service flow that
 // designates an article as a favorite.
 type ArticleUnfavoriteSfl struct {
+	BeginTxn          func(context string) db.Txn
 	ArticleFavoriteFl fs.ArticleFavoriteFlT
 }
 
@@ -22,8 +24,11 @@ type ArticleUnfavoriteSflT = func(username string, slug string) (rpc.ArticleOut,
 
 func (s ArticleUnfavoriteSfl) Make() ArticleUnfavoriteSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		var zero rpc.ArticleOut
-		pwUser, pwArticle, err := s.ArticleFavoriteFl(username, slug, false)
+		pwUser, pwArticle, err := s.ArticleFavoriteFl(username, slug, false, txn)
 		if err != nil {
 			return zero, err
 		}

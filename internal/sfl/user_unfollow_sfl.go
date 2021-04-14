@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -14,6 +15,7 @@ import (
 // CommentAddSfl is the stereotype instance for the service flow that
 // causes the current user start following a given other user.
 type UserUnfollowSfl struct {
+	BeginTxn     func(context string) db.Txn
 	UserFollowFl fs.UserFollowFlT
 }
 
@@ -22,8 +24,11 @@ type UserUnfollowSflT = func(username string, followedUsername string) (rpc.Prof
 
 func (s UserUnfollowSfl) Make() UserUnfollowSflT {
 	return func(username string, followedUsername string) (rpc.ProfileOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		var zero rpc.ProfileOut
-		user, _, err := s.UserFollowFl(username, followedUsername, false)
+		user, _, err := s.UserFollowFl(username, followedUsername, false, txn)
 		if err != nil {
 			return zero, err
 		}

@@ -7,9 +7,13 @@
 package mapdb
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
+
+type Any = interface{}
 
 type MapDb struct {
 	name  string
@@ -24,16 +28,39 @@ var globalTxnLock *sync.Mutex
 var globalTxnToken util.Uuid
 var globalTxnTokenRwLock *sync.RWMutex
 
-type Txn struct {
+type TxnMapDb struct {
 	context string
 	token   util.Uuid
 }
 
-func (s Txn) invalidTokenError() error {
-	return ErrInvalidTransaction.Make(nil, s.context, s.token, globalTxnToken)
+// Validate is part of db.Txn interface implementation.
+func (txn TxnMapDb) Validate() error {
+	globalTxnTokenRwLock.RLock()
+	defer globalTxnTokenRwLock.RUnlock()
+	if txn.token != globalTxnToken {
+		return ErrInvalidTransaction.Make(nil, txn.context, txn.token, globalTxnToken)
+	}
+	return nil
 }
 
-type Any = interface{}
+func BeginTxn(context string) db.Txn {
+	globalTxnLock.Lock()
+	globalTxnTokenRwLock.Lock()
+	defer globalTxnTokenRwLock.Unlock()
+	globalTxnToken = util.NewUuid()
+	return TxnMapDb{context, globalTxnToken}
+}
+
+// End is part of db.Txn interface implementation.
+func (t TxnMapDb) End() {
+	err := t.Validate()
+	if err != nil {
+		logrus.Error(err)
+		return
+	}
+	globalTxnLock.Unlock()
+	return
+}
 
 var (
 	ErrInvalidTransaction = util.NewErrKind("txn context %v - invalid token %v != %v")
@@ -41,30 +68,11 @@ var (
 	ErrRecordNotFound     = util.NewErrKind("database %v - record not found with key \"%v\"")
 )
 
-func BeginTxn(context string) Txn {
-	globalTxnLock.Lock()
-	globalTxnTokenRwLock.Lock()
-	defer globalTxnTokenRwLock.Unlock()
-	globalTxnToken = util.NewUuid()
-	return Txn{context, globalTxnToken}
-}
-
-func EndTxn(txn Txn) error {
-	globalTxnTokenRwLock.RLock()
-	defer globalTxnTokenRwLock.RUnlock()
-	if txn.token != globalTxnToken {
-		return txn.invalidTokenError()
+func (s MapDb) Create(key Any, value Any, txn db.Txn) error {
+	if err := txn.Validate(); err != nil {
+		return err
 	}
-	globalTxnLock.Unlock()
-	return nil
-}
-
-func (s MapDb) Create(key Any, value Any, txn Txn) error {
-	if txn.token != globalTxnToken {
-		return txn.invalidTokenError()
-	}
-	_, loaded := s.store.LoadOrStore(key, value)
-	if loaded {
+	if _, loaded := s.store.LoadOrStore(key, value); loaded {
 		return ErrDuplicateKey.Make(nil, key)
 	}
 	return nil
@@ -78,13 +86,13 @@ func (s MapDb) Read(key Any) (Any, error) {
 	return value, nil
 }
 
-func (s MapDb) Update(key Any, value Any, txn Txn) error {
-	if txn.token != globalTxnToken {
-		return txn.invalidTokenError()
+func (s MapDb) Update(key Any, value Any, txn db.Txn) error {
+	if err := txn.Validate(); err != nil {
+		return err
 	}
 
-	_, err := s.Read(key) // make sure record exists
-	if err != nil {
+	// make sure record exists
+	if _, err := s.Read(key); err != nil {
 		return err
 	}
 
@@ -92,13 +100,13 @@ func (s MapDb) Update(key Any, value Any, txn Txn) error {
 	return nil
 }
 
-func (s MapDb) Delete(key Any, txn Txn) error {
-	if txn.token != globalTxnToken {
-		return txn.invalidTokenError()
+func (s MapDb) Delete(key Any, txn db.Txn) error {
+	if err := txn.Validate(); err != nil {
+		return err
 	}
 
-	_, err := s.Read(key) // make sure record exists
-	if err != nil {
+	// make sure record exists
+	if _, err := s.Read(key); err != nil {
 		return err
 	}
 

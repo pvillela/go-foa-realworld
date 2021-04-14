@@ -23,7 +23,7 @@ type UserAuthenticateSfl struct {
 type UserAuthenticateSflT = func(_username string, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
 func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
-	return func(_username string, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
+	return func(_ string, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
 
 		email := in.User.Email
@@ -35,7 +35,8 @@ func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
 		}
 
 		if !s.UserAuthenticateBf(user, password) {
-			return zero, fs.ErrAuthenticationFailed
+			// I know the error info below is not secure but OK for now for debugging
+			return zero, fs.ErrAuthenticationFailed.Make(nil, user.Name, password)
 		}
 
 		token, err := s.UserGenTokenBf(user)

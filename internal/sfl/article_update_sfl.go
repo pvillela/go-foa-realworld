@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -15,6 +16,7 @@ import (
 // ArticleUpdateSfl is the stereotype instance for the service flow that
 // updates an article.
 type ArticleUpdateSfl struct {
+	BeginTxn                      func(context string) db.Txn
 	ArticleGetAndCheckOwnerFl     fs.ArticleGetAndCheckOwnerFlT
 	ArticleValidateBeforeUpdateBf fs.ArticleValidateBeforeUpdateBfT
 	UserGetByNameDaf              fs.UserGetByNameDafT
@@ -29,6 +31,9 @@ type ArticleUpdateSflT = func(username, slug string, in rpc.ArticleUpdateIn) (rp
 
 func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 	return func(username string, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		var zero rpc.ArticleOut
 
 		article, rc, err := s.ArticleGetAndCheckOwnerFl(slug, username)
@@ -62,16 +67,16 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 
 		// TODO: move some of this logic to a BF
 		if newSlug == slug {
-			_, err = s.ArticleUpdateDaf(article, rc)
+			_, err = s.ArticleUpdateDaf(article, rc, txn)
 			if err != nil {
 				return zero, err
 			}
 		} else {
-			_, err = s.ArticleCreateDaf(article)
+			_, err = s.ArticleCreateDaf(article, txn)
 			if err != nil {
 				return zero, err
 			}
-			err = s.ArticleDeleteDaf(slug)
+			err = s.ArticleDeleteDaf(slug, txn)
 			if err != nil {
 				return zero, err
 			}

@@ -28,10 +28,6 @@ func (s UserGetCurrentSfl) Make() UserGetCurrentSflT {
 			return rpc.UserOut{}, err
 		}
 
-		if user.Name != username {
-			return rpc.UserOut{}, fs.ErrUnauthorizedUser
-		}
-
 		token, err := s.UserGenTokenBf(user)
 		if err != nil {
 			return rpc.UserOut{}, err

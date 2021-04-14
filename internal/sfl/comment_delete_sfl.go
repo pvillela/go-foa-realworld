@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -14,6 +15,7 @@ import (
 // CommentDeleteSfl is the stereotype instance for the service flow that
 // deletes a comment from an article.
 type CommentDeleteSfl struct {
+	BeginTxn             func(context string) db.Txn
 	CommentGetByIdDaf    fs.CommentGetByIdDafT
 	CommentDeleteDaf     fs.CommentDeleteDafT
 	ArticleGetBySlugdDaf fs.ArticleGetBySlugDafT
@@ -25,15 +27,22 @@ type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) error
 
 func (s CommentDeleteSfl) Make() CommentDeleteSflT {
 	return func(username string, in rpc.CommentDeleteIn) error {
-		comment, _, err := s.CommentGetByIdDaf(in.Id)
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
+		article, _, err := s.ArticleGetBySlugdDaf(in.Slug)
+		if err != nil {
+			return err
+		}
+		comment, _, err := s.CommentGetByIdDaf(article.Uuid, in.Id)
 		if err != nil {
 			return err
 		}
 		if comment.Author.Name != username {
-			return fs.ErrUnauthorizedUser
+			return fs.ErrUnauthorizedUser.Make(nil, username)
 		}
 
-		if err := s.CommentDeleteDaf(in.Id); err != nil {
+		if err := s.CommentDeleteDaf(article.Uuid, in.Id, txn); err != nil {
 			return err
 		}
 
@@ -44,7 +53,7 @@ func (s CommentDeleteSfl) Make() CommentDeleteSflT {
 
 		article = article.UpdateComments(comment, false)
 
-		if _, err := s.ArticleUpdateDaf(article, rc); err != nil {
+		if _, err := s.ArticleUpdateDaf(article, rc, txn); err != nil {
 			return err
 		}
 

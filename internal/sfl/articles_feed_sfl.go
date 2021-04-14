@@ -31,7 +31,7 @@ func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 		var err error
 
 		if username == "" {
-			return zero, fs.ErrAuthenticationFailed
+			return zero, fs.ErrNotAuthenticated.Make(nil)
 		}
 
 		limit := in.Limit

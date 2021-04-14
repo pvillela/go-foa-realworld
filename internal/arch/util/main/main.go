@@ -6,13 +6,13 @@ import (
 )
 
 var (
-	ErrDuplicateKey = util.NewErrKind("ErrDuplicateKey", "duplicate key \"%v\"")
+	ErrDuplicateKey = util.NewErrKind("duplicate key \"%v\"")
 )
 
 var err util.Err
 
 func bar() {
-	err = ErrDuplicateKey.MakeWithSt(true, "foo")
+	err = ErrDuplicateKey.MakeWithSt(true, nil, "foo")
 }
 
 func foo() {
@@ -22,9 +22,9 @@ func foo() {
 type errW util.Err
 
 func main() {
-	fmt.Println(ErrDuplicateKey.MakeWithSt(false))
-	fmt.Println(ErrDuplicateKey.MakeWithSt(false, "foo"))
-	fmt.Println(ErrDuplicateKey.MakeWithSt(false, "foo", "bar"))
+	fmt.Println(ErrDuplicateKey.MakeWithSt(false, nil))
+	fmt.Println(ErrDuplicateKey.MakeWithSt(false, nil, "foo"))
+	fmt.Println(ErrDuplicateKey.MakeWithSt(false, nil, "foo", "bar"))
 	foo()
 	fmt.Printf("%+v\n", errW(err))
 	fmt.Println("-------------------------------------------------")

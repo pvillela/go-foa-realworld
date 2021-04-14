@@ -35,7 +35,6 @@ func (s CommentDafs) MakeGetByKey() fs.CommentGetByIdDafT {
 		if err != nil {
 			return model.Comment{}, nil, fs.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
-
 		pw, ok := value.(fs.PwComment)
 		if !ok {
 			panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap comment"))
@@ -57,20 +56,19 @@ func (s CommentDafs) nextId(articleUuid util.Uuid) int {
 }
 
 func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
-	return func(comment model.Comment, txn mapdb.Txn) (model.Comment, db.RecCtx, error) {
+	return func(comment model.Comment, txn db.Txn) (model.Comment, db.RecCtx, error) {
 		comment.ID = s.nextId(comment.ArticleUuid)
 		pw := fs.PwComment{nil, comment}
-		err := s.CommentDb.Create(commentKey(comment), pw, txn)
-		if err != nil {
+		if err := s.CommentDb.Create(commentKey(comment), pw, txn); err != nil {
 			return model.Comment{}, nil, err // can only be an invalid txn token due to first line above
 		}
 
-		return pw.Entity, pw.RecCtx, nil
+		return comment, nil, nil
 	}
 }
 
 func (s CommentDafs) MakeDelete() fs.CommentDeleteDafT {
-	return func(articleUuid util.Uuid, id int, txn mapdb.Txn) error {
+	return func(articleUuid util.Uuid, id int, txn db.Txn) error {
 		err := s.CommentDb.Delete(commentKey0(articleUuid, id), txn)
 		if util.ErrKindOf(err) == mapdb.ErrRecordNotFound {
 			return fs.ErrCommentNotFound.Make(err, articleUuid, id)

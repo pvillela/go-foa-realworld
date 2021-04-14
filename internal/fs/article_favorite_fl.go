@@ -6,6 +6,8 @@
 
 package fs
 
+import "github.com/pvillela/go-foa-realworld/internal/arch/db"
+
 // ArticleFavoriteFl is the stereotype instance for the flow that
 // designates an article as a favorite or not.
 type ArticleFavoriteFl struct {
@@ -15,10 +17,10 @@ type ArticleFavoriteFl struct {
 }
 
 // ArticleFavoriteFlT is the function type instantiated by fs.ArticleFavoriteFl.
-type ArticleFavoriteFlT = func(username, slug string, favorite bool) (PwUser, PwArticle, error)
+type ArticleFavoriteFlT = func(username, slug string, favorite bool, txn db.Txn) (PwUser, PwArticle, error)
 
 func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
-	return func(username, slug string, favorite bool) (PwUser, PwArticle, error) {
+	return func(username, slug string, favorite bool, txn db.Txn) (PwUser, PwArticle, error) {
 		user, rcUser, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return PwUser{}, PwArticle{}, err
@@ -31,7 +33,7 @@ func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
 
 		article = article.UpdateFavoritedBy(user, favorite)
 
-		rcArticle, err = s.ArticleUpdateDaf(article, rcArticle)
+		rcArticle, err = s.ArticleUpdateDaf(article, rcArticle, txn)
 		if err != nil {
 			return PwUser{}, PwArticle{}, err
 		}

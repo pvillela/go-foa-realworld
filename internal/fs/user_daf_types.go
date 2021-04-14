@@ -22,6 +22,6 @@ type UserGetByNameDafT = func(userName string) (model.User, db.RecCtx, error)
 
 type UserGetByEmailDafT = func(email string) (model.User, db.RecCtx, error)
 
-type UserUpdateDafT = func(user model.User, recCtx db.RecCtx) (db.RecCtx, error)
+type UserCreateDafT = func(user model.User, txn db.Txn) (db.RecCtx, error)
 
-type UserCreateDafT = func(user model.User) (db.RecCtx, error)
+type UserUpdateDafT = func(user model.User, recCtx db.RecCtx, txn db.Txn) (db.RecCtx, error)

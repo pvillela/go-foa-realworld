@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -15,6 +16,7 @@ import (
 // ArticleGetSfl is the stereotype instance for the service flow that
 // retrieves an article.
 type ArticleGetSfl struct {
+	BeginTxn            func(context string) db.Txn
 	UserGetByNameDaf    fs.UserGetByNameDafT
 	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
 }
@@ -24,6 +26,9 @@ type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
 func (s ArticleGetSfl) Make() ArticleGetSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		var zero rpc.ArticleOut
 		var user model.User
 		var err error

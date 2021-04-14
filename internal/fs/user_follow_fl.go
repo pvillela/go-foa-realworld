@@ -19,10 +19,10 @@ type UserFollowFl struct {
 }
 
 // UserFollowFlT is the function type instantiated by UserFollowFl.
-type UserFollowFlT = func(username string, followedUsername string, follow bool) (model.User, db.RecCtx, error)
+type UserFollowFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, db.RecCtx, error)
 
 func (s UserFollowFl) Make() UserFollowFlT {
-	return func(username string, followedUsername string, follow bool) (model.User, db.RecCtx, error) {
+	return func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, db.RecCtx, error) {
 		user, rc, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return model.User{}, nil, err
@@ -30,7 +30,7 @@ func (s UserFollowFl) Make() UserFollowFlT {
 
 		user = user.UpdateFollowees(followedUsername, follow)
 
-		if rc, err = s.UserUpdateDaf(user, rc); err != nil {
+		if rc, err = s.UserUpdateDaf(user, rc, txn); err != nil {
 			return model.User{}, nil, err
 		}
 

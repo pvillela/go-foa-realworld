@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -15,6 +16,7 @@ import (
 // UserUpdateSfl is the stereotype instance for the service flow that
 // It represents the action of registering a user.
 type UserUpdateSfl struct {
+	BeginTxn         func(context string) db.Txn
 	UserGetByNameDaf fs.UserGetByNameDafT
 	UserUpdateDaf    fs.UserUpdateDafT
 	UserGenTokenBf   fs.UserGenTokenBfT
@@ -26,6 +28,9 @@ type UserUpdateSflT = func(username string, in rpc.UserUpdateIn) (rpc.UserOut, e
 
 func (s UserUpdateSfl) Make() UserUpdateSflT {
 	return func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error) {
+		txn := s.BeginTxn("ArticleCreateSfl")
+		defer txn.End()
+
 		user, rc, err := s.UserGetByNameDaf(username)
 		if err != nil {
 			return rpc.UserOut{}, err
@@ -50,7 +55,7 @@ func (s UserUpdateSfl) Make() UserUpdateSflT {
 
 		user = user.Update(fieldsToUpdate)
 
-		_, err = s.UserUpdateDaf(user, rc)
+		_, err = s.UserUpdateDaf(user, rc, txn)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}
