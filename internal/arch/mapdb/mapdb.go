@@ -22,7 +22,7 @@ func NewMapDb(name string, store *sync.Map) MapDb {
 
 var globalTxnLock *sync.Mutex
 var globalTxnToken util.Uuid
-var globalTxnTokenUpdateLock *sync.RWMutex
+var globalTxnTokenRwLock *sync.RWMutex
 
 type Txn struct {
 	context string
@@ -43,15 +43,15 @@ var (
 
 func BeginTxn(context string) Txn {
 	globalTxnLock.Lock()
-	globalTxnTokenUpdateLock.Lock()
-	defer globalTxnTokenUpdateLock.Unlock()
+	globalTxnTokenRwLock.Lock()
+	defer globalTxnTokenRwLock.Unlock()
 	globalTxnToken = util.NewUuid()
 	return Txn{context, globalTxnToken}
 }
 
 func EndTxn(txn Txn) error {
-	globalTxnTokenUpdateLock.RLock()
-	defer globalTxnTokenUpdateLock.RUnlock()
+	globalTxnTokenRwLock.RLock()
+	defer globalTxnTokenRwLock.RUnlock()
 	if txn.token != globalTxnToken {
 		return txn.invalidTokenError()
 	}
