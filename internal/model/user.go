@@ -90,45 +90,6 @@ func (s User) Update(fieldsToUpdate map[UserUpdatableField]interface{}) User {
 	return s
 }
 
-func UpdateUser(user *User, opts ...func(fields *User)) {
-	for _, v := range opts {
-		v(user)
-	}
-}
-
-func SetUserName(input string) func(fields *User) {
-	return func(user *User) {
-		user.Name = input
-	}
-}
-
-func SetUserEmail(input string) func(fields *User) {
-	return func(user *User) {
-		user.Email = input
-	}
-}
-
-func SetUserBio(input *string) func(fields *User) {
-	return func(user *User) {
-		user.Bio = input
-	}
-}
-
-// give empty string to delete it
-func SetUserImageLink(input string) func(fields *User) {
-	return func(user *User) {
-		user.ImageLink = input
-	}
-}
-
-//func SetUserPassword(input *string) func(fields *Entity) {
-//	return func(initial *Entity) {
-//		if input != nil {
-//			initial.Password = *input
-//		}
-//	}
-//}
-
 func (user User) Follows(userName string) bool {
 	if user.FollowIDs == nil {
 		return false

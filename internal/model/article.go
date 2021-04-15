@@ -87,68 +87,6 @@ func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (a
 	return article, newSlug
 }
 
-//TODO: move all filtering stuff to ArticleGetRecentFilteredDaf
-
-type ArticleFilter = func(Article) bool
-
-func ArticleTagFilterOf(tag string) ArticleFilter {
-	return func(article Article) bool {
-		for _, articleTag := range article.TagList {
-			if articleTag == tag {
-				return true
-			}
-		}
-		return false
-	}
-}
-
-func ArticleAuthorFilterOf(authorName string) ArticleFilter {
-	return func(article Article) bool {
-		return article.Author.Name == authorName
-	}
-}
-
-func ArticleFavoritedFilterOf(username string) ArticleFilter {
-	return func(article Article) bool {
-		if username == "" {
-			return false
-		}
-		for _, user := range article.FavoritedBy {
-			if user.Name == username {
-				return true
-			}
-		}
-		return false
-	}
-}
-
-//TODO: move all limit and offset stuff to article_dafs.go
-
-type ArticleCollection []Article
-
-func (articles ArticleCollection) ApplyLimitAndOffset(limit, offset int) ArticleCollection {
-	if limit <= 0 {
-		return []Article{}
-	}
-
-	articlesSize := len(articles)
-	min := offset
-	if min < 0 {
-		min = 0
-	}
-
-	if min > articlesSize {
-		return []Article{}
-	}
-
-	max := min + limit
-	if max > articlesSize {
-		max = articlesSize
-	}
-
-	return articles[min:max]
-}
-
 func (s Article) UpdateComments(comment Comment, add bool) Article {
 	if add {
 		s.Comments = append(s.Comments, comment)

@@ -7,6 +7,6 @@
 package rpc
 
 type ArticlesFeedIn struct {
-	Limit  int
-	Offset int
+	Limit  *int
+	Offset *int
 }

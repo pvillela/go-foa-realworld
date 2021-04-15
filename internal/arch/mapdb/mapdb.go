@@ -117,3 +117,28 @@ func (s MapDb) Delete(key Any, txn db.Txn) error {
 func (s MapDb) Range(f func(key, value interface{}) bool) {
 	s.store.Range(f)
 }
+
+func (s MapDb) FindFirst(pred func(Any, Any) bool) (retVal Any, found bool) {
+	f := func(key, value Any) bool {
+		if pred(key, value) {
+			retVal = value
+			found = true
+			return false
+		}
+		return true
+	}
+	s.store.Range(f)
+	return
+}
+
+func (s MapDb) FindAll(pred func(Any, Any) bool) []Any {
+	retVals := make([]Any, 10)
+	f := func(key, value Any) bool {
+		if pred(key, value) {
+			retVals = append(retVals, value)
+		}
+		return true
+	}
+	s.store.Range(f)
+	return retVals
+}

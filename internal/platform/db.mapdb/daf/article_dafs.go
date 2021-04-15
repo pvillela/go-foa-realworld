@@ -13,11 +13,17 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 type ArticleDafs struct {
 	ArticleDb mapdb.MapDb
 }
+
+const (
+	limitDefault  = 20
+	offsetDefault = 0
+)
 
 func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 	return func(article model.Article, txn db.Txn) (db.RecCtx, error) {
@@ -100,47 +106,87 @@ func (s ArticleDafs) MakeDelete() fs.ArticleDeleteDafT {
 	}
 }
 
-func (s ArticleDafs) MakeGetByAuthorsOrderedByMostRecentDaf() fs.ArticleGetByAuthorsOrderedByMostRecentDafT {
-	return func(usernames []string) ([]model.Article, error) {
-		var toReturn []model.Article
+func (s ArticleDafs) selectAndOrderByMostRecent(
+	pred func(key, value interface{}) bool,
+	pLimit, pOffset *int,
+) []model.Article {
+	limit := limitDefault
+	if pLimit != nil {
+		limit = *pLimit
+	}
+	offset := offsetDefault
+	if pOffset != nil {
+		offset = *pOffset
+	}
 
-		s.ArticleDb.Range(func(key, value interface{}) bool {
-			pw, ok := value.(fs.PwArticle)
-			if !ok {
-				panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
-			}
-			for _, username := range usernames {
-				if pw.Entity.Author.Name == username {
-					toReturn = append(toReturn, pw.Entity)
+	selected := s.ArticleDb.FindAll(pred)
+	less := func(i, j int) bool {
+		return selected[i].(fs.PwArticle).Entity.CreatedAt.After(selected[i].(fs.PwArticle).Entity.CreatedAt)
+	}
+	util.Sort(selected, less)
+	selected = util.SliceWindow(selected, limit, offset)
+
+	res := make([]model.Article, limit)
+	for i := range selected {
+		res[i] = selected[i].(fs.PwArticle).Entity
+	}
+
+	return res
+}
+
+func (s ArticleDafs) MakeGetRecentForAuthorsDaf() fs.ArticleGetRecentForAuthorsDafT {
+	return func(usernames []string, pLimit, pOffset *int) ([]model.Article, error) {
+		pred := func(_, value interface{}) bool {
+			article := value.(fs.PwArticle).Entity
+			for _, name := range usernames {
+				if name == article.Author.Name {
+					return true
 				}
 			}
-			return true
-		})
-
-		return toReturn, nil
+			return false
+		}
+		res := s.selectAndOrderByMostRecent(pred, pLimit, pOffset)
+		return res, nil
 	}
 }
 
 func (s ArticleDafs) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
-	return func(filters []model.ArticleFilter) ([]model.Article, error) {
-		var toReturn []model.Article
+	return func(in rpc.ArticlesListIn) ([]model.Article, error) {
+		pred := func(_, value interface{}) bool {
+			article := value.(fs.PwArticle).Entity
 
-		s.ArticleDb.Range(func(key, value interface{}) bool {
-			pw, ok := value.(fs.PwArticle)
-			if !ok {
-				panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
-			}
-
-			for _, funcToApply := range filters {
-				if !funcToApply(pw.Entity) { // "AND filter" : if one of the filter is at false, skip the pw
-					return true
+			findTag := func(tag string) bool {
+				for _, t := range article.TagList {
+					if t == tag {
+						return true
+					}
 				}
+				return false
+			}
+			if tag := in.Tag; tag != nil && !findTag(*tag) {
+				return false
 			}
 
-			toReturn = append(toReturn, pw.Entity)
-			return true
-		})
+			if author := in.Author; author != nil && article.Author.Name != *author {
+				return false
+			}
 
-		return toReturn, nil
+			findFavoritedBy := func(favoritedBy string) bool {
+				for _, user := range article.FavoritedBy {
+					if user.Name == favoritedBy {
+						return true
+					}
+				}
+				return false
+			}
+			if favorited := in.Favorited; favorited != nil && findFavoritedBy(*favorited) {
+				return false
+			}
+
+			return true
+		}
+
+		res := s.selectAndOrderByMostRecent(pred, in.Limit, in.Offset)
+		return res, nil
 	}
 }

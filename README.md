@@ -10,6 +10,8 @@ Some of the code was based on https://github.com/err0r500/go-realworld-clean.
 v Complete first pass at SFLs. 
 v Review use of pointers, clean it up. 
 v Review model in terms of relationships and how they should be represented.
+* Redo GetBy... functions to use FindFirst
+* Complete review and clean-up of model
 * Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.
     - Start with article filtering logic
 * Review model and move functionality to BFs and DAFs as appropriate.
