@@ -29,17 +29,21 @@ func commentKey0(articleUuid util.Uuid, id int) string {
 	return string(articleUuid) + "-" + strconv.Itoa(id)
 }
 
+func pwCommentFromDb(value interface{}) fs.PwComment {
+	pw, ok := value.(fs.PwComment)
+	if !ok {
+		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap comment"))
+	}
+	return pw
+}
+
 func (s CommentDafs) MakeGetByKey() fs.CommentGetByIdDafT {
 	return func(articleUuid util.Uuid, id int) (model.Comment, db.RecCtx, error) {
 		value, err := s.CommentDb.Read(commentKey0(articleUuid, id))
 		if err != nil {
 			return model.Comment{}, nil, fs.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
-		pw, ok := value.(fs.PwComment)
-		if !ok {
-			panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap comment"))
-		}
-
+		pw := pwCommentFromDb(value)
 		return pw.Entity, pw.RecCtx, nil
 	}
 }

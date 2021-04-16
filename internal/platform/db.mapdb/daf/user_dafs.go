@@ -19,17 +19,24 @@ type UserDafs struct {
 	UserDb mapdb.MapDb
 }
 
+func pwUserFromDb(value interface{}) fs.PwUser {
+	pw, ok := value.(fs.PwUser)
+	if !ok {
+		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap user"))
+	}
+	return pw
+}
+
+func userFromDb(value interface{}) model.User {
+	return pwUserFromDb(value).Entity
+}
+
 func (s UserDafs) getByName(username string) (model.User, db.RecCtx, error) {
 	value, err := s.UserDb.Read(username)
 	if err != nil {
 		return model.User{}, nil, fs.ErrUserNameNotFound.Make(err, username)
 	}
-
-	pw, ok := value.(fs.PwUser)
-	if !ok {
-		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap pw"))
-	}
-
+	pw := pwUserFromDb(value)
 	return pw.Entity, pw.RecCtx, nil
 }
 
@@ -38,28 +45,19 @@ func (s UserDafs) MakeGetByName() fs.UserGetByNameDafT {
 }
 
 func (s UserDafs) getByEmail(email string) (model.User, db.RecCtx, error) {
-	var foundPw fs.PwUser
-	var pwWasFound bool
-
-	s.UserDb.Range(func(key, value interface{}) bool {
-		pw, ok := value.(fs.PwUser)
-		if !ok {
-			panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap user"))
+	pred := func(_, value interface{}) bool {
+		if userFromDb(value).Email == email {
+			return true
 		}
+		return false
+	}
 
-		if pw.Entity.Email == email {
-			foundPw = pw
-			pwWasFound = true
-			return false // stop range
-		}
-
-		return true // keep iterating
-	})
-
-	if !pwWasFound {
+	value, found := s.UserDb.FindFirst(pred)
+	if !found {
 		return model.User{}, nil, fs.ErrUserEmailNotFound.Make(nil, email)
 	}
-	return foundPw.Entity, foundPw.RecCtx, nil
+	pw := pwUserFromDb(value)
+	return pw.Entity, pw.RecCtx, nil
 }
 
 func (s UserDafs) MakeGetByEmail() fs.UserGetByEmailDafT {

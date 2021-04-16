@@ -25,6 +25,18 @@ const (
 	offsetDefault = 0
 )
 
+func pwArticleFromDb(value interface{}) fs.PwArticle {
+	pw, ok := value.(fs.PwArticle)
+	if !ok {
+		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
+	}
+	return pw
+}
+
+func articleFromDb(value interface{}) model.Article {
+	return pwArticleFromDb(value).Entity
+}
+
 func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 	return func(article model.Article, txn db.Txn) (db.RecCtx, error) {
 		_, _, err := s.getBySlug(article.Slug)
@@ -46,23 +58,19 @@ func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 }
 
 func (s ArticleDafs) getBySlug(slug string) (model.Article, db.RecCtx, error) {
-	var iVal interface{}
-	var found bool
-	s.ArticleDb.Range(func(key, value interface{}) bool {
-		if key == slug {
-			iVal = value
-			found = true
-			return false
+	pred := func(_, value interface{}) bool {
+		article := articleFromDb(value)
+		if article.Slug == slug {
+			return true
 		}
-		return true
-	})
+		return false
+	}
+
+	value, found := s.ArticleDb.FindFirst(pred)
 	if !found {
 		return model.Article{}, nil, fs.ErrArticleSlugNotFound.Make(nil, slug)
 	}
-	pw, ok := iVal.(fs.PwArticle)
-	if !ok {
-		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
-	}
+	pw := pwArticleFromDb(value)
 
 	return pw.Entity, pw.RecCtx, nil
 }
@@ -121,14 +129,14 @@ func (s ArticleDafs) selectAndOrderByMostRecent(
 
 	selected := s.ArticleDb.FindAll(pred)
 	less := func(i, j int) bool {
-		return selected[i].(fs.PwArticle).Entity.CreatedAt.After(selected[i].(fs.PwArticle).Entity.CreatedAt)
+		return articleFromDb(selected[i]).CreatedAt.After(articleFromDb(selected[j]).CreatedAt)
 	}
 	util.Sort(selected, less)
 	selected = util.SliceWindow(selected, limit, offset)
 
 	res := make([]model.Article, limit)
 	for i := range selected {
-		res[i] = selected[i].(fs.PwArticle).Entity
+		res[i] = articleFromDb(selected[i])
 	}
 
 	return res
@@ -137,7 +145,7 @@ func (s ArticleDafs) selectAndOrderByMostRecent(
 func (s ArticleDafs) MakeGetRecentForAuthorsDaf() fs.ArticleGetRecentForAuthorsDafT {
 	return func(usernames []string, pLimit, pOffset *int) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
-			article := value.(fs.PwArticle).Entity
+			article := articleFromDb(value)
 			for _, name := range usernames {
 				if name == article.Author.Name {
 					return true
@@ -153,7 +161,7 @@ func (s ArticleDafs) MakeGetRecentForAuthorsDaf() fs.ArticleGetRecentForAuthorsD
 func (s ArticleDafs) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
 	return func(in rpc.ArticlesListIn) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
-			article := value.(fs.PwArticle).Entity
+			article := articleFromDb(value)
 
 			findTag := func(tag string) bool {
 				for _, t := range article.TagList {
