@@ -7,17 +7,17 @@ import (
 )
 
 /////////////////////
-// Types
+// Public types
 
 type Errx interface {
 	error
 	Kind() Kind
 	Cause() error
 	Args() []interface{}
-	FullMsg() string
-	DirectMsg() string
-	StackTrace() errors.StackTrace
-	DirectStackTrace() errors.StackTrace
+	Msg() string
+	RecursiveMsg() string
+	StackTrace() StackTrace
+	DirectStackTrace() StackTrace
 	ErrxChain() []Errx
 	CauseChain() []error
 	InnermostCause() error
@@ -29,20 +29,25 @@ func _() {
 	func(errx Errx) {}(&errxImpl{})
 }
 
+type StackTrace errors.StackTrace
+
+/////////////////////
+// Private types
+
 type errxImpl struct {
-	kind            Kind
-	args            []interface{}
-	cause           error
-	errorsCompanion error // for use of errors.New and errors.Wrap
+	kind   Kind
+	args   []interface{}
+	cause  error
+	tracer stackTracer
 }
 
 type stackTracer interface {
 	StackTrace() errors.StackTrace
 }
 
-type causer interface {
-	Cause() error
-}
+type dummyError struct{}
+
+func (dummyError) Error() string { return "" }
 
 /////////////////////
 // Helper functions
@@ -86,7 +91,7 @@ func (errx *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool
 // Methods
 
 func (e *errxImpl) Error() string {
-	return e.errorsCompanion.Error()
+	return e.RecursiveMsg()
 }
 
 func (e *errxImpl) Kind() Kind {
@@ -101,20 +106,25 @@ func (e *errxImpl) Args() []interface{} {
 	return e.args
 }
 
-func (e *errxImpl) FullMsg() string {
-	return e.Error()
-}
-
-func (e *errxImpl) DirectMsg() string {
+func (e *errxImpl) Msg() string {
 	return e.msgWithArgs()
 }
 
-func (e *errxImpl) StackTrace() errors.StackTrace {
-	var trace errors.StackTrace
+func (e *errxImpl) RecursiveMsg() string {
+	str := e.Msg()
+	if cause := e.cause; cause != nil {
+		str = str + " -> " + cause.Error()
+	}
+	return str
+}
+
+func (e *errxImpl) StackTrace() StackTrace {
+	var trace StackTrace
 	var cause error
 
 	f := func(e *errxImpl) bool {
-		if trace = stackTrace(e.errorsCompanion); trace != nil {
+		if e.tracer != nil {
+			trace = StackTrace(e.tracer.StackTrace())
 			return false
 		}
 		cause = e.cause
@@ -128,13 +138,13 @@ func (e *errxImpl) StackTrace() errors.StackTrace {
 	}
 
 	// The innermost cause in the chain may be a stackTracer
-	return stackTrace(cause)
+	return StackTrace(stackTrace(cause))
 }
 
-func (e *errxImpl) DirectStackTrace() errors.StackTrace {
-	tracer, ok := e.errorsCompanion.(stackTracer)
+func (e *errxImpl) DirectStackTrace() StackTrace {
+	tracer, ok := e.tracer.(stackTracer)
 	if ok {
-		return tracer.StackTrace()
+		return StackTrace(tracer.StackTrace())
 	}
 	return nil
 }
@@ -187,9 +197,9 @@ func (e errxImpl) Format(s fmt.State, verb rune) {
 	case 'v':
 		if s.Flag('+') {
 			for _, errx := range e.ErrxChain() {
-				_, _ = io.WriteString(s, errx.DirectMsg())
+				_, _ = io.WriteString(s, errx.Msg())
 				if trace := errx.DirectStackTrace(); trace != nil {
-					trace.Format(s, verb)
+					errors.StackTrace(trace).Format(s, verb)
 				}
 				_, _ = io.WriteString(s, "\n")
 			}
@@ -206,10 +216,13 @@ func (e errxImpl) Format(s fmt.State, verb rune) {
 /////////////////////
 // Other public functions
 
-func StackTrace(err error) errors.StackTrace {
-	tracer, ok := err.(stackTracer)
-	if ok {
-		return tracer.StackTrace()
+func StackTraceOf(err error) StackTrace {
+	switch e := err.(type) {
+	case Errx:
+		return e.StackTrace()
+	case stackTracer:
+		return StackTrace(e.StackTrace())
+	default:
+		return nil
 	}
-	return nil
 }

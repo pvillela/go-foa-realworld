@@ -28,13 +28,7 @@ func (s Kind) Make(cause error, args ...interface{}) Errx {
 	err := errxImpl{kind: s}
 	err.args = args
 	err.cause = cause
-	if cause == nil {
-		err.errorsCompanion = errors.New(err.msgWithArgs())
-	} else if causex, ok := cause.(*errxImpl); ok {
-		err.errorsCompanion = errors.Wrap(causex.errorsCompanion, err.msgWithArgs())
-	} else {
-		err.errorsCompanion = errors.Wrap(cause, err.msgWithArgs())
-	}
+	err.tracer = errors.WithStack(dummyError{}).(stackTracer)
 	return &err
 }
 
@@ -42,13 +36,5 @@ func (s Kind) Decorate(cause Errx, args ...interface{}) Errx {
 	err := errxImpl{kind: s}
 	err.args = args
 	err.cause = cause
-	if cause == nil {
-		return s.Make(cause, args)
-	} else if causex, ok := cause.(*errxImpl); ok {
-		err.errorsCompanion = errors.WithMessage(causex.errorsCompanion, err.msgWithArgs())
-	} else {
-		// This can't happen.
-		panic("errxImpl is the only valid implementation of interface Errx")
-	}
 	return &err
 }
