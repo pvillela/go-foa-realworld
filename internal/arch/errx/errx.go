@@ -11,7 +11,7 @@ import (
 
 type Errx interface {
 	error
-	Kind() Kind
+	Kind() *Kind
 	Cause() error
 	Args() []interface{}
 	Msg() string
@@ -41,7 +41,7 @@ func (s StackTrace) Format(state fmt.State, verb rune) {
 // Private types
 
 type errxImpl struct {
-	kind   Kind
+	kind   *Kind
 	args   []interface{}
 	cause  error
 	tracer stackTracer
@@ -75,7 +75,7 @@ func stackTrace(err error) errors.StackTrace {
 }
 
 func (e *errxImpl) msgWithArgs() string {
-	return fmt.Sprintf(*e.kind.msg, e.args...)
+	return fmt.Sprintf(e.kind.msg, e.args...)
 }
 
 func (errx *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool) {
@@ -100,7 +100,7 @@ func (e *errxImpl) Error() string {
 	return e.RecursiveMsg()
 }
 
-func (e *errxImpl) Kind() Kind {
+func (e *errxImpl) Kind() *Kind {
 	return e.kind
 }
 
