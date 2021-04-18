@@ -9,8 +9,8 @@ package daf
 import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
@@ -74,7 +74,7 @@ func (s UserDafs) MakeCreate() fs.UserCreateDafT {
 
 		pwUser := fs.PwUser{nil, user}
 		err := s.UserDb.Create(user.Name, pwUser, txn)
-		if util.ErrKindOf(err) == mapdb.ErrDuplicateKey {
+		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
 			return nil, fs.ErrDuplicateUserName.Make(err, user.Name)
 		}
 		if err != nil {
@@ -93,7 +93,7 @@ func (s UserDafs) MakeUpdate() fs.UserUpdateDafT {
 
 		pw := fs.PwUser{recCtx, user}
 		err := s.UserDb.Update(user.Name, pw, txn)
-		if util.ErrKindOf(err) == mapdb.ErrRecordNotFound {
+		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
 			return nil, fs.ErrUserNameNotFound.Make(err, user.Name)
 		}
 		if err != nil {

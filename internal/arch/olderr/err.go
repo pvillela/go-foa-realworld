@@ -55,6 +55,10 @@ func (s ErrKind) MakeWithSt(withStackTrace bool, cause error, args ...interface{
 	return err
 }
 
+func (e Err) Cause() error {
+	return e.cause
+}
+
 func (e Err) StackTrace() string {
 	return e.stackTrace
 }

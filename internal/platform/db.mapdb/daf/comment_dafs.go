@@ -9,6 +9,7 @@ package daf
 import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
@@ -74,7 +75,7 @@ func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
 func (s CommentDafs) MakeDelete() fs.CommentDeleteDafT {
 	return func(articleUuid util.Uuid, id int, txn db.Txn) error {
 		err := s.CommentDb.Delete(commentKey0(articleUuid, id), txn)
-		if util.ErrKindOf(err) == mapdb.ErrRecordNotFound {
+		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
 			return fs.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
 		return err

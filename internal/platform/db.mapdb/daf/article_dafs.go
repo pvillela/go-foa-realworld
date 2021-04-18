@@ -9,6 +9,7 @@ package daf
 import (
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
@@ -46,7 +47,7 @@ func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 
 		pw := fs.PwArticle{nil, article}
 		err = s.ArticleDb.Create(article.Uuid, pw, txn)
-		if util.ErrKindOf(err) == mapdb.ErrDuplicateKey {
+		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
 			return nil, fs.ErrDuplicateArticleUuid.Make(err, article.Uuid)
 		}
 		if err != nil {
@@ -87,7 +88,7 @@ func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
 
 		pw := fs.PwArticle{recCtx, article}
 		err := s.ArticleDb.Update(article.Uuid, pw, txn)
-		if util.ErrKindOf(err) == mapdb.ErrRecordNotFound {
+		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
 			return nil, fs.ErrArticleNotFound.Make(err, article.Uuid)
 		}
 		if err != nil {

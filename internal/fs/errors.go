@@ -6,20 +6,22 @@
 
 package fs
 
-import "github.com/pvillela/go-foa-realworld/internal/arch/util"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+)
 
 var (
-	ErrDuplicateArticleSlug = util.NewErrKind("duplicate article slug \"%v\"")
-	ErrDuplicateArticleUuid = util.NewErrKind("duplicate article uuid %v")
-	ErrArticleSlugNotFound  = util.NewErrKind("article slug \"%v\" not found")
-	ErrArticleNotFound      = util.NewErrKind("article not found for Uuid %v")
-	ErrCommentNotFound      = util.NewErrKind("comment not found for articleUuid %v and id %")
-	ErrProfileNotFound      = util.NewErrKind("profile not found")
-	ErrUserNameNotFound     = util.NewErrKind("user not found for username \"%v\"")
-	ErrUserEmailNotFound    = util.NewErrKind("user not found for email %v")
-	ErrUnauthorizedUser     = util.NewErrKind("user \"%v\" not authorized to take this action")
-	ErrAuthenticationFailed = util.NewErrKind("user authentication failed with name \"%v\" and password \"%v\"")
-	ErrNotAuthenticated     = util.NewErrKind("user not authenticated")
-	ErrDuplicateUserName    = util.NewErrKind("user with name \"%v\" already exists")
-	ErrDuplicateUserEmail   = util.NewErrKind("user with email %v already exists")
+	ErrDuplicateArticleSlug = errx.NewKind("duplicate article slug \"%v\"")
+	ErrDuplicateArticleUuid = errx.NewKind("duplicate article uuid %v")
+	ErrArticleSlugNotFound  = errx.NewKind("article slug \"%v\" not found")
+	ErrArticleNotFound      = errx.NewKind("article not found for Uuid %v")
+	ErrCommentNotFound      = errx.NewKind("comment not found for articleUuid %v and id %")
+	ErrProfileNotFound      = errx.NewKind("profile not found")
+	ErrUserNameNotFound     = errx.NewKind("user not found for username \"%v\"")
+	ErrUserEmailNotFound    = errx.NewKind("user not found for email %v")
+	ErrUnauthorizedUser     = errx.NewKind("user \"%v\" not authorized to take this action")
+	ErrAuthenticationFailed = errx.NewKind("user authentication failed with name \"%v\" and password \"%v\"")
+	ErrNotAuthenticated     = errx.NewKind("user not authenticated")
+	ErrDuplicateUserName    = errx.NewKind("user with name \"%v\" already exists")
+	ErrDuplicateUserEmail   = errx.NewKind("user with email %v already exists")
 )

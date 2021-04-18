@@ -8,6 +8,7 @@ package mapdb
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/sirupsen/logrus"
 	"sync"
@@ -63,9 +64,9 @@ func (t TxnMapDb) End() {
 }
 
 var (
-	ErrInvalidTransaction = util.NewErrKind("txn context %v - invalid token %v != %v")
-	ErrDuplicateKey       = util.NewErrKind("database %v - duplicate key \"%v\"")
-	ErrRecordNotFound     = util.NewErrKind("database %v - record not found with key \"%v\"")
+	ErrInvalidTransaction = errx.NewKind("txn context %v - invalid token %v != %v")
+	ErrDuplicateKey       = errx.NewKind("database %v - duplicate key \"%v\"")
+	ErrRecordNotFound     = errx.NewKind("database %v - record not found with key \"%v\"")
 )
 
 func (s MapDb) Create(key Any, value Any, txn db.Txn) error {
