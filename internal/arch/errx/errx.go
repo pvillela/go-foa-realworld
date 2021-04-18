@@ -29,7 +29,13 @@ func _() {
 	func(errx Errx) {}(&errxImpl{})
 }
 
-type StackTrace errors.StackTrace
+type StackTrace struct {
+	inner errors.StackTrace
+}
+
+func (s StackTrace) Format(state fmt.State, verb rune) {
+	s.inner.Format(state, verb)
+}
 
 /////////////////////
 // Private types
@@ -124,7 +130,7 @@ func (e *errxImpl) StackTrace() StackTrace {
 
 	f := func(e *errxImpl) bool {
 		if e.tracer != nil {
-			trace = StackTrace(e.tracer.StackTrace())
+			trace = StackTrace{e.tracer.StackTrace()}
 			return false
 		}
 		cause = e.cause
@@ -133,20 +139,19 @@ func (e *errxImpl) StackTrace() StackTrace {
 
 	e.traverseErrxChain(true, f)
 
-	if trace != nil {
+	if trace.inner != nil {
 		return trace
 	}
 
 	// The innermost cause in the chain may be a stackTracer
-	return StackTrace(stackTrace(cause))
+	return StackTrace{stackTrace(cause)}
 }
 
 func (e *errxImpl) DirectStackTrace() StackTrace {
-	tracer, ok := e.tracer.(stackTracer)
-	if ok {
-		return StackTrace(tracer.StackTrace())
+	if e.tracer != nil {
+		return StackTrace{e.tracer.StackTrace()}
 	}
-	return nil
+	return StackTrace{}
 }
 
 func (e *errxImpl) ErrxChain() []Errx {
@@ -198,8 +203,8 @@ func (e errxImpl) Format(s fmt.State, verb rune) {
 		if s.Flag('+') {
 			for _, errx := range e.ErrxChain() {
 				_, _ = io.WriteString(s, errx.Msg())
-				if trace := errx.DirectStackTrace(); trace != nil {
-					errors.StackTrace(trace).Format(s, verb)
+				if trace := errx.DirectStackTrace(); trace.inner != nil {
+					trace.Format(s, verb)
 				}
 				_, _ = io.WriteString(s, "\n")
 			}
@@ -221,8 +226,8 @@ func StackTraceOf(err error) StackTrace {
 	case Errx:
 		return e.StackTrace()
 	case stackTracer:
-		return StackTrace(e.StackTrace())
+		return StackTrace{e.StackTrace()}
 	default:
-		return nil
+		return StackTrace{}
 	}
 }
