@@ -14,34 +14,32 @@ import (
 type Article struct {
 	Uuid        util.Uuid
 	Slug        string
+	Author      User
 	Title       string
 	Description string
 	Body        *string
 	TagList     []string
+	FavoritedBy []User
+	Comments    []Comment
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	FavoritedBy []User
-	Author      User
-	Comments    []Comment
 }
 
 type Comment struct {
 	ArticleUuid util.Uuid
 	ID          int
+	Author      User
+	Body        *string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	Body        *string
-	Author      User
 }
 
-type ArticleUpdatableField int
-
-const (
-	ArticleTitle ArticleUpdatableField = iota
-	ArticleDescription
-	ArticleBody
-	ArticleTagList
-)
+type ArticleUpdateSrc struct {
+	Title       *string
+	Description *string
+	Body        *string
+	TagList     *[]string
+}
 
 func (Article) Create(
 	title string,
@@ -54,37 +52,37 @@ func (Article) Create(
 	article := Article{
 		Uuid:        util.NewUuid(),   // make sure this is unique index in database
 		Slug:        util.Slug(title), // make sure this is unique index in database
+		Author:      author,
 		Title:       title,
 		Description: description,
 		Body:        body,
 		TagList:     tagList,
+		FavoritedBy: nil,
+		Comments:    nil,
 		CreatedAt:   now,
 		UpdatedAt:   now,
-		FavoritedBy: nil,
-		Author:      author,
-		Comments:    nil,
 	}
 	return article
 }
 
-func (s Article) Update(fieldsToUpdate map[ArticleUpdatableField]interface{}) (article Article, slug string) {
-	article = s
-	for k, v := range fieldsToUpdate {
-		switch k {
-		case ArticleTitle:
-			article.Title = v.(string)
-		case ArticleDescription:
-			article.Description = v.(string)
-		case ArticleBody:
-			article.Body = v.(*string)
-		case ArticleTagList:
-			article.TagList = v.([]string)
-		}
+func (s Article) Update(src ArticleUpdateSrc) Article {
+	if src.Title != nil {
+		s.Title = *src.Title
 	}
-	newSlug := util.Slug(article.Title)
-	article.Slug = newSlug
-	article.UpdatedAt = time.Now()
-	return article, newSlug
+	if src.Description != nil {
+		s.Description = *src.Description
+	}
+	if src.Body != nil {
+		s.Body = src.Body
+	}
+	if src.TagList != nil {
+		s.TagList = *src.TagList
+	}
+
+	s.Slug = util.Slug(s.Title)
+	s.UpdatedAt = time.Now()
+
+	return s
 }
 
 func (s Article) UpdateComments(comment Comment, add bool) Article {

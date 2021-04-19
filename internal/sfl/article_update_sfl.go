@@ -41,20 +41,14 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 			return zero, err
 		}
 
-		fieldsToUpdate := make(map[model.ArticleUpdatableField]interface{}, 3)
-		if v := in.Article.Title; v != nil {
-			fieldsToUpdate[model.ArticleTitle] = *v
-		}
-		if v := in.Article.Description; v != nil {
-			fieldsToUpdate[model.ArticleDescription] = *v
-		}
-		if v := in.Article.Body; v != nil {
-			fieldsToUpdate[model.ArticleBody] = v
+		updateSrc := model.ArticleUpdateSrc{
+			Title:       in.Article.Title,
+			Description: in.Article.Description,
+			Body:        in.Article.Body,
 		}
 
-		var newSlug string
-
-		article, newSlug = article.Update(fieldsToUpdate)
+		article = article.Update(updateSrc)
+		newSlug := article.Slug
 
 		if err := s.ArticleValidateBeforeUpdateBf(article); err != nil {
 			return zero, err
