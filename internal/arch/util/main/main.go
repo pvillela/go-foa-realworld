@@ -7,8 +7,9 @@ import (
 
 var (
 	ErrXxx = errx.NewKind("xxx \"%v\"")
-	ErrYyy = errx.NewKind("yyy \"%v\"")
-	ErrZzz = errx.NewKind("zzz \"%v\"")
+	ErrYyy = errx.NewKind("yyy \"%v\"", ErrXxx, ErrXxx)
+	ErrZzz = errx.NewKind("zzz \"%v\"", ErrYyy)
+	ErrWww = errx.NewKind("www \"%v\"", ErrYyy, ErrZzz)
 )
 
 var bazErr errx.Errx
@@ -101,4 +102,38 @@ func main() {
 
 	fmt.Println("\n---fmt.Printf(\"%+v\\n\", errx.StackTrace(bazErr)----------------------------------------------")
 	fmt.Printf("%+v\n", errx.StackTraceOf(bazErr))
+
+	fmt.Println("\n===SubKinds=====================================================================")
+	fmt.Println()
+	
+	deref := func(m map[*errx.Kind]struct{}) []errx.Kind {
+		slice := make([]errx.Kind, 0, len(m))
+		for kind, _ := range m {
+			slice = append(slice, *kind)
+		}
+		return slice
+	}
+
+	fmt.Println("ErrXxx.SuperKinds()", deref(ErrXxx.SuperKinds()))
+	fmt.Println("ErrXxx.IsSubKindOf(ErrXxx)", ErrXxx.IsSubKindOf(ErrXxx))
+	fmt.Println("ErrXxx.IsSubKindOf(ErrYyy)", ErrXxx.IsSubKindOf(ErrYyy))
+	fmt.Println()
+
+	fmt.Println("ErrYyy.SuperKinds()", deref(ErrYyy.SuperKinds()))
+	fmt.Println("ErrYyy.IsSubKindOf(ErrXxx)", ErrYyy.IsSubKindOf(ErrXxx))
+	fmt.Println("ErrYyy.IsSubKindOf(ErrZzz)", ErrYyy.IsSubKindOf(ErrZzz))
+	fmt.Println()
+
+	fmt.Println("ErrZzz.SuperKinds()", deref(ErrZzz.SuperKinds()))
+	fmt.Println("ErrZzz.IsSubKindOf(ErrXxx)", ErrZzz.IsSubKindOf(ErrXxx))
+	fmt.Println("ErrZzz.IsSubKindOf(ErrYyy)", ErrZzz.IsSubKindOf(ErrYyy))
+	fmt.Println("ErrZzz.IsSubKindOf(ErrZzz)", ErrZzz.IsSubKindOf(ErrZzz))
+	fmt.Println("ErrZzz.IsSubKindOf(ErrWww)", ErrZzz.IsSubKindOf(ErrWww))
+	fmt.Println()
+
+	fmt.Println("ErrWww.SuperKinds()", deref(ErrWww.SuperKinds()))
+	fmt.Println("ErrWww.IsSubKindOf(ErrXxx)", ErrWww.IsSubKindOf(ErrXxx))
+	fmt.Println("ErrWww.IsSubKindOf(ErrYyy)", ErrWww.IsSubKindOf(ErrYyy))
+	fmt.Println("ErrWww.IsSubKindOf(ErrZzz)", ErrWww.IsSubKindOf(ErrZzz))
+	fmt.Println("ErrWww.IsSubKindOf(ErrWww)", ErrWww.IsSubKindOf(ErrWww))
 }
