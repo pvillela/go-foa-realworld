@@ -38,7 +38,7 @@ func (s ArticlesFeedSfl) Make() ArticlesFeedSflT {
 			return zero, err
 		}
 
-		articles, err := s.ArticleGetRecentForAuthorsDaf(user.FollowIDs, in.Limit, in.Offset)
+		articles, err := s.ArticleGetRecentForAuthorsDaf(user.FollowedNames, in.Limit, in.Offset)
 		if err != nil {
 			return zero, err
 		}

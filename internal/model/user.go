@@ -22,12 +22,9 @@ type User struct {
 	PasswordSalt   []byte
 	Bio            *string
 	ImageLink      string
-	FollowIDs      []string
-
-	// TODO: remove permanently
-	//Favorites      []Article
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	FollowedNames  []string // usernames
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type UserUpdatableField int
@@ -62,7 +59,7 @@ func (User) Create(
 		PasswordSalt:   salt,
 		Bio:            nil,
 		ImageLink:      "",
-		FollowIDs:      nil,
+		FollowedNames:  nil,
 		//Favorites:      nil,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -91,29 +88,29 @@ func (s User) Update(fieldsToUpdate map[UserUpdatableField]interface{}) User {
 }
 
 func (user User) Follows(userName string) bool {
-	if user.FollowIDs == nil {
+	if user.FollowedNames == nil {
 		return false
 	}
 
-	sort.Strings(user.FollowIDs)
-	i := sort.SearchStrings(user.FollowIDs, userName)
-	return i < len(user.FollowIDs) && user.FollowIDs[i] == userName
+	sort.Strings(user.FollowedNames)
+	i := sort.SearchStrings(user.FollowedNames, userName)
+	return i < len(user.FollowedNames) && user.FollowedNames[i] == userName
 }
 
 // UpdateFollowees will append or remove followee to current user according to follow param
 func (s User) UpdateFollowees(followeeName string, follow bool) User {
 	if follow {
-		s.FollowIDs = append(s.FollowIDs, followeeName)
+		s.FollowedNames = append(s.FollowedNames, followeeName)
 		return s
 	}
 
-	for i := 0; i < len(s.FollowIDs); i++ {
-		if s.FollowIDs[i] == followeeName {
-			s.FollowIDs = append(s.FollowIDs[:i], s.FollowIDs[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
+	for i := 0; i < len(s.FollowedNames); i++ {
+		if s.FollowedNames[i] == followeeName {
+			s.FollowedNames = append(s.FollowedNames[:i], s.FollowedNames[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
 		}
 	}
-	if len(s.FollowIDs) == 0 {
-		s.FollowIDs = nil
+	if len(s.FollowedNames) == 0 {
+		s.FollowedNames = nil
 	}
 	return s
 }
