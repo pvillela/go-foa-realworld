@@ -18,7 +18,7 @@ v Redo GetBy... functions to use FindFirst
   v Add followers count field to User
 * Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.
     - Start with article filtering logic
-* Review model and move functionality to BFs and DAFs as appropriate.
+v Review model and move functionality to BFs and DAFs as appropriate.
 * Review basic error handling, including fs/errors.go.
 * Create request adapter pattern that includes:
     - last-resort error handling
