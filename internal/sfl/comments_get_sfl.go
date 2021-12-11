@@ -34,7 +34,7 @@ func (s CommentsGetSfl) Make() CommentsGetSflT {
 			article.Comments = []model.Comment{}
 		}
 
-		commentsOut := rpc.CommentsOut{}.FromModel(article.Comments)
+		commentsOut := rpc.CommentsOut_FromModel(article.Comments)
 
 		return commentsOut, nil
 	}

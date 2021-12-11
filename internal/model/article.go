@@ -7,8 +7,9 @@
 package model
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"time"
+
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 )
 
 type Article struct {
@@ -41,7 +42,7 @@ type ArticleUpdateSrc struct {
 	TagList     *[]string
 }
 
-func (Article) Create(
+func Article_Create(
 	title string,
 	description string,
 	body *string,
@@ -155,7 +156,7 @@ func (s Article) UpdateFavoritedBy(user User, add bool) Article {
 
 }
 
-func (Comment) Create(
+func Comment_Create(
 	articleUuid util.Uuid,
 	body *string,
 	author User,

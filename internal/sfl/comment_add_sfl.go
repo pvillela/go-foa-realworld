@@ -56,7 +56,7 @@ func (s CommentAddSfl) Make() CommentAddSflT {
 			return zero, err
 		}
 
-		commentOut := rpc.CommentOut{}.FromModel(insertedComment)
+		commentOut := rpc.CommentOut_FromModel(insertedComment)
 		return commentOut, err
 	}
 }

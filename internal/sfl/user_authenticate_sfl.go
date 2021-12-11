@@ -44,7 +44,7 @@ func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
 			return zero, err
 		}
 
-		userOut := rpc.UserOut{}.FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token)
 		return userOut, err
 	}
 }

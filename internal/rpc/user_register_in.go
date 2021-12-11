@@ -19,5 +19,5 @@ type UserRegisterIn struct {
 }
 
 func (s UserRegisterIn) ToUser() model.User {
-	return model.User{}.Create(s.User.Username, s.User.Email, s.User.Password)
+	return model.User_Create(s.User.Username, s.User.Email, s.User.Password)
 }

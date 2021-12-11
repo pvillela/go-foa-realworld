@@ -24,5 +24,5 @@ type commentAddIn0 struct {
 // TODO: move this directly to the SFL because we have to read the article based on the slug
 //   to get the uuid.
 func (in CommentAddIn) ToComment(articleUuid util.Uuid, commentAuthor model.User) model.Comment {
-	return model.Comment{}.Create(articleUuid, in.Comment.Body, commentAuthor)
+	return model.Comment_Create(articleUuid, in.Comment.Body, commentAuthor)
 }

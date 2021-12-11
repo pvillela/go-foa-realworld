@@ -26,7 +26,7 @@ func (s TagsGetSfl) Make() TagsGetSflT {
 		if err != nil {
 			return rpc.TagsOut{}, err
 		}
-		tagsOut := rpc.TagsOut{}.FromModel(tags)
+		tagsOut := rpc.TagsOut_FromModel(tags)
 		return tagsOut, err
 	}
 }

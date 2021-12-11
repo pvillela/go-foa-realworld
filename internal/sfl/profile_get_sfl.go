@@ -38,7 +38,7 @@ func (s ProfileGetSfl) Make() ProfileGetSflT {
 			follows = user.Follows(profileName)
 		}
 
-		profileOut := rpc.ProfileOut{}.FromModel(profileUser, follows)
+		profileOut := rpc.ProfileOut_FromModel(profileUser, follows)
 
 		return profileOut, nil
 	}

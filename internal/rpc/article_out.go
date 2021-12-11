@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package rpc
@@ -34,7 +34,7 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
-func (ArticleOut) FromModel(user model.User, article model.Article) ArticleOut {
+func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
 	isFollowingAuthor := false
 	for _, userName := range user.FollowedNames {
 		if userName == article.Author.Name {
@@ -58,7 +58,7 @@ func (ArticleOut) FromModel(user model.User, article model.Article) ArticleOut {
 		Body:           article.Body,
 		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-		Author:         Profile{}.FromModel(article.Author, isFollowingAuthor),
+		Author:         Profile_FromModel(article.Author, isFollowingAuthor),
 		TagList:        article.TagList,
 		Favorited:      favorite,
 		FavoritesCount: len(article.FavoritedBy),
@@ -71,7 +71,7 @@ func (ArticlesOut) FromModel(user model.User, articles []model.Article) Articles
 	outs := []ArticleOut{} // return at least an empty array (not nil)
 
 	for _, article := range articles {
-		outs = append(outs, ArticleOut{}.FromModel(user, article))
+		outs = append(outs, ArticleOut_FromModel(user, article))
 	}
 
 	return ArticlesOut{outs, len(outs)}

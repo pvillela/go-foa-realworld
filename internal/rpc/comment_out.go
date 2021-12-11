@@ -14,7 +14,7 @@ type CommentOut struct {
 	Comment model.Comment
 }
 
-func (CommentOut) FromModel(comment model.Comment) CommentOut {
+func CommentOut_FromModel(comment model.Comment) CommentOut {
 	return CommentOut{comment}
 }
 
@@ -22,10 +22,10 @@ type CommentsOut struct {
 	Comments []CommentOut
 }
 
-func (CommentsOut) FromModel(comments []model.Comment) CommentsOut {
+func CommentsOut_FromModel(comments []model.Comment) CommentsOut {
 	outs := make([]CommentOut, len(comments))
 	for i, comment := range comments {
-		outs[i] = CommentOut{}.FromModel(comment)
+		outs[i] = CommentOut_FromModel(comment)
 	}
 	return CommentsOut{outs}
 }

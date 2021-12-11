@@ -32,7 +32,7 @@ func (s UserFollowSfl) Make() UserFollowSflT {
 		if err != nil {
 			return zero, err
 		}
-		profileOut := rpc.ProfileOut{}.FromModel(user, true)
+		profileOut := rpc.ProfileOut_FromModel(user, true)
 		return profileOut, err
 	}
 }

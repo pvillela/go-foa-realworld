@@ -10,6 +10,6 @@ type TagsOut struct {
 	Tags []string
 }
 
-func (TagsOut) FromModel(tags []string) TagsOut {
+func TagsOut_FromModel(tags []string) TagsOut {
 	return TagsOut{tags}
 }

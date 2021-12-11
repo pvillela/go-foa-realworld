@@ -9,9 +9,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
-	"time"
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 		UpdatedAt: time.Now().Add(10),
 	}
 
-	userOut := rpc.UserOut{}.FromModel(user, "abc")
+	userOut := rpc.UserOut_FromModel(user, "abc")
 
 	bytes, err := json.Marshal(userOut)
 	str := string(bytes)

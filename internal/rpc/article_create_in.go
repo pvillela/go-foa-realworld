@@ -25,7 +25,7 @@ func (in ArticleCreateIn) ToArticle(author model.User) model.Article {
 		tagList = new([]string)
 	}
 
-	return model.Article{}.Create(
+	return model.Article_Create(
 		in.Article.Title,
 		in.Article.Description,
 		in.Article.Body,

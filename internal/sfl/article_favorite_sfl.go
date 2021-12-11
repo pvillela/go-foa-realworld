@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -32,7 +32,7 @@ func (s ArticleFavoriteSfl) Make() ArticleFavoriteSflT {
 		if err != nil {
 			return zero, err
 		}
-		articleOut := rpc.ArticleOut{}.FromModel(pwUser.Entity, pwArticle.Entity)
+		articleOut := rpc.ArticleOut_FromModel(pwUser.Entity, pwArticle.Entity)
 		return articleOut, err
 	}
 }

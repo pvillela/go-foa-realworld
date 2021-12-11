@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -52,7 +52,7 @@ func (s ArticleCreateSfl) Make() ArticleCreateSflT {
 			return zero, err
 		}
 
-		articleOut := rpc.ArticleOut{}.FromModel(user, article)
+		articleOut := rpc.ArticleOut_FromModel(user, article)
 		return articleOut, err
 	}
 }

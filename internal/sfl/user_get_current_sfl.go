@@ -33,7 +33,7 @@ func (s UserGetCurrentSfl) Make() UserGetCurrentSflT {
 			return rpc.UserOut{}, err
 		}
 
-		userOut := rpc.UserOut{}.FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token)
 		return userOut, err
 	}
 }

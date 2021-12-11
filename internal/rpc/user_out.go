@@ -20,7 +20,7 @@ type userOut0 struct {
 	Image    *string
 }
 
-func (UserOut) FromModel(user model.User, token string) UserOut {
+func UserOut_FromModel(user model.User, token string) UserOut {
 	uo := UserOut{}
 	uo.User = userOut0{
 		Email:    user.Email,

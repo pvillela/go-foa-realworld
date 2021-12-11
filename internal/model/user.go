@@ -8,9 +8,10 @@ package model
 
 import (
 	"crypto/rand"
-	"github.com/pvillela/go-foa-realworld/internal/arch/crypto"
 	"sort"
 	"time"
+
+	"github.com/pvillela/go-foa-realworld/internal/arch/crypto"
 )
 
 // User represents a user account in the system
@@ -23,6 +24,7 @@ type User struct {
 	Bio            *string
 	ImageLink      string
 	FollowedNames  []string // usernames
+	NumFollowers   int
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
@@ -37,7 +39,7 @@ const (
 	UserImageLink
 )
 
-func (User) Create(
+func User_Create(
 	username string,
 	email string,
 	password string,
@@ -61,8 +63,9 @@ func (User) Create(
 		ImageLink:      "",
 		FollowedNames:  nil,
 		//Favorites:      nil,
-		CreatedAt: now,
-		UpdatedAt: now,
+		CreatedAt:    now,
+		UpdatedAt:    now,
+		NumFollowers: 0,
 	}
 }
 
