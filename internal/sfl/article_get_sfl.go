@@ -13,20 +13,19 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleGetSflS is the stereotype instance for the service flow that
+// ArticleGetSflT is the type of the stereotype instance for the service flow that
 // retrieves an article.
-type ArticleGetSflS struct {
-	BeginTxn            func(context string) db.Txn
-	UserGetByNameDaf    fs.UserGetByNameDafT
-	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
-}
-
-// ArticleGetSflT is the function type instantiated by ArticleGetSflS.
 type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
-func (s ArticleGetSflS) Make() ArticleGetSflT {
+// ArticleGetSflC is the function that constructs a stereotype instance of type
+// ArticleGetSflT.
+func ArticleGetSflC(
+	beginTxn func(context string) db.Txn,
+	userGetByNameDaf fs.UserGetByNameDafT,
+	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
+) ArticleGetSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.ArticleOut
@@ -34,13 +33,13 @@ func (s ArticleGetSflS) Make() ArticleGetSflT {
 		var err error
 
 		if username != "" {
-			user, _, err = s.UserGetByNameDaf(username)
+			user, _, err = userGetByNameDaf(username)
 			if err != nil {
 				return zero, err
 			}
 		}
 
-		article, _, err := s.ArticleGetBySlugDaf(slug)
+		article, _, err := articleGetBySlugDaf(slug)
 		if err != nil {
 			return zero, err
 		}

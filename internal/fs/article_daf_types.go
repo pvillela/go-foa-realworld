@@ -12,21 +12,32 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// PwArticle is a wrapper of the model.User entity
-// containing context information required for persistence purposes.
-type PwArticle struct {
-	db.RecCtx
-	Entity model.Article
-}
+// PwArticle is a type alias
+type PwArticle = db.Pw[model.Article]
 
-type ArticleCreateDafT = func(article model.Article, txn db.Txn) (db.RecCtx, error)
+// RecCtxArticle is a type alias
+type RecCtxArticle = db.RecCtx[model.Article]
 
-type ArticleGetBySlugDafT = func(slug string) (model.Article, db.RecCtx, error)
+// ArticleCreateDafT is the type of the stereotype instance for the DAF that
+// creates an article.
+type ArticleCreateDafT = func(article model.Article, txn db.Txn) (RecCtxArticle, error)
 
-type ArticleUpdateDafT = func(article model.Article, recCtx db.RecCtx, txn db.Txn) (db.RecCtx, error)
+// ArticleGetBySlugDafT is the type of the stereotype instance for the DAF that
+// retrieves an article by slug.
+type ArticleGetBySlugDafT = func(slug string) (model.Article, RecCtxArticle, error)
 
+// ArticleUpdateDafT is the type of the stereotype instance for the DAF that
+// updates an article.
+type ArticleUpdateDafT = func(article model.Article, recCtx RecCtxArticle, txn db.Txn) (RecCtxArticle, error)
+
+// ArticleDeleteDafT is the type of the stereotype instance for the DAF that
+// deletes an article.
 type ArticleDeleteDafT = func(slug string, txn db.Txn) error
 
+// ArticleGetRecentForAuthorsDafT is the type of the stereotype instance for the DAF that
+// retrieves recent articles for given authors.
 type ArticleGetRecentForAuthorsDafT = func(usernames []string, pLimit, pOffset *int) ([]model.Article, error)
 
+// ArticleGetRecentFilteredDafT is the type of the stereotype instance for the DAF that
+// retrieves recent articles based on filter criteria.
 type ArticleGetRecentFilteredDafT = func(in rpc.ArticlesListIn) ([]model.Article, error)

@@ -6,34 +6,43 @@
 
 package fs
 
-import "github.com/pvillela/go-foa-realworld/internal/arch/db"
+import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+)
 
-// ArticleFavoriteFlS is the stereotype instance for the flow that
+// ArticleFavoriteFlT is the type of the stereotype instance for the flow that
 // designates an article as a favorite or not.
-type ArticleFavoriteFlS struct {
-	UserGetByNameDaf    UserGetByNameDafT
-	ArticleGetBySlugDaf ArticleGetBySlugDafT
-	ArticleUpdateDaf    ArticleUpdateDafT
-}
+type ArticleFavoriteFlT = func(
+	username, slug string,
+	favorite bool,
+	txn db.Txn,
+) (PwUser, PwArticle, error)
 
-// ArticleFavoriteFlT is the function type instantiated by fs.ArticleFavoriteFlS.
-type ArticleFavoriteFlT = func(username, slug string, favorite bool, txn db.Txn) (PwUser, PwArticle, error)
-
-func (s ArticleFavoriteFlS) Make() ArticleFavoriteFlT {
-	return func(username, slug string, favorite bool, txn db.Txn) (PwUser, PwArticle, error) {
-		user, rcUser, err := s.UserGetByNameDaf(username)
+// ArticleFavoriteFlC is the function that constructs a stereotype instance of type
+// ArticleFavoriteFlT.
+func ArticleFavoriteFlC(
+	userGetByNameDaf UserGetByNameDafT,
+	articleGetBySlugDaf ArticleGetBySlugDafT,
+	articleUpdateDaf ArticleUpdateDafT,
+) ArticleFavoriteFlT {
+	return func(
+		username, slug string,
+		favorite bool,
+		txn db.Txn,
+	) (PwUser, PwArticle, error) {
+		user, rcUser, err := userGetByNameDaf(username)
 		if err != nil {
 			return PwUser{}, PwArticle{}, err
 		}
 
-		article, rcArticle, err := s.ArticleGetBySlugDaf(slug)
+		article, rcArticle, err := articleGetBySlugDaf(slug)
 		if err != nil {
 			return PwUser{}, PwArticle{}, err
 		}
 
 		article = article.UpdateFavoritedBy(user, favorite)
 
-		rcArticle, err = s.ArticleUpdateDaf(article, rcArticle, txn)
+		rcArticle, err = articleUpdateDaf(article, rcArticle, txn)
 		if err != nil {
 			return PwUser{}, PwArticle{}, err
 		}

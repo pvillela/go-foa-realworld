@@ -11,27 +11,31 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// CommentAddSfl is the stereotype instance for the service flow that
+// UserFollowFlT is the type of the stereotype instance for the flow that
 // causes the current user start following a given other user.
-type UserFollowFlS struct {
-	UserGetByNameDaf UserGetByNameDafT
-	UserUpdateDaf    UserUpdateDafT
-}
+type UserFollowFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, RecCtxUser, error)
 
-// UserFollowFlT is the function type instantiated by UserFollowFlS.
-type UserFollowFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, db.RecCtx, error)
-
-func (s UserFollowFlS) Make() UserFollowFlT {
-	return func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, db.RecCtx, error) {
-		user, rc, err := s.UserGetByNameDaf(username)
+// UserFollowFlC is the function that constructs a stereotype instance of type
+// UserFollowFlT.
+func UserFollowFlC(
+	userGetByNameDaf UserGetByNameDafT,
+	userUpdateDaf UserUpdateDafT,
+) UserFollowFlT {
+	return func(
+		username string,
+		followedUsername string,
+		follow bool,
+		txn db.Txn,
+	) (model.User, RecCtxUser, error) {
+		user, rc, err := userGetByNameDaf(username)
 		if err != nil {
-			return model.User{}, nil, err
+			return model.User{}, RecCtxUser{}, err
 		}
 
 		user = user.UpdateFollowees(followedUsername, follow)
 
-		if rc, err = s.UserUpdateDaf(user, rc, txn); err != nil {
-			return model.User{}, nil, err
+		if rc, err = userUpdateDaf(user, rc, txn); err != nil {
+			return model.User{}, RecCtxUser{}, err
 		}
 
 		return user, rc, nil

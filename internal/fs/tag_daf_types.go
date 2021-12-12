@@ -6,6 +6,10 @@
 
 package fs
 
+// TagGetAllDafT is the type of the stereotype instance for the DAF that
+// retrieves all tags.
 type TagGetAllDafT = func() ([]string, error)
 
+// TagAddDafT is the type of the stereotype instance for the DAF that
+// adds a tag.
 type TagAddDafT = func(newTags []string) error

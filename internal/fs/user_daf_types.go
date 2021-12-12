@@ -11,17 +11,24 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// PwUser is a wrapper of the model.User entity
-// containing context information required for ersistence purposes.
-type PwUser struct {
-	db.RecCtx
-	Entity model.User
-}
+// PwUser is a type alias
+type PwUser = db.Pw[model.User]
 
-type UserGetByNameDafT = func(userName string) (model.User, db.RecCtx, error)
+// RecCtxUser is a type alias
+type RecCtxUser = db.RecCtx[model.User]
 
-type UserGetByEmailDafT = func(email string) (model.User, db.RecCtx, error)
+// UserGetByNameDafT is the type of the stereotype instance for the DAF that
+// retrieves a user by username.
+type UserGetByNameDafT = func(userName string) (model.User, RecCtxUser, error)
 
-type UserCreateDafT = func(user model.User, txn db.Txn) (db.RecCtx, error)
+// UserGetByEmailDafT is the type of the stereotype instance for the DAF that
+// retrieves a user by email address.
+type UserGetByEmailDafT = func(email string) (model.User, RecCtxUser, error)
 
-type UserUpdateDafT = func(user model.User, recCtx db.RecCtx, txn db.Txn) (db.RecCtx, error)
+// UserCreateDafT is the type of the stereotype instance for the DAF that
+// creates a user.
+type UserCreateDafT = func(user model.User, txn db.Txn) (RecCtxUser, error)
+
+// UserUpdateDafT is the type of the stereotype instance for the DAF that
+// updates a user.
+type UserUpdateDafT = func(user model.User, recCtx RecCtxUser, txn db.Txn) (RecCtxUser, error)

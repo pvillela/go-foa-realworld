@@ -12,27 +12,26 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleCreateSflS is the stereotype instance for the service flow that
+// ArticleCreateSflT is the type of the stereotype instance for the service flow that
 // creates an article.
-type ArticleCreateSflS struct {
-	BeginTxn         func(context string) db.Txn
-	UserGetByNameDaf fs.UserGetByNameDafT
-	ArticleCreateDaf fs.ArticleCreateDafT
-	TagAddDaf        fs.TagAddDafT
-}
-
-// ArticleCreateSflT is the function type instantiated by ArticleCreateSflS.
 type ArticleCreateSflT = func(username string, in rpc.ArticleCreateIn) (rpc.ArticleOut, error)
 
-func (s ArticleCreateSflS) Make() ArticleCreateSflT {
+// ArticleCreateSflC is the function that constructs a stereotype instance of type
+// ArticleCreateSflT.
+func ArticleCreateSflC(
+	beginTxn func(context string) db.Txn,
+	userGetByNameDaf fs.UserGetByNameDafT,
+	articleCreateDaf fs.ArticleCreateDafT,
+	tagAddDaf fs.TagAddDafT,
+) ArticleCreateSflT {
 	articleValidateBeforeCreateBf := fs.ArticleValidateBeforeCreateBfI
 	return func(username string, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		zero := rpc.ArticleOut{}
 
-		user, _, err := s.UserGetByNameDaf(username)
+		user, _, err := userGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
@@ -43,12 +42,12 @@ func (s ArticleCreateSflS) Make() ArticleCreateSflT {
 			return zero, err
 		}
 
-		_, err = s.ArticleCreateDaf(article, txn)
+		_, err = articleCreateDaf(article, txn)
 		if err != nil {
 			return zero, err
 		}
 
-		if err := s.TagAddDaf(article.TagList); err != nil {
+		if err := tagAddDaf(article.TagList); err != nil {
 			return zero, err
 		}
 

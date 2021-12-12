@@ -12,15 +12,20 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// PwComment is a wrapper of the model.User entity
-// containing context information required for persistence purposes.
-type PwComment struct {
-	db.RecCtx
-	Entity model.Comment
-}
+// PwArticle is a type alias
+type PwComment = db.Pw[model.Comment]
 
-type CommentGetByIdDafT = func(articleUuid util.Uuid, id int) (model.Comment, db.RecCtx, error)
+// RecCtxArticle is a type alias
+type RecCtxComment = db.RecCtx[model.Comment]
 
-type CommentCreateDafT = func(comment model.Comment, txn db.Txn) (model.Comment, db.RecCtx, error)
+// CommentGetByIdDafT is the type of the stereotype instance for the DAF that
+// retrieves a comment by ID.
+type CommentGetByIdDafT = func(articleUuid util.Uuid, id int) (model.Comment, RecCtxComment, error)
 
+// CommentCreateDafT is the type of the stereotype instance for the DAF that
+// creates a comment.
+type CommentCreateDafT = func(comment model.Comment, txn db.Txn) (model.Comment, RecCtxComment, error)
+
+// CommentDeleteDafT is the type of the stereotype instance for the DAF that
+// deletes a comment.
 type CommentDeleteDafT = func(articleUuid util.Uuid, id int, txn db.Txn) error

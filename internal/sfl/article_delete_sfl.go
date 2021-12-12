@@ -11,27 +11,26 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 )
 
-// ArticleFavoriteSflS is the stereotype instance for the service flow that
+// ArticleDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes an article.
-type ArticleDeleteSflS struct {
-	BeginTxn                  func(context string) db.Txn
-	ArticleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT
-	ArticleDeleteDaf          fs.ArticleDeleteDafT
-}
-
-// ArticleDeleteSflT is the function type instantiated by ArticleDeleteSflS.
 type ArticleDeleteSflT = func(username, slug string) error
 
-func (s ArticleDeleteSflS) Make() ArticleDeleteSflT {
+// ArticleDeleteSflC is the function that constructs a stereotype instance of type
+// ArticleDeleteSflT.
+func ArticleDeleteSflC(
+	beginTxn func(context string) db.Txn,
+	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
+	articleDeleteDaf fs.ArticleDeleteDafT,
+) ArticleDeleteSflT {
 	return func(username string, slug string) error {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
-		_, _, err := s.ArticleGetAndCheckOwnerFl(username, slug)
+		_, _, err := articleGetAndCheckOwnerFl(username, slug)
 		if err != nil {
 			return err
 		}
 
-		return s.ArticleDeleteDaf(slug, txn)
+		return articleDeleteDaf(slug, txn)
 	}
 }

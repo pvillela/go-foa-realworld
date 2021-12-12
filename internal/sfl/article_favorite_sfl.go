@@ -12,23 +12,22 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleFavoriteSflS is the stereotype instance for the service flow that
+// ArticleFavoriteSflT is the type of the stereotype instance for the service flow that
 // designates an article as a favorite.
-type ArticleFavoriteSflS struct {
-	BeginTxn          func(context string) db.Txn
-	ArticleFavoriteFl fs.ArticleFavoriteFlT
-}
-
-// ArticleFavoriteSflT is the function type instantiated by ArticleFavoriteSflS.
 type ArticleFavoriteSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
-func (s ArticleFavoriteSflS) Make() ArticleFavoriteSflT {
+// ArticleFavoriteSflC is the function that constructs a stereotype instance of type
+// ArticleFavoriteSflT.
+func ArticleFavoriteSflC(
+	beginTxn func(context string) db.Txn,
+	articleFavoriteFl fs.ArticleFavoriteFlT,
+) ArticleFavoriteSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.ArticleOut
-		pwUser, pwArticle, err := s.ArticleFavoriteFl(username, slug, true, txn)
+		pwUser, pwArticle, err := articleFavoriteFl(username, slug, true, txn)
 		if err != nil {
 			return zero, err
 		}
