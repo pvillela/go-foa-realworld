@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -12,9 +12,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentDeleteSfl is the stereotype instance for the service flow that
+// CommentDeleteSflS is the stereotype instance for the service flow that
 // deletes a comment from an article.
-type CommentDeleteSfl struct {
+type CommentDeleteSflS struct {
 	BeginTxn             func(context string) db.Txn
 	CommentGetByIdDaf    fs.CommentGetByIdDafT
 	CommentDeleteDaf     fs.CommentDeleteDafT
@@ -22,12 +22,12 @@ type CommentDeleteSfl struct {
 	ArticleUpdateDaf     fs.ArticleUpdateDafT
 }
 
-// CommentDeleteSflT is the function type instantiated by CommentDeleteSfl.
+// CommentDeleteSflT is the function type instantiated by CommentDeleteSflS.
 type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) error
 
-func (s CommentDeleteSfl) Make() CommentDeleteSflT {
+func (s CommentDeleteSflS) Make() CommentDeleteSflT {
 	return func(username string, in rpc.CommentDeleteIn) error {
-		txn := s.BeginTxn("ArticleCreateSfl")
+		txn := s.BeginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		article, _, err := s.ArticleGetBySlugdDaf(in.Slug)

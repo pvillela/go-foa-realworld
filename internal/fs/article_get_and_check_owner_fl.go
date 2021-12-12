@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package fs
@@ -11,24 +11,24 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// ArticleGetAndCheckOwnerFl is the stereotype instance for the flow that
+// ArticleGetAndCheckOwnerFlS is the stereotype instance for the flow that
 // checks if a given article's author's username matches a given username.
-type ArticleGetAndCheckOwnerFl struct {
+type ArticleGetAndCheckOwnerFlS struct {
 	ArticleGetBySlugDaf ArticleGetBySlugDafT
-	ArticleCheckOwnerBf ArticleCheckOwnerBfT
 }
 
-// ArticleGetAndCheckOwnerFlT is the function type instantiated by fs.ArticleGetAndCheckOwnerFl.
+// ArticleGetAndCheckOwnerFlT is the function type instantiated by fs.ArticleGetAndCheckOwnerFlS.
 type ArticleGetAndCheckOwnerFlT = func(username, slug string) (model.Article, db.RecCtx, error)
 
-func (s ArticleGetAndCheckOwnerFl) Make() ArticleGetAndCheckOwnerFlT {
+func (s ArticleGetAndCheckOwnerFlS) Make() ArticleGetAndCheckOwnerFlT {
+	articleCheckOwnerBf := ArticleCheckOwnerBfI
 	return func(slug string, username string) (model.Article, db.RecCtx, error) {
 		article, rc, err := s.ArticleGetBySlugDaf(slug)
 		if err != nil {
 			return model.Article{}, nil, err
 		}
 
-		if err := s.ArticleCheckOwnerBf(article, username); err != nil {
+		if err := articleCheckOwnerBf(article, username); err != nil {
 			return model.Article{}, nil, err
 		}
 

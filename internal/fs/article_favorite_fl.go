@@ -1,25 +1,25 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package fs
 
 import "github.com/pvillela/go-foa-realworld/internal/arch/db"
 
-// ArticleFavoriteFl is the stereotype instance for the flow that
+// ArticleFavoriteFlS is the stereotype instance for the flow that
 // designates an article as a favorite or not.
-type ArticleFavoriteFl struct {
+type ArticleFavoriteFlS struct {
 	UserGetByNameDaf    UserGetByNameDafT
 	ArticleGetBySlugDaf ArticleGetBySlugDafT
 	ArticleUpdateDaf    ArticleUpdateDafT
 }
 
-// ArticleFavoriteFlT is the function type instantiated by fs.ArticleFavoriteFl.
+// ArticleFavoriteFlT is the function type instantiated by fs.ArticleFavoriteFlS.
 type ArticleFavoriteFlT = func(username, slug string, favorite bool, txn db.Txn) (PwUser, PwArticle, error)
 
-func (s ArticleFavoriteFl) Make() ArticleFavoriteFlT {
+func (s ArticleFavoriteFlS) Make() ArticleFavoriteFlT {
 	return func(username, slug string, favorite bool, txn db.Txn) (PwUser, PwArticle, error) {
 		user, rcUser, err := s.UserGetByNameDaf(username)
 		if err != nil {

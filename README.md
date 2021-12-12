@@ -11,7 +11,7 @@ v Complete first pass at SFLs.
 v Review use of pointers, clean it up. 
 v Review model in terms of relationships and how they should be represented.
 v Redo GetBy... functions to use FindFirst
-* Complete review and clean-up of model
+v Complete review and clean-up of model
   x Embed Comment in Article; no need for separate Comment DAFs with mapdb
   v No need for this for mapdb, but we want to do it for consistency with how we might model it
     with a real database (relational or NoSQL): Separate Favorited entity with its own DAFs

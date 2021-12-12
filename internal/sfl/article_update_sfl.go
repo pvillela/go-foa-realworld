@@ -13,25 +13,25 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleUpdateSfl is the stereotype instance for the service flow that
+// ArticleUpdateSflS is the stereotype instance for the service flow that
 // updates an article.
-type ArticleUpdateSfl struct {
-	BeginTxn                      func(context string) db.Txn
-	ArticleGetAndCheckOwnerFl     fs.ArticleGetAndCheckOwnerFlT
-	ArticleValidateBeforeUpdateBf fs.ArticleValidateBeforeUpdateBfT
-	UserGetByNameDaf              fs.UserGetByNameDafT
-	ArticleUpdateDaf              fs.ArticleUpdateDafT
-	ArticleGetBySlugDaf           fs.ArticleGetBySlugDafT
-	ArticleCreateDaf              fs.ArticleCreateDafT
-	ArticleDeleteDaf              fs.ArticleDeleteDafT
+type ArticleUpdateSflS struct {
+	BeginTxn                  func(context string) db.Txn
+	ArticleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT
+	UserGetByNameDaf          fs.UserGetByNameDafT
+	ArticleUpdateDaf          fs.ArticleUpdateDafT
+	ArticleGetBySlugDaf       fs.ArticleGetBySlugDafT
+	ArticleCreateDaf          fs.ArticleCreateDafT
+	ArticleDeleteDaf          fs.ArticleDeleteDafT
 }
 
-// ArticleUpdateSflT is the function type instantiated by ArticleUpdateSfl.
+// ArticleUpdateSflT is the function type instantiated by ArticleUpdateSflS.
 type ArticleUpdateSflT = func(username, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error)
 
-func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
+func (s ArticleUpdateSflS) Make() ArticleUpdateSflT {
+	articleValidateBeforeUpdateBf := fs.ArticleValidateBeforeUpdateBfI
 	return func(username string, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
-		txn := s.BeginTxn("ArticleCreateSfl")
+		txn := s.BeginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.ArticleOut
@@ -50,7 +50,7 @@ func (s ArticleUpdateSfl) Make() ArticleUpdateSflT {
 		article = article.Update(updateSrc)
 		newSlug := article.Slug
 
-		if err := s.ArticleValidateBeforeUpdateBf(article); err != nil {
+		if err := articleValidateBeforeUpdateBf(article); err != nil {
 			return zero, err
 		}
 

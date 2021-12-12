@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -12,17 +12,17 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticlesListSfl is the stereotype instance for the service flow that
+// ArticlesListSflS is the stereotype instance for the service flow that
 // retrieve recent articles based on a set of query parameters.
-type ArticlesListSfl struct {
+type ArticlesListSflS struct {
 	UserGetByNameDaf            fs.UserGetByNameDafT
 	ArticleGetRecentFilteredDaf fs.ArticleGetRecentFilteredDafT
 }
 
-// ArticlesListSflT is the function type instantiated by ArticlesListSfl.
+// ArticlesListSflT is the function type instantiated by ArticlesListSflS.
 type ArticlesListSflT = func(username string, in rpc.ArticlesListIn) (rpc.ArticlesOut, error)
 
-func (s ArticlesListSfl) Make() ArticlesListSflT {
+func (s ArticlesListSflS) Make() ArticlesListSflT {
 	return func(username string, in rpc.ArticlesListIn) (rpc.ArticlesOut, error) {
 		var zero rpc.ArticlesOut
 		var user model.User
@@ -40,7 +40,7 @@ func (s ArticlesListSfl) Make() ArticlesListSflT {
 			return zero, err
 		}
 
-		articlesOut := rpc.ArticlesOut{}.FromModel(user, articles)
+		articlesOut := rpc.ArticlesOut_FromModel(user, articles)
 		return articlesOut, err
 	}
 }

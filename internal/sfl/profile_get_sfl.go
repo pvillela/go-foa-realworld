@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -11,16 +11,16 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ProfileGetSfl is the stereotype instance for the service flow that
+// ProfileGetSflS is the stereotype instance for the service flow that
 // retrieves a user profile.
-type ProfileGetSfl struct {
+type ProfileGetSflS struct {
 	UserGetByNameDaf fs.UserGetByNameDafT
 }
 
-// ProfileGetSflT is the function type instantiated by CommentsGetSfl.
+// ProfileGetSflT is the function type instantiated by CommentsGetSflS.
 type ProfileGetSflT = func(username, profileName string) (rpc.ProfileOut, error)
 
-func (s ProfileGetSfl) Make() ProfileGetSflT {
+func (s ProfileGetSflS) Make() ProfileGetSflT {
 	return func(username, profileName string) (rpc.ProfileOut, error) {
 		var zero rpc.ProfileOut
 

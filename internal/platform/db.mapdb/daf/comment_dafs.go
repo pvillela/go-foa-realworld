@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package daf
@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-type CommentDafs struct {
+type CommentDafsS struct {
 	CommentDb mapdb.MapDb
 }
 
@@ -38,7 +38,7 @@ func pwCommentFromDb(value interface{}) fs.PwComment {
 	return pw
 }
 
-func (s CommentDafs) MakeGetByKey() fs.CommentGetByIdDafT {
+func (s CommentDafsS) MakeGetByKey() fs.CommentGetByIdDafT {
 	return func(articleUuid util.Uuid, id int) (model.Comment, db.RecCtx, error) {
 		value, err := s.CommentDb.Read(commentKey0(articleUuid, id))
 		if err != nil {
@@ -49,7 +49,7 @@ func (s CommentDafs) MakeGetByKey() fs.CommentGetByIdDafT {
 	}
 }
 
-func (s CommentDafs) nextId(articleUuid util.Uuid) int {
+func (s CommentDafsS) nextId(articleUuid util.Uuid) int {
 	nextId := 1
 	s.CommentDb.Range(func(key, value interface{}) bool {
 		if strings.HasPrefix(key.(string), string(articleUuid)) {
@@ -60,7 +60,7 @@ func (s CommentDafs) nextId(articleUuid util.Uuid) int {
 	return nextId
 }
 
-func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
+func (s CommentDafsS) MakeCreate() fs.CommentCreateDafT {
 	return func(comment model.Comment, txn db.Txn) (model.Comment, db.RecCtx, error) {
 		comment.ID = s.nextId(comment.ArticleUuid)
 		pw := fs.PwComment{nil, comment}
@@ -72,7 +72,7 @@ func (s CommentDafs) MakeCreate() fs.CommentCreateDafT {
 	}
 }
 
-func (s CommentDafs) MakeDelete() fs.CommentDeleteDafT {
+func (s CommentDafsS) MakeDelete() fs.CommentDeleteDafT {
 	return func(articleUuid util.Uuid, id int, txn db.Txn) error {
 		err := s.CommentDb.Delete(commentKey0(articleUuid, id), txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {

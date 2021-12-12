@@ -13,20 +13,20 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleGetSfl is the stereotype instance for the service flow that
+// ArticleGetSflS is the stereotype instance for the service flow that
 // retrieves an article.
-type ArticleGetSfl struct {
+type ArticleGetSflS struct {
 	BeginTxn            func(context string) db.Txn
 	UserGetByNameDaf    fs.UserGetByNameDafT
 	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
 }
 
-// ArticleGetSflT is the function type instantiated by ArticleGetSfl.
+// ArticleGetSflT is the function type instantiated by ArticleGetSflS.
 type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
 
-func (s ArticleGetSfl) Make() ArticleGetSflT {
+func (s ArticleGetSflS) Make() ArticleGetSflT {
 	return func(username string, slug string) (rpc.ArticleOut, error) {
-		txn := s.BeginTxn("ArticleCreateSfl")
+		txn := s.BeginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.ArticleOut

@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -12,9 +12,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentAddSfl is the stereotype instance for the service flow that
+// CommentAddSflS is the stereotype instance for the service flow that
 // adds a comment to an article.
-type CommentAddSfl struct {
+type CommentAddSflS struct {
 	BeginTxn            func(context string) db.Txn
 	UserGetByNameDaf    fs.UserGetByNameDafT
 	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
@@ -22,12 +22,12 @@ type CommentAddSfl struct {
 	ArticleUpdateDaf    fs.ArticleUpdateDafT
 }
 
-// CommentAddSflT is the function type instantiated by CommentAddSfl.
+// CommentAddSflT is the function type instantiated by CommentAddSflS.
 type CommentAddSflT = func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error)
 
-func (s CommentAddSfl) Make() CommentAddSflT {
+func (s CommentAddSflS) Make() CommentAddSflT {
 	return func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error) {
-		txn := s.BeginTxn("ArticleCreateSfl")
+		txn := s.BeginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.CommentOut

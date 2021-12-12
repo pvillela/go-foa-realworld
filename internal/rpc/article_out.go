@@ -67,7 +67,7 @@ func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
 	return ArticleOut{articleOut0}
 }
 
-func (ArticlesOut) FromModel(user model.User, articles []model.Article) ArticlesOut {
+func ArticlesOut_FromModel(user model.User, articles []model.Article) ArticlesOut {
 	outs := []ArticleOut{} // return at least an empty array (not nil)
 
 	for _, article := range articles {

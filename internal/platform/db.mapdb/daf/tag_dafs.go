@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package daf
@@ -11,11 +11,11 @@ import (
 	"sync"
 )
 
-type TagDafs struct {
+type TagDafsS struct {
 	Store *sync.Map
 }
 
-func (s TagDafs) MakeGetAll() fs.TagGetAllDafT {
+func (s TagDafsS) MakeGetAll() fs.TagGetAllDafT {
 	return func() ([]string, error) {
 		var ret []string
 
@@ -32,7 +32,7 @@ func (s TagDafs) MakeGetAll() fs.TagGetAllDafT {
 	}
 }
 
-func (s TagDafs) MakeAdd() fs.TagAddDafT {
+func (s TagDafsS) MakeAdd() fs.TagAddDafT {
 	return func(newTags []string) error {
 		for _, tag := range newTags {
 			s.Store.Store(tag, true)

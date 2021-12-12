@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package sfl
@@ -11,18 +11,18 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// UserAuthenticateSfl is the stereotype instance for the service flow that
+// UserAuthenticateSflS is the stereotype instance for the service flow that
 // authenticates a user.
-type UserAuthenticateSfl struct {
+type UserAuthenticateSflS struct {
 	UserGetByEmailDaf  fs.UserGetByEmailDafT
 	UserAuthenticateBf fs.UserAuthenticateBfT
-	UserGenTokenBf     fs.UserGenTokenBfT
 }
 
-// UserAuthenticateSflT is the function type instantiated by UserAuthenticateSfl.
+// UserAuthenticateSflT is the function type instantiated by UserAuthenticateSflS.
 type UserAuthenticateSflT = func(_username string, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
-func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
+func (s UserAuthenticateSflS) Make() UserAuthenticateSflT {
+	userGenTokenBf := fs.UserGenTokenBfI
 	return func(_ string, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
 
@@ -39,7 +39,7 @@ func (s UserAuthenticateSfl) Make() UserAuthenticateSflT {
 			return zero, fs.ErrAuthenticationFailed.Make(nil, user.Name, password)
 		}
 
-		token, err := s.UserGenTokenBf(user)
+		token, err := userGenTokenBf(user)
 		if err != nil {
 			return zero, err
 		}

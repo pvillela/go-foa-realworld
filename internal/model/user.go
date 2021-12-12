@@ -30,7 +30,7 @@ type User struct {
 }
 
 type UserUpdateSrc struct {
-	Name      *string
+	Username  *string
 	Email     *string
 	Password  *string
 	Bio       *string
@@ -68,8 +68,8 @@ func User_Create(
 }
 
 func (s User) Update(v UserUpdateSrc) User {
-	if v.Name != nil {
-		s.Name = *v.Name
+	if v.Username != nil {
+		s.Name = *v.Username
 	}
 	if v.Email != nil {
 		s.Email = *v.Email

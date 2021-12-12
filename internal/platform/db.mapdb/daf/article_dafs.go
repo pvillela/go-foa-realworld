@@ -1,7 +1,7 @@
 /*
- *  Copyright © 2021 Paulo Villela. All rights reserved.
- *  Use of this source code is governed by the Apache 2.0 license
- *  that can be found in the LICENSE file.
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
  */
 
 package daf
@@ -17,7 +17,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-type ArticleDafs struct {
+type ArticleDafsS struct {
 	ArticleDb mapdb.MapDb
 }
 
@@ -38,7 +38,7 @@ func articleFromDb(value interface{}) model.Article {
 	return pwArticleFromDb(value).Entity
 }
 
-func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
+func (s ArticleDafsS) MakeCreate() fs.ArticleCreateDafT {
 	return func(article model.Article, txn db.Txn) (db.RecCtx, error) {
 		_, _, err := s.getBySlug(article.Slug)
 		if err == nil {
@@ -58,7 +58,7 @@ func (s ArticleDafs) MakeCreate() fs.ArticleCreateDafT {
 	}
 }
 
-func (s ArticleDafs) getBySlug(slug string) (model.Article, db.RecCtx, error) {
+func (s ArticleDafsS) getBySlug(slug string) (model.Article, db.RecCtx, error) {
 	pred := func(_, value interface{}) bool {
 		article := articleFromDb(value)
 		if article.Slug == slug {
@@ -76,11 +76,11 @@ func (s ArticleDafs) getBySlug(slug string) (model.Article, db.RecCtx, error) {
 	return pw.Entity, pw.RecCtx, nil
 }
 
-func (s ArticleDafs) MakeGetBySlug() fs.ArticleGetBySlugDafT {
+func (s ArticleDafsS) MakeGetBySlug() fs.ArticleGetBySlugDafT {
 	return s.getBySlug
 }
 
-func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
+func (s ArticleDafsS) MakeUpdate() fs.ArticleUpdateDafT {
 	return func(article model.Article, recCtx db.RecCtx, txn db.Txn) (db.RecCtx, error) {
 		if artBySlug, _, err := s.getBySlug(article.Slug); err == nil && artBySlug.Uuid != article.Uuid {
 			return nil, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
@@ -99,7 +99,7 @@ func (s ArticleDafs) MakeUpdate() fs.ArticleUpdateDafT {
 	}
 }
 
-func (s ArticleDafs) MakeDelete() fs.ArticleDeleteDafT {
+func (s ArticleDafsS) MakeDelete() fs.ArticleDeleteDafT {
 	return func(slug string, txn db.Txn) error {
 		article, _, err := s.getBySlug(slug)
 		if err != nil {
@@ -115,7 +115,7 @@ func (s ArticleDafs) MakeDelete() fs.ArticleDeleteDafT {
 	}
 }
 
-func (s ArticleDafs) selectAndOrderByMostRecent(
+func (s ArticleDafsS) selectAndOrderByMostRecent(
 	pred func(key, value interface{}) bool,
 	pLimit, pOffset *int,
 ) []model.Article {
@@ -143,7 +143,7 @@ func (s ArticleDafs) selectAndOrderByMostRecent(
 	return res
 }
 
-func (s ArticleDafs) MakeGetRecentForAuthorsDaf() fs.ArticleGetRecentForAuthorsDafT {
+func (s ArticleDafsS) MakeGetRecentForAuthorsDaf() fs.ArticleGetRecentForAuthorsDafT {
 	return func(usernames []string, pLimit, pOffset *int) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
 			article := articleFromDb(value)
@@ -159,7 +159,7 @@ func (s ArticleDafs) MakeGetRecentForAuthorsDaf() fs.ArticleGetRecentForAuthorsD
 	}
 }
 
-func (s ArticleDafs) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
+func (s ArticleDafsS) MakeGetRecentFiltered() fs.ArticleGetRecentFilteredDafT {
 	return func(in rpc.ArticlesListIn) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
 			article := articleFromDb(value)
