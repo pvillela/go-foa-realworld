@@ -12,29 +12,28 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentDeleteSflS is the stereotype instance for the service flow that
+// CommentDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes a comment from an article.
-type CommentDeleteSflS struct {
-	BeginTxn             func(context string) db.Txn
-	CommentGetByIdDaf    fs.CommentGetByIdDafT
-	CommentDeleteDaf     fs.CommentDeleteDafT
-	ArticleGetBySlugdDaf fs.ArticleGetBySlugDafT
-	ArticleUpdateDaf     fs.ArticleUpdateDafT
-}
-
-// CommentDeleteSflT is the function type instantiated by CommentDeleteSflS.
 type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) error
 
-func (s CommentDeleteSflS) Make() CommentDeleteSflT {
+// CommentDeleteSflC is the function that constructs a stereotype instance of type
+// CommentDeleteSflT.
+func CommentDeleteSflC(
+	beginTxn func(context string) db.Txn,
+	commentGetByIdDaf fs.CommentGetByIdDafT,
+	commentDeleteDaf fs.CommentDeleteDafT,
+	articleGetBySlugdDaf fs.ArticleGetBySlugDafT,
+	articleUpdateDaf fs.ArticleUpdateDafT,
+) CommentDeleteSflT {
 	return func(username string, in rpc.CommentDeleteIn) error {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
-		article, _, err := s.ArticleGetBySlugdDaf(in.Slug)
+		article, _, err := articleGetBySlugdDaf(in.Slug)
 		if err != nil {
 			return err
 		}
-		comment, _, err := s.CommentGetByIdDaf(article.Uuid, in.Id)
+		comment, _, err := commentGetByIdDaf(article.Uuid, in.Id)
 		if err != nil {
 			return err
 		}
@@ -42,18 +41,18 @@ func (s CommentDeleteSflS) Make() CommentDeleteSflT {
 			return fs.ErrUnauthorizedUser.Make(nil, username)
 		}
 
-		if err := s.CommentDeleteDaf(article.Uuid, in.Id, txn); err != nil {
+		if err := commentDeleteDaf(article.Uuid, in.Id, txn); err != nil {
 			return err
 		}
 
-		article, rc, err := s.ArticleGetBySlugdDaf(in.Slug)
+		article, rc, err := articleGetBySlugdDaf(in.Slug)
 		if err != nil {
 			return err
 		}
 
 		article = article.UpdateComments(comment, false)
 
-		if _, err := s.ArticleUpdateDaf(article, rc, txn); err != nil {
+		if _, err := articleUpdateDaf(article, rc, txn); err != nil {
 			return err
 		}
 

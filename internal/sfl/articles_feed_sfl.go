@@ -12,18 +12,17 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticlesFeedSflS is the stereotype instance for the service flow that
+// ArticlesFeedSflT is the type of the stereotype instance for the service flow that
 // queries for all articles authored by other users followed by
 // the current user, with optional limit and offset pagination parameters.
-type ArticlesFeedSflS struct {
-	UserGetByNameDaf              fs.UserGetByNameDafT
-	ArticleGetRecentForAuthorsDaf fs.ArticleGetRecentForAuthorsDafT
-}
-
-// ArticlesFeedSflT is the function type instantiated by ArticlesFeedSflS.
 type ArticlesFeedSflT = func(username string, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error)
 
-func (s ArticlesFeedSflS) Make() ArticlesFeedSflT {
+// ArticlesFeedSflC is the function that constructs a stereotype instance of type
+// ArticlesFeedSflT.
+func ArticlesFeedSflC(
+	userGetByNameDaf fs.UserGetByNameDafT,
+	articleGetRecentForAuthorsDaf fs.ArticleGetRecentForAuthorsDafT,
+) ArticlesFeedSflT {
 	return func(username string, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {
 		var zero rpc.ArticlesOut
 		var user model.User
@@ -33,12 +32,12 @@ func (s ArticlesFeedSflS) Make() ArticlesFeedSflT {
 			return zero, fs.ErrNotAuthenticated.Make(nil)
 		}
 
-		user, _, err = s.UserGetByNameDaf(username)
+		user, _, err = userGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
 
-		articles, err := s.ArticleGetRecentForAuthorsDaf(user.FollowedNames, in.Limit, in.Offset)
+		articles, err := articleGetRecentForAuthorsDaf(user.FollowedNames, in.Limit, in.Offset)
 		if err != nil {
 			return zero, err
 		}

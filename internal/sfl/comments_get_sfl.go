@@ -12,20 +12,19 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentsGetSflS is the stereotype instance for the service flow that
+// CommentsGetSflC is the type of the stereotype instance for the service flow that
 // retrieves the comments of an article.
-type CommentsGetSflS struct {
-	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
-}
-
-// CommentsGetSflT is the function type instantiated by CommentsGetSflS.
 type CommentsGetSflT = func(username string, slug string) (rpc.CommentsOut, error)
 
-func (s CommentsGetSflS) Make() CommentsGetSflT {
+// CommentsGetSflC is the function that constructs a stereotype instance of type
+// CommentsGetSflT.
+func CommentsGetSflC(
+	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
+) CommentsGetSflT {
 	return func(username string, slug string) (rpc.CommentsOut, error) {
 		var zero rpc.CommentsOut
 
-		article, _, err := s.ArticleGetBySlugDaf(slug)
+		article, _, err := articleGetBySlugDaf(slug)
 		if err != nil {
 			return zero, err
 		}

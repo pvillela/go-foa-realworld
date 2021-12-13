@@ -11,19 +11,18 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// UserGetCurrentSflS is the stereotype instance for the service flow that
+// ArticleCreateSflT is the type of the stereotype instance for the service flow that
 // returns the current user.
-type UserGetCurrentSflS struct {
-	UserGetByNameDaf fs.UserGetByNameDafT
-}
-
-// UserGetCurrentSflT is the function type instantiated by UserGetCurrentSflS.
 type UserGetCurrentSflT = func(username string) (rpc.UserOut, error)
 
-func (s UserGetCurrentSflS) Make() UserGetCurrentSflT {
+// UserGetCurrentSflC is the function that constructs a stereotype instance of type
+// UserGetCurrentSflT.
+func UserGetCurrentSflC(
+	userGetByNameDaf fs.UserGetByNameDafT,
+) UserGetCurrentSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	return func(username string) (rpc.UserOut, error) {
-		user, _, err := s.UserGetByNameDaf(username)
+		user, _, err := userGetByNameDaf(username)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

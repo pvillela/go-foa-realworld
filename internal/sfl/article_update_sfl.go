@@ -17,9 +17,9 @@ import (
 // updates an article.
 type ArticleUpdateSflT = func(username, slug string, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error)
 
-// ArticleUpdateSflTC is the function that constructs a stereotype instance of type
+// ArticleUpdateSflC is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT.
-func ArticleUpdateSflTC(
+func ArticleUpdateSflC(
 	beginTxn func(context string) db.Txn,
 	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
 	userGetByNameDaf fs.UserGetByNameDafT,

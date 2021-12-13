@@ -7,19 +7,19 @@
 package daf
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"sync"
 )
 
-type TagDafsS struct {
-	Store *sync.Map
-}
-
-func (s TagDafsS) MakeGetAll() fs.TagGetAllDafT {
+// TagGetAllDafC is the function that constructs a stereotype instance of type
+// fs.TagGetAllDafT.
+func TagGetAllDafC(
+	tagDb mapdb.MapDb,
+) fs.TagGetAllDafT {
 	return func() ([]string, error) {
 		var ret []string
 
-		s.Store.Range(func(key, value interface{}) bool {
+		tagDb.Store.Range(func(key, value interface{}) bool {
 			tag, ok := key.(string)
 			if !ok {
 				return true
@@ -32,10 +32,14 @@ func (s TagDafsS) MakeGetAll() fs.TagGetAllDafT {
 	}
 }
 
-func (s TagDafsS) MakeAdd() fs.TagAddDafT {
+// TagAddDafC is the function that constructs a stereotype instance of type
+// fs.TagAddDafT.
+func TagAddDafC(
+	tagDb mapdb.MapDb,
+) fs.TagAddDafT {
 	return func(newTags []string) error {
 		for _, tag := range newTags {
-			s.Store.Store(tag, true)
+			tagDb.Store.Store(tag, true)
 		}
 		return nil
 	}

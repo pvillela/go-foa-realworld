@@ -11,18 +11,17 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// TagsGetSflS is the stereotype instance for the service flow that
+// TagsGetSflT is the type of the stereotype instance for the service flow that
 // retrieves all tags.
-type TagsGetSflS struct {
-	TagGetAllDaf fs.TagGetAllDafT
-}
-
-// TagsGetSflT is the function type instantiated by TagsGetSflS.
 type TagsGetSflT = func() (rpc.TagsOut, error)
 
-func (s TagsGetSflS) Make() TagsGetSflT {
+// TagsGetSflC is the function that constructs a stereotype instance of type
+// TagsGetSflT.
+func TagsGetSflC(
+	tagGetAllDaf fs.TagGetAllDafT,
+) TagsGetSflT {
 	return func() (rpc.TagsOut, error) {
-		tags, err := s.TagGetAllDaf()
+		tags, err := tagGetAllDaf()
 		if err != nil {
 			return rpc.TagsOut{}, err
 		}

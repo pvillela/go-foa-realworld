@@ -6,16 +6,19 @@
 
 package web
 
-func PostPseudoHandler(pReq Any, svc func(Any) (Any, error)) func(Filler) (Any, error) {
-	return func(filler Filler) (Any, error) {
+func PostPseudoHandler[S any, T any](svc func(S) (T, error)) func(Filler[S]) (T, error) {
+	return func(filler Filler[S]) (T, error) {
+		var req S
+		var resp T
+		pReq := &req
 		err := filler(pReq)
 
 		if err != nil {
-			return nil, FillerError{err}
+			return resp, FillerError{err}
 		}
 
-		resp, err := svc(pReq)
+		resp, err = svc(req)
 
-		return &resp, err
+		return resp, err
 	}
 }

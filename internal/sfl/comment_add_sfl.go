@@ -12,47 +12,46 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentAddSflS is the stereotype instance for the service flow that
+// CommentAddSflT is the type of the stereotype instance for the service flow that
 // adds a comment to an article.
-type CommentAddSflS struct {
-	BeginTxn            func(context string) db.Txn
-	UserGetByNameDaf    fs.UserGetByNameDafT
-	ArticleGetBySlugDaf fs.ArticleGetBySlugDafT
-	CommentCreateDaf    fs.CommentCreateDafT
-	ArticleUpdateDaf    fs.ArticleUpdateDafT
-}
-
-// CommentAddSflT is the function type instantiated by CommentAddSflS.
 type CommentAddSflT = func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error)
 
-func (s CommentAddSflS) Make() CommentAddSflT {
+// CommentAddSflC is the function that constructs a stereotype instance of type
+// CommentAddSflT.
+func CommentAddSflC(
+	beginTxn func(context string) db.Txn,
+	userGetByNameDaf fs.UserGetByNameDafT,
+	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
+	commentCreateDaf fs.CommentCreateDafT,
+	articleUpdateDaf fs.ArticleUpdateDafT,
+) CommentAddSflT {
 	return func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.CommentOut
 		var err error
 
-		commentAuthor, _, err := s.UserGetByNameDaf(username)
+		commentAuthor, _, err := userGetByNameDaf(username)
 		if err != nil {
 			return zero, err
 		}
 
-		article, rc, err := s.ArticleGetBySlugDaf(in.Slug)
+		article, rc, err := articleGetBySlugDaf(in.Slug)
 		if err != nil {
 			return zero, err
 		}
 
 		rawComment := in.ToComment(article.Uuid, commentAuthor)
 
-		insertedComment, _, err := s.CommentCreateDaf(rawComment, txn)
+		insertedComment, _, err := commentCreateDaf(rawComment, txn)
 		if err != nil {
 			return zero, err
 		}
 
 		article.Comments = append(article.Comments, insertedComment)
 
-		if _, err := s.ArticleUpdateDaf(article, rc, txn); err != nil {
+		if _, err := articleUpdateDaf(article, rc, txn); err != nil {
 			return zero, err
 		}
 

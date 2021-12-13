@@ -8,7 +8,7 @@ package web
 
 type Any = interface{}
 
-type Filler = func(Any) error
+type Filler[T any] func(*T) error
 
 type FillerError struct {
 	FillerError error

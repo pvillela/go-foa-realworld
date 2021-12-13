@@ -16,10 +16,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type UserDafsS struct {
-	UserDb mapdb.MapDb
-}
-
 func pwUserFromDb(value interface{}) fs.PwUser {
 	pw, ok := value.(fs.PwUser)
 	if !ok {
@@ -32,8 +28,11 @@ func userFromDb(value interface{}) model.User {
 	return pwUserFromDb(value).Entity
 }
 
-func (s UserDafsS) getByName(username string) (model.User, fs.RecCtxUser, error) {
-	value, err := s.UserDb.Read(username)
+func getByName(
+	userDb mapdb.MapDb,
+	username string,
+) (model.User, fs.RecCtxUser, error) {
+	value, err := userDb.Read(username)
 	if err != nil {
 		return model.User{}, fs.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, username)
 	}
@@ -41,11 +40,17 @@ func (s UserDafsS) getByName(username string) (model.User, fs.RecCtxUser, error)
 	return pw.Entity, pw.RecCtx, nil
 }
 
-func (s UserDafsS) MakeGetByName() fs.UserGetByNameDafT {
-	return s.getByName
+// UserGetByNameDafC is the function that constructs a stereotype instance of type
+// fs.UserGetByNameDafT.
+func UserGetByNameDafT(
+	userDb mapdb.MapDb,
+) fs.UserGetByNameDafT {
+	return func(userName string) (model.User, fs.RecCtxUser, error) {
+		return getByName(userDb, userName)
+	}
 }
 
-func (s UserDafsS) getByEmail(email string) (model.User, fs.RecCtxUser, error) {
+func getByEmail(userDb mapdb.MapDb, email string) (model.User, fs.RecCtxUser, error) {
 	pred := func(_, value interface{}) bool {
 		if userFromDb(value).Email == email {
 			return true
@@ -53,7 +58,7 @@ func (s UserDafsS) getByEmail(email string) (model.User, fs.RecCtxUser, error) {
 		return false
 	}
 
-	value, found := s.UserDb.FindFirst(pred)
+	value, found := userDb.FindFirst(pred)
 	if !found {
 		return model.User{}, fs.RecCtxUser{}, fs.ErrUserEmailNotFound.Make(nil, email)
 	}
@@ -61,20 +66,28 @@ func (s UserDafsS) getByEmail(email string) (model.User, fs.RecCtxUser, error) {
 	return pw.Entity, pw.RecCtx, nil
 }
 
-func (s UserDafsS) MakeGetByEmail() fs.UserGetByEmailDafT {
+// UserGetByEmailDafC is the function that constructs a stereotype instance of type
+// fs.UserGetByEmailDafT.
+func UserGetByEmailDafC(
+	userDb mapdb.MapDb,
+) fs.UserGetByEmailDafT {
 	return func(email string) (model.User, fs.RecCtxUser, error) {
-		return s.getByEmail(email)
+		return getByEmail(userDb, email)
 	}
 }
 
-func (s UserDafsS) MakeCreate() fs.UserCreateDafT {
+// UserCreateDafT is the function that constructs a stereotype instance of type
+// fs.UserCreateDafT.
+func UserCreateDafT(
+	userDb mapdb.MapDb,
+) fs.UserCreateDafT {
 	return func(user model.User, txn db.Txn) (fs.RecCtxUser, error) {
-		if _, _, err := s.getByEmail(user.Email); err == nil {
+		if _, _, err := getByEmail(userDb, user.Email); err == nil {
 			return fs.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
 		}
 
 		pwUser := fs.PwUser{RecCtx: fs.RecCtxUser{}, Entity: user}
-		err := s.UserDb.Create(user.Name, pwUser, txn)
+		err := userDb.Create(user.Name, pwUser, txn)
 		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
 			return fs.RecCtxUser{}, fs.ErrDuplicateUserName.Make(err, user.Name)
 		}
@@ -86,14 +99,18 @@ func (s UserDafsS) MakeCreate() fs.UserCreateDafT {
 	}
 }
 
-func (s UserDafsS) MakeUpdate() fs.UserUpdateDafT {
+// UserUpdateDafC is the function that constructs a stereotype instance of type
+// fs.UserUpdateDafT.
+func UserUpdateDafC(
+	userDb mapdb.MapDb,
+) fs.UserUpdateDafT {
 	return func(user model.User, recCtx fs.RecCtxUser, txn db.Txn) (fs.RecCtxUser, error) {
-		if userByEmail, _, err := s.getByEmail(user.Email); err == nil && userByEmail.Name != user.Name {
+		if userByEmail, _, err := getByEmail(userDb, user.Email); err == nil && userByEmail.Name != user.Name {
 			return fs.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
 		}
 
 		pw := fs.PwUser{RecCtx: recCtx, Entity: user}
-		err := s.UserDb.Update(user.Name, pw, txn)
+		err := userDb.Update(user.Name, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
 			return fs.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Name)
 		}

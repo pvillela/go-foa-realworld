@@ -14,16 +14,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func PostHanderMaker(
-	pInput Any,
-	svc func(Any) (Any, error),
+func PostHandlerMaker[S any, T any](
+	svc func(S) (T, error),
 	errorHandler func(Any, web.RequestContext) web.ErrorResult,
 ) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		filler := func(pInput Any) error {
-			// Bind JSON content of request body to
-			// struct created above
+		filler := func(pInput *S) error {
+			// Bind JSON content of request body to pInput
 			err := c.BindJSON(pInput)
 			if err != nil {
 				// Gin automatically returns an error
@@ -52,7 +50,7 @@ func PostHanderMaker(
 			}
 		}()
 
-		pseudoHdlr := web.PostPseudoHandler(pInput, svc)
+		pseudoHdlr := web.PostPseudoHandler(svc)
 
 		pResp, err := pseudoHdlr(filler)
 
@@ -70,7 +68,7 @@ func PostHanderMaker(
 	}
 }
 
-func SimpleMapGetHanderMaker(svc func(map[string]string) (Any, error)) gin.HandlerFunc {
+func SimpleMapGetHandlerMaker(svc func(map[string]string) (Any, error)) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		params := c.Request.URL.Query()
