@@ -12,23 +12,22 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentAddSflS is the stereotype instance for the service flow that
+// UserUnfollowSflT is the type of the stereotype instance for the service flow that
 // causes the current user start following a given other user.
-type UserUnfollowSflS struct {
-	BeginTxn     func(context string) db.Txn
-	UserFollowFl fs.UserFollowFlT
-}
-
-// UserUnfollowSflT is the function type instantiated by UserUnfollowSflS.
 type UserUnfollowSflT = func(username string, followedUsername string) (rpc.ProfileOut, error)
 
-func (s UserUnfollowSflS) Make() UserUnfollowSflT {
+// UserUnfollowSflC is the function that constructs a stereotype instance of type
+// UserUnfollowSflT.
+func UserUnfollowSflC(
+	beginTxn func(context string) db.Txn,
+	userFollowFl fs.UserFollowFlT,
+) UserUnfollowSflT {
 	return func(username string, followedUsername string) (rpc.ProfileOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		var zero rpc.ProfileOut
-		user, _, err := s.UserFollowFl(username, followedUsername, false, txn)
+		user, _, err := userFollowFl(username, followedUsername, false, txn)
 		if err != nil {
 			return zero, err
 		}

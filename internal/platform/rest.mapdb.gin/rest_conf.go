@@ -6,7 +6,7 @@
 
 package main
 
-import "github.com/pvillela/gfoa/examples/transpmtmock/travelsvc/internal/boot"
+import "github.com/pvillela/go-foa-realworld/internal/boot"
 
 var config = boot.TravelConfig{
 	CfgForValidateTripRequestBf:  "CfgForValidateTripRequestBf",

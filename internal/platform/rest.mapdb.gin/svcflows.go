@@ -7,16 +7,11 @@
 package main
 
 import (
-	"errors"
-	"github.com/pvillela/gfoa/examples/transpmtmock/travelsvc/pkg/model"
-	"github.com/pvillela/gfoa/examples/transpmtmock/travelsvc/pkg/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
-	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.mapdb/daf"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
-	log "github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -46,6 +41,7 @@ var mapDb = mapdb.MapDb{
 var userGetByNameDaf = daf.UserGetByEmailDafC(mapDb)
 var userUpdateDaf = daf.UserUpdateDafC(mapDb)
 var userFollowFl = fs.UserFollowFlC(userGetByNameDaf, userUpdateDaf)
+var userCreateDaf = daf.UserCreateDafC(mapDb)
 
 var articleCreateDaf = daf.ArticleCreateDafC(mapDb)
 var articleGetBySlugDaf = daf.ArticleGetBySlugDafC(mapDb)
@@ -86,38 +82,38 @@ var tagsGetSfl = sfl.TagsGetSflC(tagGetAllDaf)
 var userAuthenticateSfl = sfl.UserAuthenticateSflC(userGetByNameDaf, fs.UserAuthenticateBfI)
 var userFollowSfl = sfl.UserFollowSflC(beginTxn, userFollowFl)
 var userGetCurrentSfl = sfl.UserGetCurrentSflC(userGetByNameDaf)
-var userRegisterSfl = wgin.PostHandlerMaker(userRegisterSfl, web.DefaultErrorHandler)
-var userUnfollowSfl = wgin.PostHandlerMaker(userUnfollowSfl, web.DefaultErrorHandler)
-var userUpdateSfl = wgin.PostHandlerMaker(userUpdateSfl, web.DefaultErrorHandler)
+var userRegisterSfl = sfl.UserRegisterSflC(beginTxn, userCreateDaf)
+var userUnfollowSfl = sfl.UserUnfollowSflC(beginTxn, userFollowFl)
+var userUpdateSfl = sfl.UserUpdateSflC(beginTxn, userGetByNameDaf, userUpdateDaf)
 
-func tripSvcflowM(m map[string]string) (interface{}, error) {
-	cardInfo, cardInfoOk := m["cardInfo"]
-	deviceInfo, deviceInfoOk := m["deviceInfo"]
-
-	log.Info("m[cardInfo]", m["cardInfo"])
-	log.Info("m[deviceInfo]", m["deviceInfo"])
-
-	errMsg := ""
-	if !cardInfoOk {
-		errMsg = "cardInfo parameter not found"
-	}
-	if !deviceInfoOk {
-		if errMsg != "" {
-			errMsg = errMsg + ", "
-		}
-		errMsg = errMsg + "deviceInfo parameter not found"
-	}
-
-	var err error
-	if errMsg != "" {
-		err = errors.New(errMsg)
-		return rpc.TripResponse{}, err
-	}
-
-	input := rpc.TripRequest{
-		CardInfo:   model.CardInfo(cardInfo),
-		DeviceInfo: model.DeviceInfo(deviceInfo),
-	}
-
-	return tripSvc(input)
-}
+//func tripSvcflowM(m map[string]string) (interface{}, error) {
+//	cardInfo, cardInfoOk := m["cardInfo"]
+//	deviceInfo, deviceInfoOk := m["deviceInfo"]
+//
+//	log.Info("m[cardInfo]", m["cardInfo"])
+//	log.Info("m[deviceInfo]", m["deviceInfo"])
+//
+//	errMsg := ""
+//	if !cardInfoOk {
+//		errMsg = "cardInfo parameter not found"
+//	}
+//	if !deviceInfoOk {
+//		if errMsg != "" {
+//			errMsg = errMsg + ", "
+//		}
+//		errMsg = errMsg + "deviceInfo parameter not found"
+//	}
+//
+//	var err error
+//	if errMsg != "" {
+//		err = errors.New(errMsg)
+//		return rpc.TripResponse{}, err
+//	}
+//
+//	input := rpc.TripRequest{
+//		CardInfo:   model.CardInfo(cardInfo),
+//		DeviceInfo: model.DeviceInfo(deviceInfo),
+//	}
+//
+//	return tripSvc(input)
+//}

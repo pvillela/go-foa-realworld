@@ -12,32 +12,30 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// UserUpdateSflS is the stereotype instance for the service flow that
-// It represents the action of registering a user.
-type UserUpdateSflS struct {
-	BeginTxn         func(context string) db.Txn
-	UserGetByNameDaf fs.UserGetByNameDafT
-	UserUpdateDaf    fs.UserUpdateDafT
-}
-
-// UserUpdateSflT is the type of a function that takes an rpc.UserUpdateIn as input
-// and returns a model.User.
+// UserUpdateSflT is the type of the stereotype instance for the service flow that
+// updates a user.
 type UserUpdateSflT = func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error)
 
-func (s UserUpdateSflS) Make() UserUpdateSflT {
+// UserUpdateSflC is the function that constructs a stereotype instance of type
+// UserUpdateSflT.
+func UserUpdateSflC(
+	beginTxn func(context string) db.Txn,
+	userGetByNameDaf fs.UserGetByNameDafT,
+	userUpdateDaf fs.UserUpdateDafT,
+) UserUpdateSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	return func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
-		user, rc, err := s.UserGetByNameDaf(username)
+		user, rc, err := userGetByNameDaf(username)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}
 
 		user = user.Update(in.User)
 
-		_, err = s.UserUpdateDaf(user, rc, txn)
+		_, err = userUpdateDaf(user, rc, txn)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

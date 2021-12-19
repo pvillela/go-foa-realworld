@@ -12,26 +12,24 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// UserRegisterSflS is the stereotype instance for the service flow that
-// It represents the action of registering a user.
-type UserRegisterSflS struct {
-	BeginTxn      func(context string) db.Txn
-	UserCreateDaf fs.UserCreateDafT
-}
-
-// UserRegisterSflT is the type of a function that takes an rpc.UserRegisterIn as input
-// and returns a model.User.
+// UserRegisterSflT is the type of the stereotype instance for the service flow that
+// represents the action of registering a user.
 type UserRegisterSflT = func(in rpc.UserRegisterIn) (rpc.UserOut, error)
 
-func (s UserRegisterSflS) Make() UserRegisterSflT {
+// UserRegisterSflC is the function that constructs a stereotype instance of type
+// UserRegisterSflT.
+func UserRegisterSflC(
+	beginTxn func(context string) db.Txn,
+	userCreateDaf fs.UserCreateDafT,
+) UserRegisterSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	return func(in rpc.UserRegisterIn) (rpc.UserOut, error) {
-		txn := s.BeginTxn("ArticleCreateSflS")
+		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		user := in.ToUser()
 
-		_, err := s.UserCreateDaf(user, txn)
+		_, err := userCreateDaf(user, txn)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

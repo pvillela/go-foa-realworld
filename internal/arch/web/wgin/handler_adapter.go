@@ -9,18 +9,20 @@ package wgin
 import (
 	"net/http"
 
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+
 	"github.com/gin-gonic/gin"
-	"github.com/pvillela/gfoa/pkg/web"
 	log "github.com/sirupsen/logrus"
 )
 
 func PostHandlerMaker[S any, T any](
-	svc func(S) (T, error),
+	svc func(string, S) (T, error),
+	requestCtxExtractor func(), // TODO: fix this
 	errorHandler func(Any, web.RequestContext) web.ErrorResult,
 ) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		filler := func(pInput *S) error {
+		filler := func(pUsername *string, pInput *S) error {
 			// Bind JSON content of request body to pInput
 			err := c.BindJSON(pInput)
 			if err != nil {

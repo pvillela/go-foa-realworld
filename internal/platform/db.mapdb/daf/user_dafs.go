@@ -76,9 +76,9 @@ func UserGetByEmailDafC(
 	}
 }
 
-// UserCreateDafT is the function that constructs a stereotype instance of type
+// UserCreateDafC is the function that constructs a stereotype instance of type
 // fs.UserCreateDafT.
-func UserCreateDafT(
+func UserCreateDafC(
 	userDb mapdb.MapDb,
 ) fs.UserCreateDafT {
 	return func(user model.User, txn db.Txn) (fs.RecCtxUser, error) {
