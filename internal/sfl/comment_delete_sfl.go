@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,7 +15,7 @@ import (
 
 // CommentDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes a comment from an article.
-type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) error
+type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) (arch.Unit, error)
 
 // CommentDeleteSflC is the function that constructs a stereotype instance of type
 // CommentDeleteSflT.
@@ -25,37 +26,37 @@ func CommentDeleteSflC(
 	articleGetBySlugdDaf fs.ArticleGetBySlugDafT,
 	articleUpdateDaf fs.ArticleUpdateDafT,
 ) CommentDeleteSflT {
-	return func(username string, in rpc.CommentDeleteIn) error {
+	return func(username string, in rpc.CommentDeleteIn) (arch.Unit, error) {
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 
 		article, _, err := articleGetBySlugdDaf(in.Slug)
 		if err != nil {
-			return err
+			return arch.Void, err
 		}
 		comment, _, err := commentGetByIdDaf(article.Uuid, in.Id)
 		if err != nil {
-			return err
+			return arch.Void, err
 		}
 		if comment.Author.Name != username {
-			return fs.ErrUnauthorizedUser.Make(nil, username)
+			return arch.Void, fs.ErrUnauthorizedUser.Make(nil, username)
 		}
 
 		if err := commentDeleteDaf(article.Uuid, in.Id, txn); err != nil {
-			return err
+			return arch.Void, err
 		}
 
 		article, rc, err := articleGetBySlugdDaf(in.Slug)
 		if err != nil {
-			return err
+			return arch.Void, err
 		}
 
 		article = article.UpdateComments(comment, false)
 
 		if _, err := articleUpdateDaf(article, rc, txn); err != nil {
-			return err
+			return arch.Void, err
 		}
 
-		return nil
+		return arch.Void, nil
 	}
 }

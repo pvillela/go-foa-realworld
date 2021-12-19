@@ -8,8 +8,8 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/gosimple/slug v1.9.0
 	github.com/pkg/errors v0.9.1
-	github.com/pvillela/gfoa v0.0.0-20210312073642-523fd8888860
 	github.com/sirupsen/logrus v1.8.1
+	github.com/twinj/uuid v1.0.0
 )
 
 require (
@@ -23,8 +23,10 @@ require (
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
+	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/sys v0.0.0-20200116001909-b77594299b42 // indirect
+	gopkg.in/stretchr/testify.v1 v1.2.2 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

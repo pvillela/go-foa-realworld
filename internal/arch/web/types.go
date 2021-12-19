@@ -6,9 +6,7 @@
 
 package web
 
-type Any = interface{}
-
-type Filler[T any] func(*string, *T) error
+type Filler[T any] func(*RequestContext, *T) error
 
 type FillerError struct {
 	FillerError error
@@ -32,10 +30,11 @@ type ErrorResult struct {
 }
 
 type ErrorDetail struct {
-	error string
-	Args  []string
-	Path  string
+	Err  string
+	Args []string
+	Path string
 }
 
 type RequestContext struct {
+	Username string
 }

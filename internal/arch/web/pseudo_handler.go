@@ -10,19 +10,19 @@ func PostPseudoHandler[S any, T any](
 	svc func(string, S) (T, error),
 ) func(Filler[S]) (T, error) {
 	return func(filler Filler[S]) (T, error) {
-		var req S
-		var resp T
-		var username string
-		pReq := &req
-		pUsername := &username
-		err := filler(pUsername, pReq)
+		var input S
+		var output T
+		var reqCtx RequestContext
+		pReq := &input
+		pReqCtx := &reqCtx
+		err := filler(pReqCtx, pReq)
 
 		if err != nil {
-			return resp, FillerError{err}
+			return output, FillerError{err}
 		}
 
-		resp, err = svc(username, req)
+		output, err = svc(reqCtx.Username, input)
 
-		return resp, err
+		return output, err
 	}
 }

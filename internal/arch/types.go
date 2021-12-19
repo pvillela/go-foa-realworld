@@ -4,6 +4,10 @@
  * that can be found in the LICENSE file.
  */
 
-package wgin
+package arch
 
 type Any = interface{}
+
+type Unit = struct{}
+
+var Void Unit

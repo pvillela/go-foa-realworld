@@ -7,6 +7,7 @@
 package wgin
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"net/http"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -17,14 +18,27 @@ import (
 
 func PostHandlerMaker[S any, T any](
 	svc func(string, S) (T, error),
-	requestCtxExtractor func(), // TODO: fix this
-	errorHandler func(Any, web.RequestContext) web.ErrorResult,
+	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
+	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		filler := func(pUsername *string, pInput *S) error {
+		filler := func(pReqCtx *web.RequestContext, pInput *S) error {
+			req := c.Request
+			reqCtx, err := reqCtxExtractor(req)
+			if err != nil {
+
+				log.Info(err)
+
+				c.JSON(401, gin.H{
+					"msg": err.Error(),
+				})
+				return err
+			}
+			pReqCtx = &reqCtx
+
 			// Bind JSON content of request body to pInput
-			err := c.BindJSON(pInput)
+			err = c.BindJSON(pInput)
 			if err != nil {
 				// Gin automatically returns an error
 				// response when the BindJSON operation
@@ -41,7 +55,7 @@ func PostHandlerMaker[S any, T any](
 			return nil
 		}
 
-		setErrorResponse := func(errorContents Any, ctx web.RequestContext) {
+		setErrorResponse := func(errorContents arch.Any, ctx web.RequestContext) {
 			errResult := errorHandler(errorContents, web.RequestContext{})
 			c.JSON(errResult.StatusCode, errResult)
 		}
@@ -70,7 +84,7 @@ func PostHandlerMaker[S any, T any](
 	}
 }
 
-func SimpleMapGetHandlerMaker(svc func(map[string]string) (Any, error)) gin.HandlerFunc {
+func SimpleMapGetHandlerMaker(svc func(map[string]string) (arch.Any, error)) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		params := c.Request.URL.Query()
