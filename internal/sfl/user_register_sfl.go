@@ -24,7 +24,7 @@ func UserRegisterSflC(
 ) UserRegisterSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	return func(_ string, in rpc.UserRegisterIn) (rpc.UserOut, error) {
-		txn := beginTxn("ArticleCreateSflS")
+		txn := beginTxn("UserRegisterSflT")
 		defer txn.End()
 
 		user := in.ToUser()

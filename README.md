@@ -7,6 +7,9 @@ Some of the code was based on https://github.com/err0r500/go-realworld-clean.
 
 ## To-dos:
 
+- Create web handlers for non-POST methods
+- Create Default ReqCtxExtractor
+- Implement correct request context logic with Context. Initially, ReqCtx is only used as an intermediary to get username and is not being stored in Context.
 v Complete first pass at SFLs. 
 v Review use of pointers, clean it up. 
 v Review model in terms of relationships and how they should be represented.

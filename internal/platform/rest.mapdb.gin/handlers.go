@@ -7,26 +7,45 @@
 package main
 
 import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 )
 
-var articleCreateSflH = wgin.PostHandlerMaker(articleCreateSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articleDeleteSflH = wgin.DeleteHandlerMaker(articleDeleteSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articleFavoriteSflH = wgin.PostHandlerMaker(articleFavoriteSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articleGetSflH = wgin.GetHandlerMaker(articleGetSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articleUnfavoriteSflH = wgin.DeleteHandlerMaker(articleUnfavoriteSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articleUpdateSflH = wgin.PutHandlerMaker(articleUpdateSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articlesFeedSflH = wgin.GetHandlerMaker(articlesFeedSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var articlesListSflH = wgin.GetHandlerMaker(articlesListSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var commentAddSflH = wgin.PostHandlerMaker(commentAddSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var commentDeleteSflH = wgin.DeleteHandlerMaker(commentDeleteSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var commentsGetSflH = wgin.GetHandlerMaker(commentsGetSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var profileGetSflH = wgin.GetHandlerMaker(profileGetSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var tagsGetSflH = wgin.GetHandlerMaker(tagsGetSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var userAuthenticateSflH = wgin.PostHandlerMaker(userAuthenticateSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var userFollowSflH = wgin.PostHandlerMaker(userFollowSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var userGetCurrentSflH = wgin.GetHandlerMaker(userGetCurrentSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var userRegisterSflH = wgin.PostHandlerMaker(userRegisterSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var userUnfollowSflH = wgin.DeleteHandlerMaker(userUnfollowSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
-var userUpdateSflH = wgin.PutHandlerMaker(userUpdateSfl, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)
+func authenticator(pReq *http.Request) error {
+	panic("todo")
+}
+
+func bodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T]) gin.HandlerFunc {
+	return wgin.BodyHandlerMaker[S, T](authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
+}
+
+func getHandlerOf[S any, T any](sfl wgin.Sfl[S, T], mapper func(map[string]string) (S, error)) gin.HandlerFunc {
+	return wgin.GetHandlerMaker[S, T](mapper, authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
+}
+
+func mappedBodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T], mapper func(map[string]string, *S) error) gin.HandlerFunc {
+	return wgin.MappedBodyHandlerMaker[S, T](mapper, authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
+}
+
+var articleCreateSflH = bodyHandlerOf(articleCreateSfl)
+var articleDeleteSflH = wgin.DeleteHandlerMaker(articleDeleteSfl)
+var articleFavoriteSflH = bodyHandlerOf(articleFavoriteSfl)
+var articleGetSflH = wgin.GetHandlerMaker(articleGetSfl)
+var articleUnfavoriteSflH = wgin.DeleteHandlerMaker(articleUnfavoriteSfl)
+var articleUpdateSflH = wgin.PutHandlerMaker(articleUpdateSfl)
+var articlesFeedSflH = wgin.GetHandlerMaker(articlesFeedSfl)
+var articlesListSflH = wgin.GetHandlerMaker(articlesListSfl)
+var commentAddSflH = bodyHandlerOf(commentAddSfl)
+var commentDeleteSflH = wgin.DeleteHandlerMaker(commentDeleteSfl)
+var commentsGetSflH = wgin.GetHandlerMaker(commentsGetSfl)
+var profileGetSflH = wgin.GetHandlerMaker(profileGetSfl)
+var tagsGetSflH = wgin.GetHandlerMaker(tagsGetSfl)
+var userAuthenticateSflH = bodyHandlerOf(userAuthenticateSfl)
+var userFollowSflH = bodyHandlerOf(userFollowSfl)
+var userGetCurrentSflH = wgin.GetHandlerMaker(userGetCurrentSfl)
+var userRegisterSflH = bodyHandlerOf(userRegisterSfl)
+var userUnfollowSflH = wgin.DeleteHandlerMaker(userUnfollowSfl)
+var userUpdateSflH = wgin.PutHandlerMaker(userUpdateSfl)
