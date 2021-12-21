@@ -7,12 +7,13 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.mapdb/daf"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
-	"sync"
 )
 
 /////
@@ -85,35 +86,3 @@ var userGetCurrentSfl = sfl.UserGetCurrentSflC(userGetByNameDaf)
 var userRegisterSfl = sfl.UserRegisterSflC(beginTxn, userCreateDaf)
 var userUnfollowSfl = sfl.UserUnfollowSflC(beginTxn, userFollowFl)
 var userUpdateSfl = sfl.UserUpdateSflC(beginTxn, userGetByNameDaf, userUpdateDaf)
-
-//func tripSvcflowM(m map[string]string) (interface{}, error) {
-//	cardInfo, cardInfoOk := m["cardInfo"]
-//	deviceInfo, deviceInfoOk := m["deviceInfo"]
-//
-//	log.Info("m[cardInfo]", m["cardInfo"])
-//	log.Info("m[deviceInfo]", m["deviceInfo"])
-//
-//	errMsg := ""
-//	if !cardInfoOk {
-//		errMsg = "cardInfo parameter not found"
-//	}
-//	if !deviceInfoOk {
-//		if errMsg != "" {
-//			errMsg = errMsg + ", "
-//		}
-//		errMsg = errMsg + "deviceInfo parameter not found"
-//	}
-//
-//	var err error
-//	if errMsg != "" {
-//		err = errors.New(errMsg)
-//		return rpc.TripResponse{}, err
-//	}
-//
-//	input := rpc.TripRequest{
-//		CardInfo:   model.CardInfo(cardInfo),
-//		DeviceInfo: model.DeviceInfo(deviceInfo),
-//	}
-//
-//	return tripSvc(input)
-//}

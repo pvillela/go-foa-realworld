@@ -6,17 +6,17 @@
 
 package main
 
-import "github.com/pvillela/go-foa-realworld/internal/boot"
+// import "github.com/pvillela/go-foa-realworld/internal/boot"
 
-var config = boot.TravelConfig{
-	CfgForValidateTripRequestBf:  "CfgForValidateTripRequestBf",
-	CfgForGetPostedCardStateDaf:  "CfgForGetPostedCardStateDaf",
-	CfgForGetUnpostedUsagesDaf:   "CfgForGetUnpostedUsagesDaf",
-	CfgForUpdateCardStateBf:      "CfgForUpdateCardStateBf",
-	CfgForRateTripSc:             "CfgForRateTripSc",
-	CfgForPrepareUsageBf:         "CfgForPrepareUsageBf",
-	CfgForWriteUsageDaf:          "CfgForWriteUsageDaf",
-	CfgForPrepareDownstreamEvtBf: "CfgForPrepareDownstreamEvtBf",
-	CfgForDownstreamEp:           "CfgForDownstreamEp",
-	CfgForPrepareResponseBf:      "CfgForPrepareResponseBf",
-}
+// var config = boot.TravelConfig{
+// 	CfgForValidateTripRequestBf:  "CfgForValidateTripRequestBf",
+// 	CfgForGetPostedCardStateDaf:  "CfgForGetPostedCardStateDaf",
+// 	CfgForGetUnpostedUsagesDaf:   "CfgForGetUnpostedUsagesDaf",
+// 	CfgForUpdateCardStateBf:      "CfgForUpdateCardStateBf",
+// 	CfgForRateTripSc:             "CfgForRateTripSc",
+// 	CfgForPrepareUsageBf:         "CfgForPrepareUsageBf",
+// 	CfgForWriteUsageDaf:          "CfgForWriteUsageDaf",
+// 	CfgForPrepareDownstreamEvtBf: "CfgForPrepareDownstreamEvtBf",
+// 	CfgForDownstreamEp:           "CfgForDownstreamEp",
+// 	CfgForPrepareResponseBf:      "CfgForPrepareResponseBf",
+// }

@@ -19,33 +19,31 @@ func authenticator(pReq *http.Request) error {
 }
 
 func bodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T]) gin.HandlerFunc {
-	return wgin.BodyHandlerMaker[S, T](authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
+	return wgin.StdFullBodyHandlerMaker[S, T](
+		authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
 }
 
-func getHandlerOf[S any, T any](sfl wgin.Sfl[S, T], mapper func(map[string]string) (S, error)) gin.HandlerFunc {
-	return wgin.GetHandlerMaker[S, T](mapper, authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
-}
-
-func mappedBodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T], mapper func(map[string]string, *S) error) gin.HandlerFunc {
-	return wgin.MappedBodyHandlerMaker[S, T](mapper, authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
+func noBodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T]) gin.HandlerFunc {
+	return wgin.StdNoBodyHandlerMaker[S, T](
+		authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
 }
 
 var articleCreateSflH = bodyHandlerOf(articleCreateSfl)
-var articleDeleteSflH = wgin.DeleteHandlerMaker(articleDeleteSfl)
+var articleDeleteSflH = noBodyHandlerOf(articleDeleteSfl)
 var articleFavoriteSflH = bodyHandlerOf(articleFavoriteSfl)
-var articleGetSflH = wgin.GetHandlerMaker(articleGetSfl)
-var articleUnfavoriteSflH = wgin.DeleteHandlerMaker(articleUnfavoriteSfl)
-var articleUpdateSflH = wgin.PutHandlerMaker(articleUpdateSfl)
-var articlesFeedSflH = wgin.GetHandlerMaker(articlesFeedSfl)
-var articlesListSflH = wgin.GetHandlerMaker(articlesListSfl)
+var articleGetSflH = noBodyHandlerOf(articleGetSfl)
+var articleUnfavoriteSflH = noBodyHandlerOf(articleUnfavoriteSfl)
+var articleUpdateSflH = bodyHandlerOf(articleUpdateSfl)
+var articlesFeedSflH = noBodyHandlerOf(articlesFeedSfl)
+var articlesListSflH = noBodyHandlerOf(articlesListSfl)
 var commentAddSflH = bodyHandlerOf(commentAddSfl)
-var commentDeleteSflH = wgin.DeleteHandlerMaker(commentDeleteSfl)
-var commentsGetSflH = wgin.GetHandlerMaker(commentsGetSfl)
-var profileGetSflH = wgin.GetHandlerMaker(profileGetSfl)
-var tagsGetSflH = wgin.GetHandlerMaker(tagsGetSfl)
+var commentDeleteSflH = noBodyHandlerOf(commentDeleteSfl)
+var commentsGetSflH = noBodyHandlerOf(commentsGetSfl)
+var profileGetSflH = noBodyHandlerOf(profileGetSfl)
+var tagsGetSflH = noBodyHandlerOf(tagsGetSfl)
 var userAuthenticateSflH = bodyHandlerOf(userAuthenticateSfl)
 var userFollowSflH = bodyHandlerOf(userFollowSfl)
-var userGetCurrentSflH = wgin.GetHandlerMaker(userGetCurrentSfl)
+var userGetCurrentSflH = noBodyHandlerOf(userGetCurrentSfl)
 var userRegisterSflH = bodyHandlerOf(userRegisterSfl)
-var userUnfollowSflH = wgin.DeleteHandlerMaker(userUnfollowSfl)
-var userUpdateSflH = wgin.PutHandlerMaker(userUpdateSfl)
+var userUnfollowSflH = noBodyHandlerOf(userUnfollowSfl)
+var userUpdateSflH = bodyHandlerOf(userUpdateSfl)

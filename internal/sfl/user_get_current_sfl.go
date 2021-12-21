@@ -7,13 +7,14 @@
 package sfl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleCreateSflT is the type of the stereotype instance for the service flow that
 // returns the current user.
-type UserGetCurrentSflT = func(username string) (rpc.UserOut, error)
+type UserGetCurrentSflT = func(username string, _ arch.Unit) (rpc.UserOut, error)
 
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT.
@@ -21,7 +22,7 @@ func UserGetCurrentSflC(
 	userGetByNameDaf fs.UserGetByNameDafT,
 ) UserGetCurrentSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
-	return func(username string) (rpc.UserOut, error) {
+	return func(username string, _ arch.Unit) (rpc.UserOut, error) {
 		user, _, err := userGetByNameDaf(username)
 		if err != nil {
 			return rpc.UserOut{}, err

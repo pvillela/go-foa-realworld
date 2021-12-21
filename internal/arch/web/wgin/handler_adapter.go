@@ -21,11 +21,29 @@ type Sfl[S any, T any] func(string, S) (T, error)
 
 type HandlerOfSfl[S any, T any] func(Sfl[S, T]) gin.HandlerFunc
 
+type MappedHandlerOfSfl[S any, T any] func(
+	queryMapper func(map[string]string, *S) error,
+	uriMapper func(map[string]string, *S) error,
+	svc Sfl[S, T],
+) gin.HandlerFunc
+
+func setErrorAndAbort(c *gin.Context, err error, httpStatus int) {
+	log.Info(err)
+	c.JSON(http.StatusBadRequest, gin.H{
+		"msg": err.Error(),
+	})
+	c.AbortWithStatus(httpStatus)
+}
+
 // This 3rd order function produces a 2nd order function that takes service flows and returns
 // Gin handler functions.
 // Contains common logic to bind the HTTP request to service flow input, call service flow, and
 // produce HTTP responses.
 // - jsonBind: determines whether a JSON payload is expected or not. If true, the request payload
+//   will be bound to the service flow input object.
+// - queryBind: determines whether query parameters are expected or not. If true, the query params
+//   will be bound to the service flow input object.
+// - uriBind: determines whether URI parameters are expected or not. If true, the URI params
 //   will be bound to the service flow input object.
 // - queryMapper: merges a map extracted from query parameters with a service flow input object, to
 //   produce an augmented input object.
@@ -33,58 +51,71 @@ type HandlerOfSfl[S any, T any] func(Sfl[S, T]) gin.HandlerFunc
 //   produce an augmented input object.
 func handlerMaker[S any, T any](
 	jsonBind bool,
-	queryMapper func(map[string]string, *S) error,
-	uriMapper func(map[string]string, *S) error,
+	queryBind bool,
+	uriBind bool,
 	authenticator func(*http.Request) error,
 	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
-) HandlerOfSfl[S, T] {
+) MappedHandlerOfSfl[S, T] {
 
-	return func(svc Sfl[S, T]) gin.HandlerFunc {
+	return func(
+		queryMapper func(map[string]string, *S) error,
+		uriMapper func(map[string]string, *S) error,
+		svc Sfl[S, T],
+	) gin.HandlerFunc {
 
 		return func(c *gin.Context) {
 			req := c.Request
 
-			reqCtx, err := reqCtxExtractor(req)
+			err := authenticator(req)
+			if err != nil {
+				setErrorAndAbort(c, err, 401)
+				return
+			}
 
-			setErrorResponse := func(errorContents arch.Any) {
+			reqCtx, err := reqCtxExtractor(req)
+			if err != nil {
+				setErrorAndAbort(c, err, 403) // not sure this is the right code here
+				return
+			}
+
+			setErrorResponseAndAbort := func(errorContents arch.Any) {
 				errResult := errorHandler(errorContents, reqCtx)
 				c.JSON(errResult.StatusCode, errResult)
 			}
 
 			defer func() {
 				if r := recover(); r != nil {
-					setErrorResponse(r)
+					setErrorResponseAndAbort(r)
 				}
 			}()
-
-			if err != nil {
-
-				log.Info(err)
-
-				c.JSON(401, gin.H{
-					"msg": err.Error(),
-				})
-				return
-			}
 
 			var input S
 			pInput := &input
 
 			if jsonBind {
 				// Bind JSON content of request body to pInput
-				err = c.BindJSON(pInput)
+				err = c.ShouldBindJSON(pInput)
 				if err != nil {
-					// Gin automatically returns an error
-					// response when the BindJSON operation
-					// fails, we simply have to stop this
-					// function from continuing to execute
+					setErrorAndAbort(c, err, http.StatusBadRequest)
+					return
+				}
+			}
 
-					log.Info(err)
+			if queryBind {
+				// Bind query parameters to pInput
+				err = c.ShouldBindQuery(pInput)
+				if err != nil {
+					setErrorAndAbort(c, err, http.StatusBadRequest)
+					return
+				}
+			}
 
-					c.JSON(400, gin.H{
-						"msg": err.Error(),
-					})
+			if uriBind {
+				// Bind query parameters to pInput
+				err = c.ShouldBindUri(pInput)
+				if err != nil {
+					setErrorAndAbort(c, err, http.StatusBadRequest)
 					return
 				}
 			}
@@ -98,11 +129,10 @@ func handlerMaker[S any, T any](
 
 				err := queryMapper(m, pInput)
 				if err != nil {
-					c.JSON(400, gin.H{
-						"msg":  err.Error(),
-						"code": 888,
-					})
-					return
+					if err != nil {
+						setErrorAndAbort(c, err, http.StatusBadRequest)
+						return
+					}
 				}
 			}
 
@@ -115,21 +145,17 @@ func handlerMaker[S any, T any](
 
 				err := uriMapper(m, pInput)
 				if err != nil {
-					c.JSON(400, gin.H{
-						"msg":  err.Error(),
-						"code": 888,
-					})
-					return
+					if err != nil {
+						setErrorAndAbort(c, err, http.StatusBadRequest)
+						return
+					}
 				}
 			}
 
 			output, err := svc(reqCtx.Username, input)
 
 			if err != nil {
-				c.JSON(400, gin.H{
-					"msg":  err.Error(),
-					"code": 888,
-				})
+				setErrorResponseAndAbort(err)
 				return
 			}
 
@@ -138,36 +164,26 @@ func handlerMaker[S any, T any](
 	}
 }
 
-func GetHandlerMaker[S any, T any](
-	mapper func(map[string]string) (S, error),
+func StdNoBodyHandlerMaker[S any, T any](
 	authenticator func(*http.Request) error,
-	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
+	reqCtxExtractor func(*http.Request) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) HandlerOfSfl[S, T] {
-	mapper0 := func(m map[string]string, pS *S) error {
-		s, err := mapper(m)
-		if err != nil {
-			return err
-		}
-		*pS = s
-		return nil
+	return func(svc Sfl[S, T]) gin.HandlerFunc {
+		return handlerMaker[S, T](false, true, true, authenticator, reqCtxExtractor, errorHandler)(
+			nil, nil, svc,
+		)
 	}
-	return handlerMaker[S, T](false, mapper0, authenticator, reqCtxExtractor, errorHandler)
 }
 
-func MappedBodyHandlerMaker[S any, T any](
-	mapper func(map[string]string, *S) error,
+func StdFullBodyHandlerMaker[S any, T any](
 	authenticator func(*http.Request) error,
-	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
+	reqCtxExtractor func(*http.Request) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) HandlerOfSfl[S, T] {
-	return handlerMaker[S, T](true, mapper, authenticator, reqCtxExtractor, errorHandler)
-}
-
-func BodyHandlerMaker[S any, T any](
-	authenticator func(*http.Request) error,
-	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
-	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
-) HandlerOfSfl[S, T] {
-	return handlerMaker[S, T](true, nil, authenticator, reqCtxExtractor, errorHandler)
+	return func(svc Sfl[S, T]) gin.HandlerFunc {
+		return handlerMaker[S, T](true, true, true, authenticator, reqCtxExtractor, errorHandler)(
+			nil, nil, svc,
+		)
+	}
 }

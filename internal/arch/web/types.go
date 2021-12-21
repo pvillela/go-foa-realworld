@@ -6,15 +6,7 @@
 
 package web
 
-type Filler[T any] func(*RequestContext, *T) error
-
-type FillerError struct {
-	FillerError error
-}
-
-func (ferr FillerError) Error() string {
-	return ferr.FillerError.Error()
-}
+import "github.com/pvillela/go-foa-realworld/internal/arch"
 
 type ErrorResult struct {
 	StatusCode       int
@@ -25,7 +17,7 @@ type ErrorResult struct {
 	ParentSpanId     string
 	SpanId           string
 	Cause            map[string]string
-	Args             []Any
+	Args             []arch.Any
 	Details          []ErrorDetail
 }
 

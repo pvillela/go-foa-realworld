@@ -141,18 +141,18 @@ func CreateToken(userid uint64) (*TokenDetails, error) {
 }
 
 func CreateAuth(userid uint64, td *TokenDetails) error {
-	at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
-	rt := time.Unix(td.RtExpires, 0)
-	now := time.Now()
-
-	errAccess := client.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
-	if errAccess != nil {
-		return errAccess
-	}
-	errRefresh := client.Set(td.RefreshUuid, strconv.Itoa(int(userid)), rt.Sub(now)).Err()
-	if errRefresh != nil {
-		return errRefresh
-	}
+	//at := time.Unix(td.AtExpires, 0) //converting Unix to UTC(to Time object)
+	//rt := time.Unix(td.RtExpires, 0)
+	//now := time.Now()
+	//
+	//errAccess := client.Set(td.AccessUuid, strconv.Itoa(int(userid)), at.Sub(now)).Err()
+	//if errAccess != nil {
+	//	return errAccess
+	//}
+	//errRefresh := client.Set(td.RefreshUuid, strconv.Itoa(int(userid)), rt.Sub(now)).Err()
+	//if errRefresh != nil {
+	//	return errRefresh
+	//}
 	return nil
 }
 
@@ -221,35 +221,36 @@ type AccessDetails struct {
 }
 
 func FetchAuth(authD *AccessDetails) (uint64, error) {
-	userid, err := client.Get(authD.AccessUuid).Result()
-	if err != nil {
-		return 0, err
-	}
-	userID, _ := strconv.ParseUint(userid, 10, 64)
-	return userID, nil
+	//userid, err := client.Get(authD.AccessUuid).Result()
+	//if err != nil {
+	//	return 0, err
+	//}
+	//userID, _ := strconv.ParseUint(userid, 10, 64)
+	//return userID, nil
+	panic("fix or remove")
 }
 
 func CreateTodo(c *gin.Context) {
-	var td *Todo
-	if err := c.ShouldBindJSON(&td); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, "invalid json")
-		return
-	}
-	tokenAuth, err := ExtractTokenMetadata(c.Request)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		return
-	}
-	userId, err = FetchAuth(tokenAuth)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		return
-	}
-	td.UserID = userId
-
-	//you can proceed to save the Todo to a database
-	//but we will just return it to the caller here:
-	c.JSON(http.StatusCreated, td)
+	//var td *Todo
+	//if err := c.ShouldBindJSON(&td); err != nil {
+	//	c.JSON(http.StatusUnprocessableEntity, "invalid json")
+	//	return
+	//}
+	//tokenAuth, err := ExtractTokenMetadata(c.Request)
+	//if err != nil {
+	//	c.JSON(http.StatusUnauthorized, "unauthorized")
+	//	return
+	//}
+	//userId, err = FetchAuth(tokenAuth)
+	//if err != nil {
+	//	c.JSON(http.StatusUnauthorized, "unauthorized")
+	//	return
+	//}
+	//td.UserID = userId
+	//
+	////you can proceed to save the Todo to a database
+	////but we will just return it to the caller here:
+	//c.JSON(http.StatusCreated, td)
 }
 
 type Todo struct {

@@ -7,11 +7,12 @@
 package mapdb
 
 import (
+	"sync"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 type Any = interface{}
@@ -73,16 +74,16 @@ func (s MapDb) Create(key Any, value Any, txn db.Txn) error {
 	if err := txn.Validate(); err != nil {
 		return err
 	}
-	if _, loaded := s.store.LoadOrStore(key, value); loaded {
+	if _, loaded := s.Store.LoadOrStore(key, value); loaded {
 		return ErrDuplicateKey.Make(nil, key)
 	}
 	return nil
 }
 
 func (s MapDb) Read(key Any) (Any, error) {
-	value, loaded := s.store.Load(key)
+	value, loaded := s.Store.Load(key)
 	if loaded {
-		return nil, ErrRecordNotFound.Make(nil, s.name, key)
+		return nil, ErrRecordNotFound.Make(nil, s.Name, key)
 	}
 	return value, nil
 }
@@ -97,7 +98,7 @@ func (s MapDb) Update(key Any, value Any, txn db.Txn) error {
 		return err
 	}
 
-	s.store.Store(key, value)
+	s.Store.Store(key, value)
 	return nil
 }
 
@@ -111,12 +112,12 @@ func (s MapDb) Delete(key Any, txn db.Txn) error {
 		return err
 	}
 
-	s.store.Delete(key)
+	s.Store.Delete(key)
 	return nil
 }
 
 func (s MapDb) Range(f func(key, value interface{}) bool) {
-	s.store.Range(f)
+	s.Store.Range(f)
 }
 
 func (s MapDb) FindFirst(pred func(Any, Any) bool) (retVal Any, found bool) {
@@ -128,7 +129,7 @@ func (s MapDb) FindFirst(pred func(Any, Any) bool) (retVal Any, found bool) {
 		}
 		return true
 	}
-	s.store.Range(f)
+	s.Store.Range(f)
 	return
 }
 
@@ -140,6 +141,6 @@ func (s MapDb) FindAll(pred func(Any, Any) bool) []Any {
 		}
 		return true
 	}
-	s.store.Range(f)
+	s.Store.Range(f)
 	return retVals
 }

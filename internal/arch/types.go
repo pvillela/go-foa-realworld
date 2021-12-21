@@ -11,3 +11,8 @@ type Any = interface{}
 type Unit = struct{}
 
 var Void Unit
+
+type Tuple2[T1 any, T2 any] struct {
+	_1 T1
+	_2 T2
+}
