@@ -8,9 +8,10 @@ Some of the code was based on https://github.com/err0r500/go-realworld-clean.
 ## To-dos:
 
 v Create web handlers for non-POST methods
-- Test handler adapter
-- Create Default ReqCtxExtractor
-- Implement correct request context logic with Context. Initially, ReqCtx is only used as an intermediary to get username and is not being stored in Context.
+v Test handler adapter
+* Create Default ReqCtxExtractor
+* Implement correct request context logic with Context. Initially, ReqCtx is only used as an intermediary to get username and is not being stored in Context.
+* Fix fmt.Println instances with formatting directives (listed by go test ./...)
 v Complete first pass at SFLs. 
 v Review use of pointers, clean it up. 
 v Review model in terms of relationships and how they should be represented.
@@ -20,13 +21,13 @@ v Complete review and clean-up of model
   v No need for this for mapdb, but we want to do it for consistency with how we might model it
     with a real database (relational or NoSQL): Separate Favorited entity with its own DAFs
   v Add followers count field to User
-* Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.
+v Review FLs and SFLs, move functionality to BFs, model, or rpc as appropriate.
     - Start with article filtering logic
 v Review model and move functionality to BFs and DAFs as appropriate.
 * Review basic error handling, including fs/errors.go.
-* Create request adapter pattern that includes:
-    - last-resort error handling
-    - encompasses both query parameters and JSON payloads
+v Create request adapter pattern that includes:
+    v last-resort error handling
+    v encompasses both query parameters and JSON payloads
 * Create pattern for platform-independent unmarshallers.
 * Create platform-independent unmarshallers for rpc structs.
 * Implement authentication.
