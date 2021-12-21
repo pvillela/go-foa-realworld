@@ -13,8 +13,12 @@ import (
 
 func DefaultErrorHandler(errorContents arch.Any, ctx RequestContext) ErrorResult {
 	logrus.Info("Error caught in web handler:", errorContents)
-	errResult := ErrorResult{}
+	var errResult ErrorResult
 	errResult.DeveloperMessage = "Dummy error handler implementation."
 	errResult.StatusCode = 500
+	switch errorContents.(type) {
+	case error:
+		errResult.ErrorString = errorContents.(error).Error()
+	}
 	return errResult
 }

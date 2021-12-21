@@ -17,14 +17,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Sfl[S any, T any] func(string, S) (T, error)
+type SflT[S any, T any] func(username string, in S) (T, error)
 
-type HandlerOfSfl[S any, T any] func(Sfl[S, T]) gin.HandlerFunc
+type SflToHandlerT[S any, T any] func(SflT[S, T]) gin.HandlerFunc
 
-type MappedHandlerOfSfl[S any, T any] func(
+type SflToMappedHandlerT[S any, T any] func(
 	queryMapper func(map[string]string, *S) error,
 	uriMapper func(map[string]string, *S) error,
-	svc Sfl[S, T],
+	svc SflT[S, T],
 ) gin.HandlerFunc
 
 func setErrorAndAbort(c *gin.Context, err error, httpStatus int) {
@@ -49,19 +49,19 @@ func setErrorAndAbort(c *gin.Context, err error, httpStatus int) {
 //   produce an augmented input object.
 // - uriMapper: merges a map extracted from uri parameters with a service flow input object, to
 //   produce an augmented input object.
-func handlerMaker[S any, T any](
+func makeSflToHandler[S any, T any](
 	jsonBind bool,
 	queryBind bool,
 	uriBind bool,
 	authenticator func(*http.Request) error,
 	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
-) MappedHandlerOfSfl[S, T] {
+) SflToMappedHandlerT[S, T] {
 
 	return func(
 		queryMapper func(map[string]string, *S) error,
 		uriMapper func(map[string]string, *S) error,
-		svc Sfl[S, T],
+		svc SflT[S, T],
 	) gin.HandlerFunc {
 
 		return func(c *gin.Context) {
@@ -164,25 +164,25 @@ func handlerMaker[S any, T any](
 	}
 }
 
-func StdNoBodyHandlerMaker[S any, T any](
+func MakeStdNoBodySflToHandler[S any, T any](
 	authenticator func(*http.Request) error,
 	reqCtxExtractor func(*http.Request) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
-) HandlerOfSfl[S, T] {
-	return func(svc Sfl[S, T]) gin.HandlerFunc {
-		return handlerMaker[S, T](false, true, true, authenticator, reqCtxExtractor, errorHandler)(
+) SflToHandlerT[S, T] {
+	return func(svc SflT[S, T]) gin.HandlerFunc {
+		return makeSflToHandler[S, T](false, true, true, authenticator, reqCtxExtractor, errorHandler)(
 			nil, nil, svc,
 		)
 	}
 }
 
-func StdFullBodyHandlerMaker[S any, T any](
+func MakeStdFullBodySflToHandler[S any, T any](
 	authenticator func(*http.Request) error,
 	reqCtxExtractor func(*http.Request) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
-) HandlerOfSfl[S, T] {
-	return func(svc Sfl[S, T]) gin.HandlerFunc {
-		return handlerMaker[S, T](true, true, true, authenticator, reqCtxExtractor, errorHandler)(
+) SflToHandlerT[S, T] {
+	return func(svc SflT[S, T]) gin.HandlerFunc {
+		return makeSflToHandler[S, T](true, true, true, authenticator, reqCtxExtractor, errorHandler)(
 			nil, nil, svc,
 		)
 	}

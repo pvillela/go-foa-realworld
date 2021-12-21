@@ -9,5 +9,7 @@ package web
 import "net/http"
 
 func DefaultReqCtxExtractor(*http.Request) (RequestContext, error) {
-	panic("todo")
+	// TODO: implement this
+	var reqCtx RequestContext
+	return reqCtx, nil
 }

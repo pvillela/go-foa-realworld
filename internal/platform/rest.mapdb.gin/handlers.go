@@ -7,6 +7,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,16 +16,18 @@ import (
 )
 
 func authenticator(pReq *http.Request) error {
-	panic("todo")
+	// TODO: implement this
+	fmt.Println("authenticator ran")
+	return nil
 }
 
-func bodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T]) gin.HandlerFunc {
-	return wgin.StdFullBodyHandlerMaker[S, T](
+func bodyHandlerOf[S any, T any](sfl wgin.SflT[S, T]) gin.HandlerFunc {
+	return wgin.MakeStdFullBodySflToHandler[S, T](
 		authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
 }
 
-func noBodyHandlerOf[S any, T any](sfl wgin.Sfl[S, T]) gin.HandlerFunc {
-	return wgin.StdNoBodyHandlerMaker[S, T](
+func noBodyHandlerOf[S any, T any](sfl wgin.SflT[S, T]) gin.HandlerFunc {
+	return wgin.MakeStdNoBodySflToHandler[S, T](
 		authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
 }
 
