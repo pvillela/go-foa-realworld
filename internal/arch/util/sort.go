@@ -1,9 +1,13 @@
 package util
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/pvillela/go-foa-realworld/internal/arch"
+)
 
 type sortable struct {
-	slice []Any
+	slice []arch.Any
 	less  func(i, j int) bool
 }
 
@@ -22,7 +26,7 @@ func (s sortable) Less(i, j int) bool {
 	return s.less(i, j)
 }
 
-func Sort(slice []Any, less func(i, j int) bool) {
+func Sort(slice []arch.Any, less func(i, j int) bool) {
 	s := sortable{slice, less}
 	sort.Sort(s)
 }

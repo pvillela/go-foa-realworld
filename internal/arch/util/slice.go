@@ -1,10 +1,14 @@
 package util
 
-import "fmt"
+import (
+	"fmt"
 
-func SliceWindow(slice []Any, limit, offset int) []Any {
+	"github.com/pvillela/go-foa-realworld/internal/arch"
+)
+
+func SliceWindow(slice []arch.Any, limit, offset int) []arch.Any {
 	if slice == nil {
-		return []Any{}
+		return []arch.Any{}
 	}
 	if limit < 0 {
 		msg := fmt.Sprintf("SliceWindow limit is %v but should be >= 0")
@@ -24,7 +28,7 @@ func SliceWindow(slice []Any, limit, offset int) []Any {
 	return slice[offset:limit]
 }
 
-func SliceContains(slice []Any, value Any) bool {
+func SliceContains(slice []arch.Any, value arch.Any) bool {
 	for _, v := range slice {
 		if v == value {
 			return true
