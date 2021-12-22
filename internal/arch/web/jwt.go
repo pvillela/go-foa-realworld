@@ -4,9 +4,58 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/twinj/uuid"
 
 	jwt "github.com/golang-jwt/jwt/v4"
 )
+
+type TokenDetails struct {
+	AccessToken  string
+	AtClaims     jwt.MapClaims
+	RefreshToken string
+	RtClaims     jwt.MapClaims
+	AccessUuid   string
+	RefreshUuid  string
+	AtExpires    int64
+	RtExpires    int64
+}
+
+func CreateToken(userid string, secretKey []byte) (*TokenDetails, error) {
+	td := &TokenDetails{}
+	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
+	td.AccessUuid = uuid.NewV4().String()
+
+	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
+	td.RefreshUuid = uuid.NewV4().String()
+
+	var err error
+	//Creating Access Token
+	atClaims := jwt.MapClaims{}
+	atClaims["authorized"] = true
+	atClaims["access_uuid"] = td.AccessUuid
+	atClaims["sub"] = userid
+	atClaims["exp"] = td.AtExpires
+	td.AtClaims = atClaims
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	td.AccessToken, err = at.SignedString(secretKey)
+	if err != nil {
+		return nil, err
+	}
+	//Creating Refresh Token
+	rtClaims := jwt.MapClaims{}
+	rtClaims["refresh_uuid"] = td.RefreshUuid
+	rtClaims["sub"] = userid
+	rtClaims["exp"] = td.RtExpires
+	td.RtClaims = rtClaims
+	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtClaims)
+	td.RefreshToken, err = rt.SignedString(secretKey)
+	if err != nil {
+		return nil, err
+	}
+	return td, nil
+}
 
 func extractToken(r *http.Request) string {
 	bearToken := r.Header.Get("Authorization")

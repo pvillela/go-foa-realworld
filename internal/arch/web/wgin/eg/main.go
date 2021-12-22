@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 )
@@ -27,16 +28,18 @@ func svc(_ string, in In) (Out, error) {
 	return Out{in.User + in.Password}, nil
 }
 
-func authenticator(pReq *http.Request) error {
-	// TODO: implement this
-	fmt.Println("authenticator ran")
-	return nil
+var secretKey = []byte("1234567890")
+
+func dummyAuthenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
+	tokenDetails, _ := web.CreateToken("me", secretKey)
+	fmt.Println("authenticator ran\n", "tokenDetails:", tokenDetails)
+	return true, tokenDetails.AtClaims, nil
 }
 
-var defaultReqCtxExtractor = web.MakeDefaultReqCtxExtractor([]byte("1234567890"))
+var defaultReqCtxExtractor = web.DefaultReqCtxExtractor
 
 var svcH = wgin.MakeStdFullBodySflToHandler[In, Out](
-	authenticator, defaultReqCtxExtractor, web.DefaultErrorHandler,
+	dummyAuthenticator, defaultReqCtxExtractor, web.DefaultErrorHandler,
 )(svc)
 
 func main() {

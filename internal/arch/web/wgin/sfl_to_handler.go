@@ -7,8 +7,10 @@
 package wgin
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -45,16 +47,23 @@ func setErrorAndAbort(c *gin.Context, err error, httpStatus int) {
 //   will be bound to the service flow input object.
 // - uriBind: determines whether URI parameters are expected or not. If true, the URI params
 //   will be bound to the service flow input object.
+// - authenticator: authenticates the call, typically using JWT. Is nil in the case of the login
+//   service flow.
+// - reqCtxExtractor: extracts information from the HTTP request to form the RequestContext object
+//   used throught the processing flow. Is nil in the case of login.
+// - errorHadler: maps errors before for the HTTP response.
+// Below are parameters of the function returned by this function:
 // - queryMapper: merges a map extracted from query parameters with a service flow input object, to
-//   produce an augmented input object.
+//   produce an augmented input object. Usually is nil.
 // - uriMapper: merges a map extracted from uri parameters with a service flow input object, to
-//   produce an augmented input object.
+//   produce an augmented input object. Usually is nil.
+// - sfl: the service flow that is transformeed into a Gin HandlerFunc.
 func makeSflToHandler[S any, T any](
 	jsonBind bool,
 	queryBind bool,
 	uriBind bool,
-	authenticator func(*http.Request) error,
-	reqCtxExtractor func(*http.Request) (web.RequestContext, error), // TODO: See ExtractToken in jwt_stuff.go
+	authenticator func(*http.Request) (bool, jwt.MapClaims, error),
+	reqCtxExtractor func(*http.Request, jwt.MapClaims) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) SflToMappedHandlerT[S, T] {
 
@@ -65,18 +74,32 @@ func makeSflToHandler[S any, T any](
 	) gin.HandlerFunc {
 
 		return func(c *gin.Context) {
+			var err error
 			req := c.Request
 
-			err := authenticator(req)
-			if err != nil {
-				setErrorAndAbort(c, err, 401)
-				return
+			var claims jwt.MapClaims
+			if authenticator != nil {
+				var ok bool
+				ok, claims, err = authenticator(req)
+				if err != nil {
+					setErrorAndAbort(c, err, 401)
+					return
+				}
+				if !ok {
+					err = fmt.Errorf("authentication faied")
+					setErrorAndAbort(c, err, 401)
+					return
+				}
 			}
 
-			reqCtx, err := reqCtxExtractor(req)
-			if err != nil {
-				setErrorAndAbort(c, err, 403) // not sure this is the right code here
-				return
+			var reqCtx web.RequestContext
+
+			if reqCtxExtractor != nil {
+				reqCtx, err = reqCtxExtractor(req, claims)
+				if err != nil {
+					setErrorAndAbort(c, err, 403) // not sure this is the right code here
+					return
+				}
 			}
 
 			setErrorResponseAndAbort := func(errorContents arch.Any) {
@@ -159,14 +182,18 @@ func makeSflToHandler[S any, T any](
 				return
 			}
 
-			c.JSON(http.StatusOK, &output)
+			if authenticator == nil { // login case
+				// TODO: implement
+			} else { // normal case
+				c.JSON(http.StatusOK, &output)
+			}
 		}
 	}
 }
 
 func MakeStdNoBodySflToHandler[S any, T any](
-	authenticator func(*http.Request) error,
-	reqCtxExtractor func(*http.Request) (web.RequestContext, error),
+	authenticator func(*http.Request) (bool, jwt.MapClaims, error),
+	reqCtxExtractor func(*http.Request, jwt.MapClaims) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) SflToHandlerT[S, T] {
 	return func(svc SflT[S, T]) gin.HandlerFunc {
@@ -177,12 +204,22 @@ func MakeStdNoBodySflToHandler[S any, T any](
 }
 
 func MakeStdFullBodySflToHandler[S any, T any](
-	authenticator func(*http.Request) error,
-	reqCtxExtractor func(*http.Request) (web.RequestContext, error),
+	authenticator func(*http.Request) (bool, jwt.MapClaims, error),
+	reqCtxExtractor func(*http.Request, jwt.MapClaims) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) SflToHandlerT[S, T] {
 	return func(svc SflT[S, T]) gin.HandlerFunc {
 		return makeSflToHandler[S, T](true, true, true, authenticator, reqCtxExtractor, errorHandler)(
+			nil, nil, svc,
+		)
+	}
+}
+
+func MakeLoginHandler[S any, T any](
+	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
+) SflToHandlerT[S, T] {
+	return func(svc SflT[S, T]) gin.HandlerFunc {
+		return makeSflToHandler[S, T](true, false, false, nil, nil, errorHandler)(
 			nil, nil, svc,
 		)
 	}
