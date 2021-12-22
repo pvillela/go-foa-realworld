@@ -7,48 +7,21 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
-	"os"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
+	jwt "github.com/golang-jwt/jwt/v4"
 )
 
-func ExtractToken(r *http.Request) string {
-	bearToken := r.Header.Get("Authorization")
-	//normally Authorization the_token_xxx
-	strArr := strings.Split(bearToken, " ")
-	if len(strArr) == 2 {
-		return strArr[1]
-	}
-	return ""
-}
+func MakeDefaultReqCtxExtractor(secretKey []byte) func(*http.Request) (RequestContext, error) {
+	return func(req *http.Request) (RequestContext, error) {
+		var reqCtx RequestContext
 
-func VerifiedToken(r *http.Request) (*jwt.Token, error) {
-	tokenString := ExtractToken(r)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		//Make sure that the token method conform to "SigningMethodHMAC"
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		token, err := VerifiedJwtToken(req, secretKey)
+		if err != nil {
+			return reqCtx, err
 		}
-		// TODO: fix line below
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
-	})
-	if err != nil {
-		return nil, err
+
+		reqCtx.Username = token.Claims.(jwt.StandardClaims).Subject
+		return reqCtx, nil
 	}
-	return token, nil
-}
-
-func DefaultReqCtxExtractor(req *http.Request) (RequestContext, error) {
-	var reqCtx RequestContext
-
-	token, err := VerifiedToken(req)
-	if err != nil {
-		return reqCtx, err
-	}
-
-	reqCtx.Username = token.Claims.(jwt.StandardClaims).Subject
-	return reqCtx, nil
 }

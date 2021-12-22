@@ -33,8 +33,10 @@ func authenticator(pReq *http.Request) error {
 	return nil
 }
 
+var defaultReqCtxExtractor = web.MakeDefaultReqCtxExtractor([]byte("1234567890"))
+
 var svcH = wgin.MakeStdFullBodySflToHandler[In, Out](
-	authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler,
+	authenticator, defaultReqCtxExtractor, web.DefaultErrorHandler,
 )(svc)
 
 func main() {
