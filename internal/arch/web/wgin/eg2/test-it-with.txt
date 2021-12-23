@@ -1,0 +1,90 @@
+# secretKey:
+"1234567890"
+
+# UNEXPIRED tokenDetails for username "me":
+tokenDetails:
+    AccessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjRmNGNmZGI4LTdhMTktNGY2NS04NDYxLWUyMmNjMGQ5NWI0MCIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6NzY0MDI1ODgzMiwic3ViIjoibWUifQ.dsKk3uu3AO0DU56tl7kp88XzGRB-Kp-QlvJGzEK8USM"
+    AtClaims: map[access_uuid:4f4cfdb8-7a19-4f65-8461-e22cc0d95b40 authorized:true exp:7640258832 sub:me]
+    RefreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjg4NDAyNTg4MzIsInJlZnJlc2hfdXVpZCI6ImZmYzdlYjQyLThkMWMtNDc3Mi1hOGE0LTIyMWY5ZjYyMWRiZiIsInN1YiI6Im1lIn0.6YMcGOJmVMtPK63G33t88XYu71iT3yNzo4_b3jEX1E0"
+    RtClaims: map[exp:8840258832 refresh_uuid:ffc7eb42-8d1c-4772-a8a4-221f9f621dbf sub:me]
+    AccessUuis: "4f4cfdb8-7a19-4f65-8461-e22cc0d95b40"
+    RefreshUuid: "ffc7eb42-8d1c-4772-a8a4-221f9f621dbf"
+    AtExpires: 7640258832
+    RtExpires: 8840258832
+
+# claims in UNEXPIRED access token:
+access_uuid: "4f4cfdb8-7a19-4f65-8461-e22cc0d95b40"
+authorized: true
+exp: 7640258832 (February 10, 2212 5:07:12 PM GMT-05:00)
+sub: "me"
+
+# header with UNEXPIRED access token (for curl):
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjRmNGNmZGI4LTdhMTktNGY2NS04NDYxLWUyMmNjMGQ5NWI0MCIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6NzY0MDI1ODgzMiwic3ViIjoibWUifQ.dsKk3uu3AO0DU56tl7kp88XzGRB-Kp-QlvJGzEK8USM'
+
+# EXPIRED tokenDetails for username "me":
+tokenDetails:
+    AccessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjE2Mjg2NTgyLWM1NDEtNDM2NS05MGJiLTM5NTg0MDE4NTczNyIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6MTY0MDI1MjQ0NSwic3ViIjoibWUifQ.zRBG9My6-QKJ3-J7-5wX6GzoPhpFpKctbwnfQDAAuB4"
+    AtClaims: map[access_uuid:16286582-c541-4365-90bb-395840185737 authorized:true exp:1640252445 sub:me]
+    RefreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDA4NTYzNDUsInJlZnJlc2hfdXVpZCI6ImQ5NGIwMDk1LWI1YjAtNGQwZC05OWZmLWZjMzZmMDVkMGYxYSIsInN1YiI6Im1lIn0.81d6GrDHsqXsV9O952yBHlwqHqUk0UiDEwJhtkQrQFI"
+    RtClaims: map[exp:1640856345 refresh_uuid:d94b0095-b5b0-4d0d-99ff-fc36f05d0f1a sub:me]
+    AccessUuid: "16286582-c541-4365-90bb-395840185737"
+    RefreshUuid: "d94b0095-b5b0-4d0d-99ff-fc36f05d0f1a"
+    AtExpires: 1640252445
+    RtExpires: 1640856345
+
+# claims in EXPIRED access token:
+access_uuid: "16286582-c541-4365-90bb-395840185737"
+authorized: true
+exp: 1640252445 (December 23, 2021 4:40:45 AM GMT-05:00)
+sub: "me"
+
+# header with EXPIRED access token (for curl):
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjE2Mjg2NTgyLWM1NDEtNDM2NS05MGJiLTM5NTg0MDE4NTczNyIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6MTY0MDI1MjQ0NSwic3ViIjoibWUifQ.zRBG9My6-QKJ3-J7-5wX6GzoPhpFpKctbwnfQDAAuB4'
+
+# good request
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjRmNGNmZGI4LTdhMTktNGY2NS04NDYxLWUyMmNjMGQ5NWI0MCIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6NzY0MDI1ODgzMiwic3ViIjoibWUifQ.dsKk3uu3AO0DU56tl7kp88XzGRB-Kp-QlvJGzEK8USM' \
+  -d '{ "user": "manu", "password": "123" }'
+
+# good request
+curl -v -X POST \
+  http://localhost:8080/loginJSON?password=123 \
+  -H 'content-type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjRmNGNmZGI4LTdhMTktNGY2NS04NDYxLWUyMmNjMGQ5NWI0MCIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6NzY0MDI1ODgzMiwic3ViIjoibWUifQ.dsKk3uu3AO0DU56tl7kp88XzGRB-Kp-QlvJGzEK8USM' \
+  -d '{ "user": "manu" }'
+
+# good request
+curl -v -X POST \
+  http://localhost:8080/loginJSON/123 \
+  -H 'content-type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjRmNGNmZGI4LTdhMTktNGY2NS04NDYxLWUyMmNjMGQ5NWI0MCIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6NzY0MDI1ODgzMiwic3ViIjoibWUifQ.dsKk3uu3AO0DU56tl7kp88XzGRB-Kp-QlvJGzEK8USM' \
+  -d '{ "user": "manu" }'
+
+# bad request -- missing required input
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjRmNGNmZGI4LTdhMTktNGY2NS04NDYxLWUyMmNjMGQ5NWI0MCIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6NzY0MDI1ODgzMiwic3ViIjoibWUifQ.dsKk3uu3AO0DU56tl7kp88XzGRB-Kp-QlvJGzEK8USM' \
+  -d '{ "user": "manu" }'
+
+# bad request -- missing token
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -d '{ "user": "manu" }'
+
+# bad request -- expired token
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjE2Mjg2NTgyLWM1NDEtNDM2NS05MGJiLTM5NTg0MDE4NTczNyIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6MTY0MDI1MjQ0NSwic3ViIjoibWUifQ.zRBG9My6-QKJ3-J7-5wX6GzoPhpFpKctbwnfQDAAuB4' \
+  -d '{ "user": "manu", "password": "123" }'
+
+# bad request -- token with invalid signature
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3NfdXVpZCI6IjE2Mjg2NTgyLWM1NDEtNDM2NS05MGJiLTM5NTg0MDE4NTczNyIsImF1dGhvcml6ZWQiOnRydWUsImV4cCI6MTY0MDI1MjQ0NSwic3ViIjoibWUifQ.ZRBG9My6-QKJ3-J7-5wX6GzoPhpFpKctbwnfQDAAuB4' \
+  -d '{ "user": "manu", "password": "123" }'

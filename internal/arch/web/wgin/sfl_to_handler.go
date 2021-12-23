@@ -32,10 +32,10 @@ type SflToMappedHandlerT[S any, T any] func(
 
 func setErrorAndAbort(c *gin.Context, err error, httpStatus int) {
 	log.Info(err)
-	c.JSON(http.StatusBadRequest, gin.H{
+	c.JSON(httpStatus, gin.H{
 		"msg": err.Error(),
 	})
-	c.AbortWithStatus(httpStatus)
+	c.Abort()
 }
 
 // This 3rd order function produces a 2nd order function that takes a service flow and returns
@@ -101,6 +101,7 @@ func makeSflHandler[S any, T any](
 			setErrorResponseAndAbort := func(errorContents arch.Any) {
 				errResult := errorHandler(errorContents, reqCtx)
 				c.JSON(errResult.StatusCode, errResult)
+				c.Abort()
 			}
 
 			defer func() {

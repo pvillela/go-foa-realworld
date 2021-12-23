@@ -22,7 +22,9 @@ type Out struct {
 	Out string
 }
 
-func svc(_ context.Context, in In) (Out, error) {
+func svc(ctx context.Context, in In) (Out, error) {
+	username := web.ContextToRequestContext(ctx).Username
+	fmt.Println("username = ", username)
 	if in.User != "manu" || in.Password != "123" {
 		return Out{}, fmt.Errorf("Invalid user='%v' or password='%v'", in.User, in.Password)
 	}
@@ -32,9 +34,14 @@ func svc(_ context.Context, in In) (Out, error) {
 var secretKey = []byte("1234567890")
 
 func dummyAuthenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
-	tokenDetails, _ := web.CreateToken("me", secretKey)
-	fmt.Println("authenticator ran\n", "tokenDetails:", tokenDetails)
-	return true, tokenDetails.AtClaims, nil
+	var claims jwt.MapClaims
+	token, err := web.VerifiedJwtToken(pReq, secretKey)
+	if err != nil {
+		return false, claims, err
+	}
+	claims = token.Claims.(jwt.MapClaims)
+	fmt.Println("authenticator ran\n", "claims:", claims)
+	return true, claims, nil
 }
 
 var defaultReqCtxExtractor = web.DefaultReqCtxExtractor

@@ -22,12 +22,17 @@ type TokenDetails struct {
 	RtExpires    int64
 }
 
-func CreateToken(userid string, secretKey []byte) (*TokenDetails, error) {
+func CreateToken(
+	userid string,
+	secretKey []byte,
+	accessMinutes int,
+	refreshHours int,
+) (*TokenDetails, error) {
 	td := &TokenDetails{}
-	td.AtExpires = time.Now().Add(time.Minute * 15).Unix()
+	td.AtExpires = time.Now().Add(time.Minute * time.Duration(accessMinutes)).Unix()
 	td.AccessUuid = uuid.NewV4().String()
 
-	td.RtExpires = time.Now().Add(time.Hour * 24 * 7).Unix()
+	td.RtExpires = time.Now().Add(time.Hour * time.Duration(refreshHours)).Unix()
 	td.RefreshUuid = uuid.NewV4().String()
 
 	var err error
@@ -58,9 +63,9 @@ func CreateToken(userid string, secretKey []byte) (*TokenDetails, error) {
 }
 
 func extractToken(r *http.Request) string {
-	bearToken := r.Header.Get("Authorization")
-	//normally Authorization the_token_xxx
-	strArr := strings.Split(bearToken, " ")
+	// Typical header structure -- Authorization: Bearer <token>
+	bearerToken := r.Header.Get("Authorization")
+	strArr := strings.Split(bearerToken, " ")
 	if len(strArr) == 2 {
 		return strArr[1]
 	}
