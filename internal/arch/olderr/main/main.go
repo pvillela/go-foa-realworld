@@ -33,6 +33,6 @@ func main() {
 	fmt.Println(err.StackTrace())
 	fmt.Println("---err.Cause().(util.Err).StackTrace()----------------------------------------------")
 	fmt.Println(err.Cause().(util.Err).StackTrace())
-	fmt.Println("---\"%+v\\n\", err.StackTrace()----------------------------------------------")
+	fmt.Println("---err.StackTrace()----------------------------------------------")
 	fmt.Printf("%+v\n", err.StackTrace())
 }

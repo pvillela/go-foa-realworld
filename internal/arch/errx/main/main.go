@@ -40,40 +40,40 @@ func main() {
 
 	fooErr := foo()
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", errW(fooErr))----------------------------------------------")
+	fmt.Println("\n---errW(fooErr)--------------------------------------------")
 	fmt.Printf("%+v\n", errW(fooErr))
 
 	fmt.Println("\n---fmt.Println(fooErr)----------------------------------------------")
 	fmt.Println(fooErr)
 
-	fmt.Println("\n---fmt.Println(error(fooErr))----------------------------------------------")
+	fmt.Println("\n---fmt.Println(error(fooErr)--------------------------------------------")
 	fmt.Println(error(fooErr))
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", fooErr)----------------------------------------------")
+	fmt.Println("\n---fooErr)----------------------------------------------")
 	fmt.Printf("%+v\n", fooErr)
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", error(fooErr))----------------------------------------------")
+	fmt.Println("\n---error(fooErr)--------------------------------------------")
 	fmt.Printf("%+v\n", error(fooErr))
 
-	fmt.Println("\n---fooErr.StackTrace())----------------------------------------------")
+	fmt.Println("\n---fooErr.StackTrace()--------------------------------------------")
 	fmt.Println(fooErr.StackTrace())
 
-	fmt.Println("\n---errx.StackTrace(fooErr))----------------------------------------------")
+	fmt.Println("\n---errx.StackTrace(fooErr)--------------------------------------------")
 	fmt.Println(errx.StackTraceOf(fooErr))
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", errx.StackTrace(error(fooErr)))----------------------------------------------")
+	fmt.Println("\n---errx.StackTrace(error(fooErr))--------------------------------------------")
 	fmt.Printf("%+v\n", errx.StackTraceOf(error(fooErr)))
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", fooErr.DirectStackTrace())----------------------------------------------")
+	fmt.Println("\n---fooErr.DirectStackTrace()--------------------------------------------")
 	fmt.Printf("%+v\n", fooErr.DirectStackTrace())
 
-	fmt.Println("\n---fmt.Println(fooErr.Cause())----------------------------------------------")
+	fmt.Println("\n---fmt.Println(fooErr.Cause()--------------------------------------------")
 	fmt.Println(fooErr.Cause())
 
-	fmt.Println("\n---fmt.Println(fooErr.InnermostErrx())----------------------------------------------")
+	fmt.Println("\n---fmt.Println(fooErr.InnermostErrx()--------------------------------------------")
 	fmt.Println(fooErr.InnermostErrx())
 
-	fmt.Println("\n---fmt.Println(fooErr.InnermostCause())----------------------------------------------")
+	fmt.Println("\n---fmt.Println(fooErr.InnermostCause()--------------------------------------------")
 	fmt.Println(fooErr.InnermostCause())
 
 	fmt.Println("\n---fooErr.CauseChain()----------------------------------------------")
@@ -88,25 +88,25 @@ func main() {
 
 	fmt.Println("\n===bazErr=====================================================================")
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", errW(bazErr))----------------------------------------------")
+	fmt.Println("\n---errW(bazErr)--------------------------------------------")
 	fmt.Printf("%+v\n", errW(bazErr))
 
 	fmt.Println("\n---fmt.Println(bazErr)----------------------------------------------")
 	fmt.Println(bazErr)
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", bazErr)----------------------------------------------")
+	fmt.Println("\n---bazErr)----------------------------------------------")
 	fmt.Printf("%+v\n", bazErr)
 
-	fmt.Println("\n---fmt.Println(errx.StackTrace(bazErr))----------------------------------------------")
+	fmt.Println("\n---fmt.Println(errx.StackTrace(bazErr)--------------------------------------------")
 	fmt.Println(errx.StackTraceOf(bazErr))
 
-	fmt.Println("\n---fmt.Printf(\"%+v\\n\", errx.StackTrace(bazErr)----------------------------------------------")
+	fmt.Println("\n---errx.StackTrace(bazErr)----------------------------------------------")
 	fmt.Printf("%+v\n", errx.StackTraceOf(bazErr))
 
 	fmt.Println("\n===SubKinds=====================================================================")
 	fmt.Println()
 	
-	deref := func(m map[*errx.Kind]struct{}) []errx.Kind {
+deref := func(m map[*errx.Kind]struct{}) []errx.Kind {
 		slice := make([]errx.Kind, 0, len(m))
 		for kind, _ := range m {
 			slice = append(slice, *kind)

@@ -11,11 +11,11 @@ func SliceWindow(slice []arch.Any, limit, offset int) []arch.Any {
 		return []arch.Any{}
 	}
 	if limit < 0 {
-		msg := fmt.Sprintf("SliceWindow limit is %v but should be >= 0")
+		msg := fmt.Sprintf("SliceWindow limit is %v but should be >= 0", limit)
 		panic(msg)
 	}
 	if offset < 0 {
-		msg := fmt.Sprintf("SliceWindow offset is %v but should be >= 0")
+		msg := fmt.Sprintf("SliceWindow offset is %v but should be >= 0", offset)
 		panic(msg)
 	}
 	sLen := len(slice)
