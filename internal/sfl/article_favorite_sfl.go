@@ -7,6 +7,9 @@
 package sfl
 
 import (
+	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,7 +17,7 @@ import (
 
 // ArticleFavoriteSflT is the type of the stereotype instance for the service flow that
 // designates an article as a favorite.
-type ArticleFavoriteSflT = func(username string, slug string) (rpc.ArticleOut, error)
+type ArticleFavoriteSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, error)
 
 // ArticleFavoriteSflC is the function that constructs a stereotype instance of type
 // ArticleFavoriteSflT.
@@ -22,7 +25,9 @@ func ArticleFavoriteSflC(
 	beginTxn func(context string) db.Txn,
 	articleFavoriteFl fs.ArticleFavoriteFlT,
 ) ArticleFavoriteSflT {
-	return func(username string, slug string) (rpc.ArticleOut, error) {
+	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
+		username := web.ContextToRequestContext(ctx).Username
+
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

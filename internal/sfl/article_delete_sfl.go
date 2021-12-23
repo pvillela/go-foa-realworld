@@ -7,14 +7,17 @@
 package sfl
 
 import (
+	"context"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 )
 
 // ArticleDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes an article.
-type ArticleDeleteSflT = func(username, slug string) (arch.Unit, error)
+type ArticleDeleteSflT = func(ctx context.Context, slug string) (arch.Unit, error)
 
 // ArticleDeleteSflC is the function that constructs a stereotype instance of type
 // ArticleDeleteSflT.
@@ -23,7 +26,8 @@ func ArticleDeleteSflC(
 	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf fs.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
-	return func(username string, slug string) (arch.Unit, error) {
+	return func(ctx context.Context, slug string) (arch.Unit, error) {
+		username := web.ContextToRequestContext(ctx).Username
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

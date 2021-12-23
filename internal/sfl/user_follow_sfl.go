@@ -7,6 +7,9 @@
 package sfl
 
 import (
+	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,7 +17,7 @@ import (
 
 // UserFollowSflT is the type of the stereotype instance for the service flow that
 // causes the current user start following a given other user.
-type UserFollowSflT = func(username string, followedUsername string) (rpc.ProfileOut, error)
+type UserFollowSflT = func(ctx context.Context, followedUsername string) (rpc.ProfileOut, error)
 
 // UserFollowSflC is the function that constructs a stereotype instance of type
 // UserFollowSflT.
@@ -22,7 +25,9 @@ func UserFollowSflC(
 	beginTxn func(context string) db.Txn,
 	userFollowFl fs.UserFollowFlT,
 ) UserFollowSflT {
-	return func(username string, followedUsername string) (rpc.ProfileOut, error) {
+	return func(ctx context.Context, followedUsername string) (rpc.ProfileOut, error) {
+		username := web.ContextToRequestContext(ctx).Username
+
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

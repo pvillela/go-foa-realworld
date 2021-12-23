@@ -7,6 +7,9 @@
 package sfl
 
 import (
+	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,7 +17,7 @@ import (
 
 // CommentAddSflT is the type of the stereotype instance for the service flow that
 // adds a comment to an article.
-type CommentAddSflT = func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error)
+type CommentAddSflT = func(ctx context.Context, in rpc.CommentAddIn) (rpc.CommentOut, error)
 
 // CommentAddSflC is the function that constructs a stereotype instance of type
 // CommentAddSflT.
@@ -25,7 +28,9 @@ func CommentAddSflC(
 	commentCreateDaf fs.CommentCreateDafT,
 	articleUpdateDaf fs.ArticleUpdateDafT,
 ) CommentAddSflT {
-	return func(username string, in rpc.CommentAddIn) (rpc.CommentOut, error) {
+	return func(ctx context.Context, in rpc.CommentAddIn) (rpc.CommentOut, error) {
+		username := web.ContextToRequestContext(ctx).Username
+
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

@@ -7,6 +7,9 @@
 package sfl
 
 import (
+	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,7 +17,7 @@ import (
 
 // UserUpdateSflT is the type of the stereotype instance for the service flow that
 // updates a user.
-type UserUpdateSflT = func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error)
+type UserUpdateSflT = func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error)
 
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT.
@@ -24,7 +27,9 @@ func UserUpdateSflC(
 	userUpdateDaf fs.UserUpdateDafT,
 ) UserUpdateSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
-	return func(username string, in rpc.UserUpdateIn) (rpc.UserOut, error) {
+	return func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error) {
+		username := web.ContextToRequestContext(ctx).Username
+
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

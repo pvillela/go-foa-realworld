@@ -7,7 +7,10 @@
 package sfl
 
 import (
+	"context"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -15,7 +18,7 @@ import (
 
 // ArticleGetSflT is the type of the stereotype instance for the service flow that
 // retrieves an article.
-type ArticleGetSflT = func(username string, slug string) (rpc.ArticleOut, error)
+type ArticleGetSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, error)
 
 // ArticleGetSflC is the function that constructs a stereotype instance of type
 // ArticleGetSflT.
@@ -24,7 +27,9 @@ func ArticleGetSflC(
 	userGetByNameDaf fs.UserGetByNameDafT,
 	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
 ) ArticleGetSflT {
-	return func(username string, slug string) (rpc.ArticleOut, error) {
+	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
+		username := web.ContextToRequestContext(ctx).Username
+
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

@@ -11,23 +11,30 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 )
 
-func authenticator(pReq *http.Request) error {
+func authenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
 	// TODO: implement this
 	fmt.Println("authenticator ran")
-	return nil
+	mapClaims := map[string]interface{}{"sub": "me"}
+	return true, mapClaims, nil
 }
 
 func bodyHandlerOf[S any, T any](sfl wgin.SflT[S, T]) gin.HandlerFunc {
-	return wgin.MakeStdFullBodySflToHandler[S, T](
+	return wgin.MakeStdFullBodySflHandler[S, T](
 		authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
 }
 
+func loginHandlerOf[S any](sfl wgin.SflT[S, string]) gin.HandlerFunc {
+	return wgin.MakeLoginHandler[S](
+		web.DefaultErrorHandler)(sfl)
+}
+
 func noBodyHandlerOf[S any, T any](sfl wgin.SflT[S, T]) gin.HandlerFunc {
-	return wgin.MakeStdNoBodySflToHandler[S, T](
+	return wgin.MakeStdNoBodySflHandler[S, T](
 		authenticator, web.DefaultReqCtxExtractor, web.DefaultErrorHandler)(sfl)
 }
 

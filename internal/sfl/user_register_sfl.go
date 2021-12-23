@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,7 +15,7 @@ import (
 
 // UserRegisterSflT is the type of the stereotype instance for the service flow that
 // represents the action of registering a user.
-type UserRegisterSflT = func(_ string, in rpc.UserRegisterIn) (rpc.UserOut, error)
+type UserRegisterSflT = func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error)
 
 // UserRegisterSflC is the function that constructs a stereotype instance of type
 // UserRegisterSflT.
@@ -23,7 +24,7 @@ func UserRegisterSflC(
 	userCreateDaf fs.UserCreateDafT,
 ) UserRegisterSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
-	return func(_ string, in rpc.UserRegisterIn) (rpc.UserOut, error) {
+	return func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error) {
 		txn := beginTxn("UserRegisterSflT")
 		defer txn.End()
 

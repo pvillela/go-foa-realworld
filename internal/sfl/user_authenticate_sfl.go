@@ -7,13 +7,14 @@
 package sfl
 
 import (
+	"context"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
 // authenticates a user.
-type UserAuthenticateSflT = func(_username string, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
+type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT.
@@ -22,7 +23,7 @@ func UserAuthenticateSflC(
 	userAuthenticateBf fs.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
-	return func(_ string, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
+	return func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
 
 		email := in.User.Email

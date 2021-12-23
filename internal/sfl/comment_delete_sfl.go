@@ -7,6 +7,9 @@
 package sfl
 
 import (
+	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
@@ -15,7 +18,7 @@ import (
 
 // CommentDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes a comment from an article.
-type CommentDeleteSflT = func(username string, in rpc.CommentDeleteIn) (arch.Unit, error)
+type CommentDeleteSflT = func(ctx context.Context, in rpc.CommentDeleteIn) (arch.Unit, error)
 
 // CommentDeleteSflC is the function that constructs a stereotype instance of type
 // CommentDeleteSflT.
@@ -26,7 +29,9 @@ func CommentDeleteSflC(
 	articleGetBySlugdDaf fs.ArticleGetBySlugDafT,
 	articleUpdateDaf fs.ArticleUpdateDafT,
 ) CommentDeleteSflT {
-	return func(username string, in rpc.CommentDeleteIn) (arch.Unit, error) {
+	return func(ctx context.Context, in rpc.CommentDeleteIn) (arch.Unit, error) {
+		username := web.ContextToRequestContext(ctx).Username
+
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()
 

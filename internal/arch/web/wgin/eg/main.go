@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -21,7 +22,7 @@ type Out struct {
 	Out string
 }
 
-func svc(_ string, in In) (Out, error) {
+func svc(_ context.Context, in In) (Out, error) {
 	if in.User != "manu" || in.Password != "123" {
 		return Out{}, fmt.Errorf("Invalid user='%v' or password='%v'", in.User, in.Password)
 	}
@@ -38,7 +39,7 @@ func dummyAuthenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
 
 var defaultReqCtxExtractor = web.DefaultReqCtxExtractor
 
-var svcH = wgin.MakeStdFullBodySflToHandler[In, Out](
+var svcH = wgin.MakeStdFullBodySflHandler[In, Out](
 	dummyAuthenticator, defaultReqCtxExtractor, web.DefaultErrorHandler,
 )(svc)
 

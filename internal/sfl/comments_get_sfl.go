@@ -7,6 +7,7 @@
 package sfl
 
 import (
+	"context"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -14,14 +15,14 @@ import (
 
 // CommentsGetSflC is the type of the stereotype instance for the service flow that
 // retrieves the comments of an article.
-type CommentsGetSflT = func(username string, slug string) (rpc.CommentsOut, error)
+type CommentsGetSflT = func(ctx context.Context, slug string) (rpc.CommentsOut, error)
 
 // CommentsGetSflC is the function that constructs a stereotype instance of type
 // CommentsGetSflT.
 func CommentsGetSflC(
 	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
 ) CommentsGetSflT {
-	return func(username string, slug string) (rpc.CommentsOut, error) {
+	return func(_ context.Context, slug string) (rpc.CommentsOut, error) {
 		var zero rpc.CommentsOut
 
 		article, _, err := articleGetBySlugDaf(slug)
