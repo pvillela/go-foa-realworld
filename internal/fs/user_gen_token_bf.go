@@ -7,11 +7,27 @@
 package fs
 
 import (
+	"errors"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
 )
 
 type UserGenTokenBfT = func(user model.User) (string, error)
 
+const tokenTimeToLive = time.Hour * 2
+
 var UserGenTokenBfI UserGenTokenBfT = func(user model.User) (string, error) {
-	return UserGenTokenSup(user)
+	if user.Name == "" {
+		return "", errors.New("can't generate token for empty user")
+	}
+
+	claims := jwt.RegisteredClaims{
+		Subject:   user.Name,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTimeToLive)),
+		Issuer:    "real-world-demo-backend",
+	}
+
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
+		SignedString(user.PasswordSalt)
 }

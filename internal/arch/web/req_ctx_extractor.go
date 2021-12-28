@@ -12,8 +12,10 @@ import (
 	jwt "github.com/golang-jwt/jwt/v4"
 )
 
-func DefaultReqCtxExtractor(req *http.Request, claims jwt.MapClaims) (RequestContext, error) {
-	var reqCtx RequestContext
-	reqCtx.Username = claims["sub"].(string)
+func DefaultReqCtxExtractor(req *http.Request, token *jwt.Token) (RequestContext, error) {
+	reqCtx := RequestContext{
+		Username: token.Claims.(jwt.MapClaims)["sub"].(string),
+		Token:    token,
+	}
 	return reqCtx, nil
 }

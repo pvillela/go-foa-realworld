@@ -6,7 +6,10 @@
 
 package web
 
-import "github.com/pvillela/go-foa-realworld/internal/arch"
+import (
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch"
+)
 
 type ErrorResult struct {
 	StatusCode       int
@@ -29,4 +32,5 @@ type ErrorDetail struct {
 
 type RequestContext struct {
 	Username string
+	Token    *jwt.Token
 }

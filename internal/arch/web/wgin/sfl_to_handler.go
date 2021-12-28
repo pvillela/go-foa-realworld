@@ -62,8 +62,8 @@ func makeSflHandler[S any, T any](
 	jsonBind bool,
 	queryBind bool,
 	uriBind bool,
-	authenticator func(*http.Request) (bool, jwt.MapClaims, error),
-	reqCtxExtractor func(*http.Request, jwt.MapClaims) (web.RequestContext, error),
+	authenticator func(*http.Request) (bool, *jwt.Token, error),
+	reqCtxExtractor func(*http.Request, *jwt.Token) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) SflToMappedHandlerT[S, T] {
 
@@ -77,9 +77,9 @@ func makeSflHandler[S any, T any](
 			var err error
 			req := c.Request
 
-			var claims jwt.MapClaims
+			var token *jwt.Token
 			var ok bool
-			ok, claims, err = authenticator(req)
+			ok, token, err = authenticator(req)
 			if err != nil {
 				setErrorAndAbort(c, err, 401)
 				return
@@ -92,7 +92,7 @@ func makeSflHandler[S any, T any](
 
 			var reqCtx web.RequestContext
 
-			reqCtx, err = reqCtxExtractor(req, claims)
+			reqCtx, err = reqCtxExtractor(req, token)
 			if err != nil {
 				setErrorAndAbort(c, err, 403) // not sure this is the right code here
 				return
@@ -238,8 +238,8 @@ func MakeLoginHandler[S any](
 }
 
 func MakeStdNoBodySflHandler[S any, T any](
-	authenticator func(*http.Request) (bool, jwt.MapClaims, error),
-	reqCtxExtractor func(*http.Request, jwt.MapClaims) (web.RequestContext, error),
+	authenticator func(*http.Request) (bool, *jwt.Token, error),
+	reqCtxExtractor func(*http.Request, *jwt.Token) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) SflToHandlerT[S, T] {
 	return func(svc SflT[S, T]) gin.HandlerFunc {
@@ -250,8 +250,8 @@ func MakeStdNoBodySflHandler[S any, T any](
 }
 
 func MakeStdFullBodySflHandler[S any, T any](
-	authenticator func(*http.Request) (bool, jwt.MapClaims, error),
-	reqCtxExtractor func(*http.Request, jwt.MapClaims) (web.RequestContext, error),
+	authenticator func(*http.Request) (bool, *jwt.Token, error),
+	reqCtxExtractor func(*http.Request, *jwt.Token) (web.RequestContext, error),
 	errorHandler func(arch.Any, web.RequestContext) web.ErrorResult,
 ) SflToHandlerT[S, T] {
 	return func(svc SflT[S, T]) gin.HandlerFunc {

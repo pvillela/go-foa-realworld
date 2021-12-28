@@ -26,7 +26,6 @@ func UserUpdateSflC(
 	userGetByNameDaf fs.UserGetByNameDafT,
 	userUpdateDaf fs.UserUpdateDafT,
 ) UserUpdateSflT {
-	userGenTokenBf := fs.UserGenTokenBfI
 	return func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 
@@ -45,12 +44,9 @@ func UserUpdateSflC(
 			return rpc.UserOut{}, err
 		}
 
-		token, err := userGenTokenBf(user)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
+		token := web.ContextToRequestContext(ctx).Token
 
-		userOut := rpc.UserOut_FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token.Raw)
 		return userOut, err
 	}
 }

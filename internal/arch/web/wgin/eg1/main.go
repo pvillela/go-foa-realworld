@@ -33,10 +33,10 @@ func svc(ctx context.Context, in In) (Out, error) {
 
 var secretKey = []byte("1234567890")
 
-func dummyAuthenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
+func dummyAuthenticator(pReq *http.Request) (bool, *jwt.Token, error) {
 	tokenDetails, _ := web.CreateToken("me", secretKey, 100_000_000, 2_000_000)
 	fmt.Println("authenticator ran\n", "tokenDetails:", tokenDetails)
-	return true, tokenDetails.AtClaims, nil
+	return true, tokenDetails.AccessToken, nil
 }
 
 var defaultReqCtxExtractor = web.DefaultReqCtxExtractor

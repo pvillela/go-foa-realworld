@@ -16,11 +16,13 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 )
 
-func authenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
+func authenticator(pReq *http.Request) (bool, *jwt.Token, error) {
 	// TODO: implement this
 	fmt.Println("authenticator ran")
-	mapClaims := map[string]interface{}{"sub": "me"}
-	return true, mapClaims, nil
+	var token jwt.Token
+	mapClaims := jwt.MapClaims{"sub": "me"}
+	token.Claims = mapClaims
+	return true, &token, nil
 }
 
 func bodyHandlerOf[S any, T any](sfl wgin.SflT[S, T]) gin.HandlerFunc {

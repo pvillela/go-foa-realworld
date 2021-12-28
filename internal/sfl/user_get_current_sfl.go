@@ -24,7 +24,6 @@ type UserGetCurrentSflT = func(ctx context.Context, _ arch.Unit) (rpc.UserOut, e
 func UserGetCurrentSflC(
 	userGetByNameDaf fs.UserGetByNameDafT,
 ) UserGetCurrentSflT {
-	userGenTokenBf := fs.UserGenTokenBfI
 	return func(ctx context.Context, _ arch.Unit) (rpc.UserOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 
@@ -33,12 +32,9 @@ func UserGetCurrentSflC(
 			return rpc.UserOut{}, err
 		}
 
-		token, err := userGenTokenBf(user)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
+		token := web.ContextToRequestContext(ctx).Token
 
-		userOut := rpc.UserOut_FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token.Raw)
 		return userOut, err
 	}
 }

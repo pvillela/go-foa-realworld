@@ -33,15 +33,13 @@ func svc(ctx context.Context, in In) (Out, error) {
 
 var secretKey = []byte("1234567890")
 
-func dummyAuthenticator(pReq *http.Request) (bool, jwt.MapClaims, error) {
-	var claims jwt.MapClaims
+func dummyAuthenticator(pReq *http.Request) (bool, *jwt.Token, error) {
 	token, err := web.VerifiedJwtToken(pReq, secretKey)
 	if err != nil {
-		return false, claims, err
+		return false, token, err
 	}
-	claims = token.Claims.(jwt.MapClaims)
-	fmt.Println("authenticator ran\n", "claims:", claims)
-	return true, claims, nil
+	fmt.Println("authenticator ran\n", "claims:", token)
+	return true, token, nil
 }
 
 var defaultReqCtxExtractor = web.DefaultReqCtxExtractor
