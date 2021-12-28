@@ -16,7 +16,7 @@ type ArticleOut struct {
 	Article articleOut0
 }
 
-type articleOut0 struct {
+type articleOut0 = struct {
 	Slug           string   `json:"slug"`
 	Title          string   `json:"title"`
 	Description    string   `json:"description"`

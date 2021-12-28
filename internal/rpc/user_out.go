@@ -12,7 +12,7 @@ type UserOut struct {
 	User userOut0
 }
 
-type userOut0 struct {
+type userOut0 = struct {
 	Email    string
 	Token    string
 	Username string
