@@ -80,7 +80,7 @@ var profileGetSfl = sfl.ProfileGetSflC(userGetByNameDaf)
 
 var tagsGetSfl = sfl.TagsGetSflC(tagGetAllDaf)
 
-var userAuthenticateSfl = sfl.UserAuthenticateSflC(userGetByNameDaf, fs.UserAuthenticateBfI)
+var userAuthenticateSfl = sfl.UserAuthenticateSflC(userGetByNameDaf)
 var userFollowSfl = sfl.UserFollowSflC(beginTxn, userFollowFl)
 var userGetCurrentSfl = sfl.UserGetCurrentSflC(userGetByNameDaf)
 var userRegisterSfl = sfl.UserRegisterSflC(beginTxn, userCreateDaf)

@@ -20,9 +20,9 @@ type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (
 // UserAuthenticateSflT.
 func UserAuthenticateSflC(
 	userGetByEmailDaf fs.UserGetByEmailDafT,
-	userAuthenticateBf fs.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
+	userAuthenticateBf := fs.UserAuthenticateBfI
 	return func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
 
