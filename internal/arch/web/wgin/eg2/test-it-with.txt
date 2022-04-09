@@ -7,7 +7,7 @@ tokenDetails:
     AtClaims: map[access_uuid:4f4cfdb8-7a19-4f65-8461-e22cc0d95b40 authorized:true exp:7640258832 sub:me]
     RefreshToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjg4NDAyNTg4MzIsInJlZnJlc2hfdXVpZCI6ImZmYzdlYjQyLThkMWMtNDc3Mi1hOGE0LTIyMWY5ZjYyMWRiZiIsInN1YiI6Im1lIn0.6YMcGOJmVMtPK63G33t88XYu71iT3yNzo4_b3jEX1E0"
     RtClaims: map[exp:8840258832 refresh_uuid:ffc7eb42-8d1c-4772-a8a4-221f9f621dbf sub:me]
-    AccessUuis: "4f4cfdb8-7a19-4f65-8461-e22cc0d95b40"
+    AccessUuid: "4f4cfdb8-7a19-4f65-8461-e22cc0d95b40"
     RefreshUuid: "ffc7eb42-8d1c-4772-a8a4-221f9f621dbf"
     AtExpires: 7640258832
     RtExpires: 8840258832

@@ -7,10 +7,11 @@ Some of the code was based on https://github.com/err0r500/go-realworld-clean.
 
 ## To-dos:
 
+* Complete implementation of boot logic.
 * Review basic error handling, including fs/errors.go.
 * Create pattern for platform-independent unmarshallers.
 * Create platform-independent unmarshallers for rpc structs.
-* Implement authentication.
+v Implement authentication.
 * Guerrilla-test some SFLs.
 * Implement test suite.
 * Implement DAFs with SQLite. The current in-memory persistence based on the implementation in
