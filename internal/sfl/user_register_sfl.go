@@ -14,16 +14,30 @@ import (
 )
 
 // UserRegisterSflT is the type of the stereotype instance for the service flow that
-// represents the action of registering a user.
+// represents the action of registering a user, with hard-wired BF dependencies.
 type UserRegisterSflT = func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error)
 
 // UserRegisterSflC is the function that constructs a stereotype instance of type
-// UserRegisterSflT.
+// UserRegisterSflT with hard-wired BF dependencies.
 func UserRegisterSflC(
 	beginTxn func(context string) db.Txn,
 	userCreateDaf fs.UserCreateDafT,
 ) UserRegisterSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
+	return UserRegisterSflC0(
+		beginTxn,
+		userCreateDaf,
+		userGenTokenBf,
+	)
+}
+
+// UserRegisterSflC0 is the function that constructs a stereotype instance of type
+// UserRegisterSflT without hard-wired BF dependencies.
+func UserRegisterSflC0(
+	beginTxn func(context string) db.Txn,
+	userCreateDaf fs.UserCreateDafT,
+	userGenTokenBf fs.UserGenTokenBfT,
+) UserRegisterSflT {
 	return func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error) {
 		txn := beginTxn("UserRegisterSflT")
 		defer txn.End()

@@ -16,11 +16,11 @@ import (
 )
 
 // ArticleCreateSflT is the type of the stereotype instance for the service flow that
-// creates an article.
+// creates an article with hard-wired BF dependencies.
 type ArticleCreateSflT = func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error)
 
 // ArticleCreateSflC is the function that constructs a stereotype instance of type
-// ArticleCreateSflT.
+// ArticleCreateSflT with hard-wired BF dependencies.
 func ArticleCreateSflC(
 	beginTxn func(context string) db.Txn,
 	userGetByNameDaf fs.UserGetByNameDafT,
@@ -28,6 +28,24 @@ func ArticleCreateSflC(
 	tagAddDaf fs.TagAddDafT,
 ) ArticleCreateSflT {
 	articleValidateBeforeCreateBf := fs.ArticleValidateBeforeCreateBfI
+	return ArticleCreateSflC0(
+		beginTxn,
+		userGetByNameDaf,
+		articleCreateDaf,
+		tagAddDaf,
+		articleValidateBeforeCreateBf,
+	)
+}
+
+// ArticleCreateSflC0 is the function that constructs a stereotype instance of type
+// ArticleCreateSflT without hard-wired BF dependencies..
+func ArticleCreateSflC0(
+	beginTxn func(context string) db.Txn,
+	userGetByNameDaf fs.UserGetByNameDafT,
+	articleCreateDaf fs.ArticleCreateDafT,
+	tagAddDaf fs.TagAddDafT,
+	articleValidateBeforeCreateBf fs.ArticleValidateBeforeCreateBfT,
+) ArticleCreateSflT {
 	return func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 		txn := beginTxn("ArticleCreateSflS")

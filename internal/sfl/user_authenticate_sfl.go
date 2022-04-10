@@ -13,16 +13,30 @@ import (
 )
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
-// authenticates a user.
+// authenticates a user, with hard-wired BF dependencies.
 type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
-// UserAuthenticateSflT.
+// UserAuthenticateSflT with hard-wired BF dependencies.
 func UserAuthenticateSflC(
 	userGetByEmailDaf fs.UserGetByEmailDafT,
 ) UserAuthenticateSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	userAuthenticateBf := fs.UserAuthenticateBfI
+	return UserAuthenticateSflC0(
+		userGetByEmailDaf,
+		userGenTokenBf,
+		userAuthenticateBf,
+	)
+}
+
+// UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
+// UserAuthenticateSflT without hard-wired BF dependencies.
+func UserAuthenticateSflC0(
+	userGetByEmailDaf fs.UserGetByEmailDafT,
+	userGenTokenBf fs.UserGenTokenBfT,
+	userAuthenticateBf fs.UserAuthenticateBfT,
+) UserAuthenticateSflT {
 	return func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
 

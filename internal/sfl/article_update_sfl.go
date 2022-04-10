@@ -18,11 +18,11 @@ import (
 )
 
 // ArticleUpdateSflT is the type of the stereotype instance for the service flow that
-// updates an article.
+// updates an article, with hard-wired BF dependencies.
 type ArticleUpdateSflT = func(context.Context, rpc.ArticleUpdateIn) (rpc.ArticleOut, error)
 
 // ArticleUpdateSflC is the function that constructs a stereotype instance of type
-// ArticleUpdateSflT.
+// ArticleUpdateSflT with hard-wired BF dependencies.
 func ArticleUpdateSflC(
 	beginTxn func(context string) db.Txn,
 	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
@@ -33,6 +33,30 @@ func ArticleUpdateSflC(
 	articleDeleteDaf fs.ArticleDeleteDafT,
 ) ArticleUpdateSflT {
 	articleValidateBeforeUpdateBf := fs.ArticleValidateBeforeUpdateBfI
+	return ArticleUpdateSflC0(
+		beginTxn,
+		articleGetAndCheckOwnerFl,
+		userGetByNameDaf,
+		articleUpdateDaf,
+		articleGetBySlugDaf,
+		articleCreateDaf,
+		articleDeleteDaf,
+		articleValidateBeforeUpdateBf,
+	)
+}
+
+// ArticleUpdateSflC0 is the function that constructs a stereotype instance of type
+// ArticleUpdateSflT without hard-wired BF dependencies.
+func ArticleUpdateSflC0(
+	beginTxn func(context string) db.Txn,
+	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
+	userGetByNameDaf fs.UserGetByNameDafT,
+	articleUpdateDaf fs.ArticleUpdateDafT,
+	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
+	articleCreateDaf fs.ArticleCreateDafT,
+	articleDeleteDaf fs.ArticleDeleteDafT,
+	articleValidateBeforeUpdateBf fs.ArticleValidateBeforeUpdateBfT,
+) ArticleUpdateSflT {
 	return func(ctx context.Context, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 
