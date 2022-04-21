@@ -25,7 +25,7 @@ func UserOut_FromModel(user model.User, token string) UserOut {
 	uo.User = userOut0{
 		Email:    user.Email,
 		Token:    token,
-		Username: user.Name,
+		Username: user.Username,
 		Bio:      user.Bio,
 	}
 	if link := user.ImageLink; link != "" {

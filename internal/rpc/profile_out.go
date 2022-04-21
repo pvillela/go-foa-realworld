@@ -32,7 +32,7 @@ func Profile_FromModel(user model.User, follows bool) Profile {
 		s.Image = &user.ImageLink
 	}
 
-	s.Username = user.Name
+	s.Username = user.Username
 	s.Following = follows
 
 	return s

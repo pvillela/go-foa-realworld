@@ -18,14 +18,14 @@ import (
 func main() {
 	bio := "I am a Bar."
 	user := model.User{
-		Name:           "Foo",
+		Username:       "Foo",
 		Email:          "foo@bar.com",
 		IsTempPassword: false,
 		PasswordHash:   "xhxh",
 		PasswordSalt:   nil,
 		Bio:            &bio,
 		ImageLink:      "",
-		FollowedNames:  nil,
+		Following:      nil,
 		//Favorites:      nil,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now().Add(10),

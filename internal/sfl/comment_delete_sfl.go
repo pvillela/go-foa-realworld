@@ -43,7 +43,7 @@ func CommentDeleteSflC(
 		if err != nil {
 			return arch.Void, err
 		}
-		if comment.Author.Name != username {
+		if comment.Author.Username != username {
 			return arch.Void, fs.ErrUnauthorizedUser.Make(nil, username)
 		}
 

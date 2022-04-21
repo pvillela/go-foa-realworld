@@ -7,7 +7,6 @@
 package model
 
 import (
-	"crypto/rand"
 	"sort"
 	"time"
 
@@ -16,17 +15,17 @@ import (
 
 // User represents a user account in the system
 type User struct {
-	Name           string
-	Email          string
+	Id             uint   `json:"-"`
+	Username       string `json:"username"`
+	Email          string `json:"email"`
 	IsTempPassword bool
-	PasswordHash   string
-	PasswordSalt   []byte
-	Bio            *string
-	ImageLink      string
-	FollowedNames  []string // usernames
-	NumFollowers   int
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	PasswordHash   string    `json:"-"`
+	Bio            *string   `json:"bio,omitempty"`
+	ImageLink      string    `json:"image,omitempty"`
+	Following      []*User   `json:"-"`
+	Followers      []*User   `json:"-"`
+	CreatedAt      time.Time `json:"-"`
+	UpdatedAt      time.Time `json:"-"`
 }
 
 type UserUpdateSrc struct {
@@ -44,22 +43,16 @@ func User_Create(
 ) User {
 	now := time.Now()
 	c := 16
-	salt := make([]byte, c)
-	_, err := rand.Read(salt)
-	if err != nil {
-		panic(err) // should never happen
-	}
-	passwordHash := crypto.Hash(salt, password)
+	passwordHash := crypto.BcryptPasswordHash(password)
 
 	return User{
-		Name:           username,
+		Username:       username,
 		Email:          email,
 		IsTempPassword: false,
 		PasswordHash:   passwordHash,
-		PasswordSalt:   salt,
 		Bio:            nil,
 		ImageLink:      "",
-		FollowedNames:  nil,
+		Following:      nil,
 		//Favorites:      nil,
 		CreatedAt:    now,
 		UpdatedAt:    now,
@@ -69,14 +62,14 @@ func User_Create(
 
 func (s User) Update(v UserUpdateSrc) User {
 	if v.Username != nil {
-		s.Name = *v.Username
+		s.Username = *v.Username
 	}
 	if v.Email != nil {
 		s.Email = *v.Email
 	}
 	if v.Password != nil {
 		password := *v.Password
-		passwordHash := crypto.Hash(s.PasswordSalt, password)
+		passwordHash := crypto.BcryptPasswordHash(s.PasswordSalt, password)
 		s.PasswordHash = passwordHash
 	}
 	if v.Bio != nil {
@@ -91,30 +84,30 @@ func (s User) Update(v UserUpdateSrc) User {
 }
 
 func (user User) Follows(userName string) bool {
-	if user.FollowedNames == nil {
+	if user.Following == nil {
 		return false
 	}
 
-	sort.Strings(user.FollowedNames)
-	i := sort.SearchStrings(user.FollowedNames, userName)
-	return i < len(user.FollowedNames) && user.FollowedNames[i] == userName
+	sort.Strings(user.Following)
+	i := sort.SearchStrings(user.Following, userName)
+	return i < len(user.Following) && user.Following[i] == userName
 }
 
 // UpdateFollowees appends or removes followee to current user according to follow param
 func (s User) UpdateFollowees(followeeName string, follow bool) User {
 	if follow {
-		s.FollowedNames = append(s.FollowedNames, followeeName)
+		s.Following = append(s.Following, followeeName)
 		return s
 	}
 
-	for i := 0; i < len(s.FollowedNames); i++ {
-		if s.FollowedNames[i] == followeeName {
-			s.FollowedNames = append(s.FollowedNames[:i], s.FollowedNames[i+1:]...) // TODO: memory leak ? https://github.com/golang/go/wiki/SliceTricks
+	for i := 0; i < len(s.Following); i++ {
+		if s.Following[i] == followeeName {
+			s.Following = append(s.Following[:i], s.Following[i+1:]...) // TODO: memory leak ? https://github.com/golang/go/wiki/SliceTricks
 			break
 		}
 	}
-	if len(s.FollowedNames) == 0 {
-		s.FollowedNames = nil
+	if len(s.Following) == 0 {
+		s.Following = nil
 	}
 	return s
 }

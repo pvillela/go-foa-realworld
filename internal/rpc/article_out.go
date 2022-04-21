@@ -36,8 +36,8 @@ type ArticlesOut struct {
 
 func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
 	isFollowingAuthor := false
-	for _, userName := range user.FollowedNames {
-		if userName == article.Author.Name {
+	for _, userName := range user.Following {
+		if userName == article.Author.Username {
 			isFollowingAuthor = true
 			break
 		}
@@ -45,7 +45,7 @@ func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
 
 	favorite := false
 	for _, favUser := range article.FavoritedBy {
-		if user.Name == favUser.Name {
+		if user.Username == favUser.Username {
 			favorite = true
 			break
 		}

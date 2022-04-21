@@ -160,7 +160,7 @@ func ArticleGetRecentForAuthorsDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFo
 		pred := func(_, value interface{}) bool {
 			article := articleFromDb(value)
 			for _, name := range usernames {
-				if name == article.Author.Name {
+				if name == article.Author.Username {
 					return true
 				}
 			}
@@ -190,13 +190,13 @@ func ArticleGetRecentFilteredDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFilt
 				return false
 			}
 
-			if author := in.Author; author != nil && article.Author.Name != *author {
+			if author := in.Author; author != nil && article.Author.Username != *author {
 				return false
 			}
 
 			findFavoritedBy := func(favoritedBy string) bool {
 				for _, user := range article.FavoritedBy {
-					if user.Name == favoritedBy {
+					if user.Username == favoritedBy {
 						return true
 					}
 				}

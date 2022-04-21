@@ -7,6 +7,7 @@
 package fs
 
 import (
+	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
@@ -19,15 +20,15 @@ type RecCtxUser = db.RecCtx[model.User]
 
 // UserGetByNameDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by username.
-type UserGetByNameDafT = func(userName string) (model.User, RecCtxUser, error)
+type UserGetByNameDafT = func(reqCtx context.Context, userName string) (model.User, RecCtxUser, error)
 
 // UserGetByEmailDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by email address.
-type UserGetByEmailDafT = func(email string) (model.User, RecCtxUser, error)
+type UserGetByEmailDafT = func(reqCtx context.Context, email string) (model.User, RecCtxUser, error)
 
 // UserCreateDafT is the type of the stereotype instance for the DAF that
 // creates a user.
-type UserCreateDafT = func(user model.User, txn db.Txn) (RecCtxUser, error)
+type UserCreateDafT = func(reqCtx context.Context, user model.User, txn db.Txn) (RecCtxUser, error)
 
 // UserUpdateDafT is the type of the stereotype instance for the DAF that
 // updates a user.

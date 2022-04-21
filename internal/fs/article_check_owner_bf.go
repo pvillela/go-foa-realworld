@@ -14,7 +14,7 @@ import (
 type ArticleCheckOwnerBfT = func(article model.Article, username string) error
 
 var ArticleCheckOwnerBfI ArticleCheckOwnerBfT = func(article model.Article, username string) error {
-	if article.Author.Name != username {
+	if article.Author.Username != username {
 		return errors.New("article not owned by user")
 	}
 	return nil

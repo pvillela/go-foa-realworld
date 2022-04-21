@@ -18,12 +18,12 @@ type UserGenTokenBfT = func(user model.User) (string, error)
 const tokenTimeToLive = time.Hour * 2
 
 var UserGenTokenBfI UserGenTokenBfT = func(user model.User) (string, error) {
-	if user.Name == "" {
+	if user.Username == "" {
 		return "", errors.New("can't generate token for empty user")
 	}
 
 	claims := jwt.RegisteredClaims{
-		Subject:   user.Name,
+		Subject:   user.Username,
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTimeToLive)),
 		Issuer:    "real-world-demo-backend",
 	}

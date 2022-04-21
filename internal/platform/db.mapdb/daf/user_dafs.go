@@ -42,7 +42,7 @@ func getByName(
 
 // UserGetByNameDafC is the function that constructs a stereotype instance of type
 // fs.UserGetByNameDafT.
-func UserGetByNameDafT(
+func UserGetByNameDafC(
 	userDb mapdb.MapDb,
 ) fs.UserGetByNameDafT {
 	return func(userName string) (model.User, fs.RecCtxUser, error) {
@@ -87,9 +87,9 @@ func UserCreateDafC(
 		}
 
 		pwUser := fs.PwUser{RecCtx: fs.RecCtxUser{}, Entity: user}
-		err := userDb.Create(user.Name, pwUser, txn)
+		err := userDb.Create(user.Username, pwUser, txn)
 		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
-			return fs.RecCtxUser{}, fs.ErrDuplicateUserName.Make(err, user.Name)
+			return fs.RecCtxUser{}, fs.ErrDuplicateUserName.Make(err, user.Username)
 		}
 		if err != nil {
 			return fs.RecCtxUser{}, err
@@ -105,14 +105,14 @@ func UserUpdateDafC(
 	userDb mapdb.MapDb,
 ) fs.UserUpdateDafT {
 	return func(user model.User, recCtx fs.RecCtxUser, txn db.Txn) (fs.RecCtxUser, error) {
-		if userByEmail, _, err := getByEmail(userDb, user.Email); err == nil && userByEmail.Name != user.Name {
+		if userByEmail, _, err := getByEmail(userDb, user.Email); err == nil && userByEmail.Username != user.Username {
 			return fs.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
 		}
 
 		pw := fs.PwUser{RecCtx: recCtx, Entity: user}
-		err := userDb.Update(user.Name, pw, txn)
+		err := userDb.Update(user.Username, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-			return fs.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Name)
+			return fs.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Username)
 		}
 		if err != nil {
 			return fs.RecCtxUser{}, err // this can only be a transaction error

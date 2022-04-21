@@ -125,14 +125,14 @@ func (s Article) UpdateFavoritedBy(user User, add bool) Article {
 	}
 
 	for i := 0; i < len(s.FavoritedBy); i++ {
-		if s.FavoritedBy[i].Name == user.Name {
+		if s.FavoritedBy[i].Username == user.Username {
 			s.FavoritedBy = append(s.FavoritedBy[:i], s.FavoritedBy[i+1:]...) // memory leak ? https://github.com/golang/go/wiki/SliceTricks
 		}
 	}
 
 	arr := s.FavoritedBy
-	extractor := func(user User) string { return user.Name }
-	compValue := user.Name
+	extractor := func(user User) string { return user.Username }
+	compValue := user.Username
 	zero := User{}
 
 	// Boilerplate, same as in previous function

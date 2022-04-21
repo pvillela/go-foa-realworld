@@ -50,7 +50,7 @@ func UserAuthenticateSflC0(
 
 		if !userAuthenticateBf(user, password) {
 			// I know the error info below is not secure but OK for now for debugging
-			return zero, fs.ErrAuthenticationFailed.Make(nil, user.Name, password)
+			return zero, fs.ErrAuthenticationFailed.Make(nil, user.Username, password)
 		}
 
 		token, err := userGenTokenBf(user)
