@@ -36,7 +36,7 @@ type ArticlesOut struct {
 
 func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
 	isFollowingAuthor := false
-	for _, userName := range user.Following {
+	for _, userName := range user.Followees {
 		if userName == article.Author.Username {
 			isFollowingAuthor = true
 			break

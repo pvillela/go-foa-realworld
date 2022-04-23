@@ -9,10 +9,10 @@ package rpc
 import "github.com/pvillela/go-foa-realworld/internal/model"
 
 type Profile struct {
-	Username  string
-	Bio       *string
-	Image     *string
-	Following bool
+	Username  string  `json:"username"`
+	Bio       *string `json:"bio"`
+	Image     *string `json:"image"`
+	Following bool    `json:"following"`
 }
 
 type ProfileOut struct {

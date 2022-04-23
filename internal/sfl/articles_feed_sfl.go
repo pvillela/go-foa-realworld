@@ -42,7 +42,7 @@ func ArticlesFeedSflC(
 			return zero, err
 		}
 
-		articles, err := articleGetRecentForAuthorsDaf(user.Following, in.Limit, in.Offset)
+		articles, err := articleGetRecentForAuthorsDaf(user.Followees, in.Limit, in.Offset)
 		if err != nil {
 			return zero, err
 		}

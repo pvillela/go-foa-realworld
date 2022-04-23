@@ -61,7 +61,7 @@ var UserCreateDaf fs.UserCreateDafT = func(
 	defer tx.Rollback(reqCtx)
 	_, err = tx.Exec(reqCtx, "INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
 		user.Username, user.Email, user.IsTempPassword, user.PasswordHash, user.PasswordSalt, user.Bio,
-		user.ImageLink, user.Following, user.NumFollowers, user.CreatedAt, user.UpdatedAt)
+		user.ImageLink, user.Followees, user.NumFollowers, user.CreatedAt, user.UpdatedAt)
 	util.PanicOnError(err)
 	_, err = conn.Exec(reqCtx, "UserCreate", "foo")
 }

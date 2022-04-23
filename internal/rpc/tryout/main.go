@@ -25,7 +25,7 @@ func main() {
 		PasswordSalt:   nil,
 		Bio:            &bio,
 		ImageLink:      "",
-		Following:      nil,
+		Followees:      nil,
 		//Favorites:      nil,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now().Add(10),
