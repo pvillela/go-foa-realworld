@@ -11,7 +11,6 @@ import (
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -22,10 +21,6 @@ const (
 	limitDefault  = 20
 	offsetDefault = 0
 )
-
-type myMapDb struct {
-	mapdb.MapDb
-}
 
 func pwArticleFromDb(value interface{}) fs.PwArticle {
 	pw, ok := value.(fs.PwArticle)

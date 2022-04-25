@@ -7,7 +7,6 @@
 package daf
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 )
 

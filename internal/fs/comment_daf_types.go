@@ -7,16 +7,17 @@
 package fs
 
 import (
+	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// PwArticle is a type alias
-type PwComment = db.Pw[model.Comment]
-
 // RecCtxArticle is a type alias
 type RecCtxComment = db.RecCtx[model.Comment]
+
+// PwArticle is a type alias
+type PwComment = db.Pw[model.Comment, RecCtxComment]
 
 // CommentGetByIdDafT is the type of the stereotype instance for the DAF that
 // retrieves a comment by ID.
@@ -24,8 +25,8 @@ type CommentGetByIdDafT = func(articleUuid util.Uuid, id int) (model.Comment, Re
 
 // CommentCreateDafT is the type of the stereotype instance for the DAF that
 // creates a comment.
-type CommentCreateDafT = func(comment model.Comment, txn db.Txn) (model.Comment, RecCtxComment, error)
+type CommentCreateDafT = func(ctx context.Context, comment model.Comment) (model.Comment, RecCtxComment, error)
 
 // CommentDeleteDafT is the type of the stereotype instance for the DAF that
 // deletes a comment.
-type CommentDeleteDafT = func(articleUuid util.Uuid, id int, txn db.Txn) error
+type CommentDeleteDafT = func(ctx context.Context, articleUuid util.Uuid, id int) error

@@ -4,17 +4,51 @@
  * that can be found in the LICENSE file.
  */
 
-package daf
+package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/georgysavva/scany/pgxscan"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-
-	"github.com/georgysavva/scany/pgxscan"
 )
+
+func main() {
+	defer util.PanicLog()
+	myBio := "I am me."
+	user := model.User{
+		Username:     "pvillela",
+		Email:        "foo@bar.com",
+		PasswordHash: "dakfljads0fj",
+		Bio:          &myBio,
+		ImageLink:    "",
+	}
+
+	ctx := context.Background()
+
+	connStr := "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
+	pool, err := pgxpool.Connect(ctx, connStr)
+	util.PanicOnError(err)
+	ctxConn := dbpgx.CtxPgx{pool}
+	ctx, err = ctxConn.SetPool(ctx)
+	util.PanicOnError(err)
+	ctx, err = ctxConn.Begin(ctx)
+	util.PanicOnError(err)
+	fmt.Println("ctx", ctx)
+
+	recCtx, err := UserCreateDaf(ctx, user)
+	util.PanicOnError(err)
+	fmt.Println("recCtx from Create:", recCtx)
+
+	userFromDb, recCtx, err := UserGetByNameDaf(ctx, "pvillela")
+	util.PanicOnError(err)
+	fmt.Println("userFromDb:", userFromDb)
+	fmt.Println("recCtx from Read:", recCtx)
+}
 
 // UserGetByNameDaf implements a stereotype instance of type
 // fs.UserGetByNameDafT.

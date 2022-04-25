@@ -14,7 +14,7 @@ import (
 type UserAuthenticateBfT = func(user model.User, password string) bool
 
 var UserAuthenticateBfI UserAuthenticateBfT = func(user model.User, password string) bool {
-	if crypto.BcryptPasswordHash(user.PasswordSalt, password) != user.PasswordHash {
+	if crypto.ArgonPasswordHash(password) != user.PasswordHash {
 		return false
 	}
 	return true

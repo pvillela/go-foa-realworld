@@ -8,9 +8,8 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -22,24 +21,33 @@ type UserUpdateSflT = func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOu
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT.
 func UserUpdateSflC(
-	beginTxn func(context string) db.Txn,
+	ctxConn db.CtxConn,
 	userGetByNameDaf fs.UserGetByNameDafT,
 	userUpdateDaf fs.UserUpdateDafT,
 ) UserUpdateSflT {
 	return func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
+		ctx, err := ctxConn.BeginConnTx(ctx)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
 
-		user, rc, err := userGetByNameDaf(username)
+		defer ctxConn.DeferredRollback(ctx)
+
+		user, rc, err := userGetByNameDaf(ctx, username)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}
 
 		user = user.Update(in.User)
 
-		_, err = userUpdateDaf(user, rc, txn)
+		_, err = userUpdateDaf(ctx, user, rc)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
+
+		err = ctxConn.Commit(ctx)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

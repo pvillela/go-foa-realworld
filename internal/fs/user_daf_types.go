@@ -12,11 +12,11 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// PwUser is a type alias
-type PwUser = db.Pw[model.User]
-
 // RecCtxUser is a type alias
 type RecCtxUser = db.RecCtx[model.User]
+
+// PwUser is a type alias
+type PwUser = db.Pw[model.User, RecCtxUser]
 
 // UserGetByNameDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by username.
@@ -28,8 +28,8 @@ type UserGetByEmailDafT = func(reqCtx context.Context, email string) (model.User
 
 // UserCreateDafT is the type of the stereotype instance for the DAF that
 // creates a user.
-type UserCreateDafT = func(reqCtx context.Context, user model.User, txn db.Txn) (RecCtxUser, error)
+type UserCreateDafT = func(reqCtx context.Context, user model.User) (RecCtxUser, error)
 
 // UserUpdateDafT is the type of the stereotype instance for the DAF that
 // updates a user.
-type UserUpdateDafT = func(user model.User, recCtx RecCtxUser, txn db.Txn) (RecCtxUser, error)
+type UserUpdateDafT = func(reqCtx context.Context, user model.User, recCtx RecCtxUser) (RecCtxUser, error)

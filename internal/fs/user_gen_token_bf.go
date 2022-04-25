@@ -7,7 +7,8 @@
 package fs
 
 import (
-	"errors"
+	"github.com/go-errors/errors"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"time"
@@ -29,5 +30,5 @@ var UserGenTokenBfI UserGenTokenBfT = func(user model.User) (string, error) {
 	}
 
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
-		SignedString(user.PasswordSalt)
+		SignedString("") // TODO: use appropriate parameter
 }

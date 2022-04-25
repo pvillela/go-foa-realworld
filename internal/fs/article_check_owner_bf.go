@@ -7,7 +7,8 @@
 package fs
 
 import (
-	"errors"
+	"github.com/go-errors/errors"
+
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 

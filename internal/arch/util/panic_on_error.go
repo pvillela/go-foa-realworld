@@ -6,8 +6,19 @@
 
 package util
 
+import (
+	"github.com/go-errors/errors"
+	log "github.com/sirupsen/logrus"
+)
+
 func PanicOnError(err error) {
 	if err != nil {
 		panic(err)
+	}
+}
+
+func PanicLog() {
+	if r := recover(); r != nil {
+		log.Fatal("panicked:", r.(*errors.Error).ErrorStack())
 	}
 }

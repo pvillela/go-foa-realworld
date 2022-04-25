@@ -7,9 +7,9 @@
 package model
 
 type Following struct {
-	ID         uint  `json:"id"`
-	FollowerID uint  `json:"follower_id"`
-	Follower   *User `json:"follower"`
-	FolloweeID uint  `json:"followee_id"`
-	Followee   *User `json:"followee"`
+	//ID         uint  `json:"id"`
+	//FollowerID uint  `json:"follower_id"`
+	Follower *User `json:"follower"`
+	//FolloweeID uint  `json:"followee_id"`
+	Followee *User `json:"followee"`
 }
