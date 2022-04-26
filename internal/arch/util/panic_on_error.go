@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"github.com/go-errors/errors"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	log "github.com/sirupsen/logrus"
 )
 
 func PanicOnError(err error) {
@@ -19,7 +18,7 @@ func PanicOnError(err error) {
 	}
 }
 
-func PanicLog() {
+func PanicLog(logger func(args ...interface{})) {
 	if r := recover(); r != nil {
 		var str string
 		switch r.(type) {
@@ -32,6 +31,6 @@ func PanicLog() {
 		default:
 			str = fmt.Sprintf("%v", r)
 		}
-		log.Fatal("panicked:", str)
+		logger("panicked:", str)
 	}
 }

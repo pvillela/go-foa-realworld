@@ -8,7 +8,6 @@ package dbpgx
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-errors/errors"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -110,8 +109,6 @@ func (p CtxPgx) Begin(ctx context.Context) (context.Context, error) {
 
 func GetCtxTx(ctx context.Context) (pgx.Tx, error) {
 	tx, ok := ctx.Value(CtxPgxTxKey).(pgx.Tx)
-	fmt.Printf("CtxPgxTxKey %v type: %T", ctx.Value(CtxPgxTxKey), ctx.Value(CtxPgxTxKey))
-	fmt.Println("ok", ok)
 	var err error
 	if !ok {
 		err = errors.New("there is no transaction value in ctx")

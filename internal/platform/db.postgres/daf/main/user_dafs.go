@@ -12,14 +12,14 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	defer util.PanicLog()
+	defer util.PanicLog(log.Fatal)
 	myBio := "I am me."
 	user := model.User{
 		Username:     "pvillela",
@@ -39,7 +39,7 @@ func main() {
 	util.PanicOnError(err)
 	ctx, err = ctxConn.Begin(ctx)
 	util.PanicOnError(err)
-	fmt.Println("ctx", ctx)
+	//fmt.Println("ctx", ctx)
 
 	recCtx, err := UserCreateDaf(ctx, user)
 	util.PanicOnError(err)
@@ -59,11 +59,11 @@ var UserGetByNameDaf fs.UserGetByNameDafT = func(
 ) (model.User, fs.RecCtxUser, error) {
 	conn, err := dbpgx.GetCtxConn(ctx)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, fs.RecCtxUser{}, err
 	}
 	rows, err := conn.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, fs.RecCtxUser{}, err
 	}
 	pwUser := fs.PwUser{}
 	//user := model.User{}
@@ -97,7 +97,7 @@ var UserCreateDaf fs.UserCreateDafT = func(
 ) (fs.RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return fs.RecCtxUser{}, errx.ErrxOf(err)
+		return fs.RecCtxUser{}, err
 	}
 	sql := `
 	INSERT INTO users (username, email, password_hash, bio, image)
@@ -106,7 +106,7 @@ var UserCreateDaf fs.UserCreateDafT = func(
 	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
 	_, err = tx.Exec(ctx, sql, args...)
 	if err != nil {
-		return fs.RecCtxUser{}, errx.ErrxOf(err)
+		return fs.RecCtxUser{}, err
 	}
 	return fs.RecCtxUser{}, nil // TODO: return proper RecCtxUser
 }

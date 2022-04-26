@@ -39,7 +39,8 @@ func ErrxOf(err error) Errx {
 	errX, ok := err.(Errx)
 	if !ok {
 		msg := fmt.Sprintf("ErrxOf: %v", err)
-		errX = NewErrx(err, msg)
+		kind := NewKind(msg)
+		errX = kind.Make(err)
 	}
 	return errX
 }
