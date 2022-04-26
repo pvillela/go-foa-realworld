@@ -102,13 +102,16 @@ var UserCreateDaf fs.UserCreateDafT = func(
 	sql := `
 	INSERT INTO users (username, email, password_hash, bio, image)
 	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id, created_at, updated_at
 	`
 	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
-	_, err = tx.Exec(ctx, sql, args...)
+	row := tx.QueryRow(ctx, sql, args...)
+	var recCtx fs.RecCtxUser
+	err = row.Scan(&recCtx.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
 	if err != nil {
-		return fs.RecCtxUser{}, err
+		return recCtx, err
 	}
-	return fs.RecCtxUser{}, nil // TODO: return proper RecCtxUser
+	return recCtx, nil
 }
 
 //// UserUpdateDafC is the function that constructs a stereotype instance of type
