@@ -13,7 +13,7 @@ import (
 // User represents a user account in the system
 type User struct {
 	// Below added to daf.RecCtx
-	Id           uint    `json:"-"`
+	//Id           uint    `json:"-"`
 	Username     string  `json:"username"`
 	Email        string  `json:"email"`
 	PasswordHash string  `json:"-"`
@@ -22,8 +22,8 @@ type User struct {
 	Followees    []*User `json:"-"`
 	Followers    []*User `json:"-"`
 	// Below added to daf.RecCtx
-	//CreatedAt      time.Time `json:"-"`
-	//UpdatedAt      time.Time `json:"-"`
+	//CreatedAt time.Time `json:"-"`
+	//UpdatedAt time.Time `json:"-"`
 }
 
 type UserUpdateSrc struct {

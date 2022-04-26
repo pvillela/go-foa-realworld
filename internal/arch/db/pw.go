@@ -12,8 +12,8 @@ package db
 // RecCtx holds platform-specific context information about the database record,
 // e.g., an optimistic locking token and/or a record ID.
 type Pw[E any, R any] struct {
-	Entity E
-	RecCtx R
+	Entity E `db:""`
+	RecCtx R `db:""`
 }
 
 // Helper method

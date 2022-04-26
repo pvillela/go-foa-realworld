@@ -65,12 +65,13 @@ var UserGetByNameDaf fs.UserGetByNameDafT = func(
 	if err != nil {
 		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
 	}
-	//pwUser := fs.PwUser{}
-	user := model.User{}
-	err = pgxscan.ScanOne(&user, rows)
+	pwUser := fs.PwUser{}
+	//user := model.User{}
+	err = pgxscan.ScanOne(&pwUser, rows)
+	//err = pgxscan.ScanOne(&user, rows)
 	util.PanicOnError(err)
-	//return pwUser.Entity, pwUser.RecCtx, nil
-	return user, fs.RecCtxUser{}, nil
+	return pwUser.Entity, pwUser.RecCtx, nil
+	//return user, fs.RecCtxUser{}, nil
 }
 
 //// UserGetByEmailDaf implements a stereotype instance of type
