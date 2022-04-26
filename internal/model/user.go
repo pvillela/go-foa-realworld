@@ -13,12 +13,12 @@ import (
 // User represents a user account in the system
 type User struct {
 	// Below added to daf.RecCtx
-	//Id           uint    `json:"-"`
+	Id           uint    `json:"-"`
 	Username     string  `json:"username"`
 	Email        string  `json:"email"`
 	PasswordHash string  `json:"-"`
 	Bio          *string `json:"bio,omitempty"`
-	ImageLink    string  `json:"image,omitempty"`
+	ImageLink    string  `json:"image,omitempty" db:"image"`
 	Followees    []*User `json:"-"`
 	Followers    []*User `json:"-"`
 	// Below added to daf.RecCtx

@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/go-errors/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
@@ -58,16 +59,18 @@ var UserGetByNameDaf fs.UserGetByNameDafT = func(
 ) (model.User, fs.RecCtxUser, error) {
 	conn, err := dbpgx.GetCtxConn(ctx)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, err
+		return model.User{}, fs.RecCtxUser{}, errors.New(err)
 	}
-	rows, err := conn.Query(ctx, "SELECT * FROM users WHERE user_name = $1", userName)
+	rows, err := conn.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, err
+		return model.User{}, fs.RecCtxUser{}, errors.New(err)
 	}
-	pwUser := fs.PwUser{}
-	err = pgxscan.ScanOne(&pwUser, rows)
+	//pwUser := fs.PwUser{}
+	user := model.User{}
+	err = pgxscan.ScanOne(&user, rows)
 	util.PanicOnError(err)
-	return pwUser.Entity, pwUser.RecCtx, nil
+	//return pwUser.Entity, pwUser.RecCtx, nil
+	return user, fs.RecCtxUser{}, nil
 }
 
 //// UserGetByEmailDaf implements a stereotype instance of type
@@ -93,13 +96,16 @@ var UserCreateDaf fs.UserCreateDafT = func(
 ) (fs.RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return fs.RecCtxUser{}, err
+		return fs.RecCtxUser{}, errors.New(err)
 	}
-	_, err = tx.Exec(ctx, "INSERT INTO users VALUES ($1, $2, $3, $4, $5)",
-		user.Username, user.Email, user.PasswordHash, user.Bio,
-		user.ImageLink)
+	sql := `
+	INSERT INTO users (username, email, password_hash, bio, image)
+	VALUES ($1, $2, $3, $4, $5)
+	`
+	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
+	_, err = tx.Exec(ctx, sql, args...)
 	if err != nil {
-		return fs.RecCtxUser{}, err
+		return fs.RecCtxUser{}, errors.New(err)
 	}
 	return fs.RecCtxUser{}, nil // TODO: return proper RecCtxUser
 }

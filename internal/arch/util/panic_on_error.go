@@ -7,18 +7,29 @@
 package util
 
 import (
+	"fmt"
 	"github.com/go-errors/errors"
 	log "github.com/sirupsen/logrus"
 )
 
 func PanicOnError(err error) {
 	if err != nil {
-		panic(err)
+		xErr := errors.New(err)
+		panic(xErr)
 	}
 }
 
 func PanicLog() {
 	if r := recover(); r != nil {
-		log.Fatal("panicked:", r.(*errors.Error).ErrorStack())
+		var str string
+		switch r.(type) {
+		case *errors.Error:
+			str = r.(*errors.Error).ErrorStack()
+		case error:
+			str = r.(error).Error()
+		default:
+			str = fmt.Sprintf("%v", r)
+		}
+		log.Fatal("panicked:", str)
 	}
 }
