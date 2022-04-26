@@ -1,6 +1,7 @@
 package errx
 
 import (
+	"fmt"
 	"github.com/pkg/errors"
 )
 
@@ -27,6 +28,20 @@ func (s *Kind) Make(cause error, args ...interface{}) Errx {
 	err.cause = cause
 	err.tracer = errors.WithStack(dummyError{}).(stackTracer)
 	return &err
+}
+
+func NewErrx(cause error, msg string) Errx {
+	kind := NewKind(msg)
+	return kind.Make(cause)
+}
+
+func ErrxOf(err error) Errx {
+	errX, ok := err.(Errx)
+	if !ok {
+		msg := fmt.Sprintf("ErrxOf: %v", err)
+		errX = NewErrx(err, msg)
+	}
+	return errX
 }
 
 func (s *Kind) Decorate(cause Errx, args ...interface{}) Errx {

@@ -105,8 +105,8 @@ func main() {
 
 	fmt.Println("\n===SubKinds=====================================================================")
 	fmt.Println()
-	
-deref := func(m map[*errx.Kind]struct{}) []errx.Kind {
+
+	deref := func(m map[*errx.Kind]struct{}) []errx.Kind {
 		slice := make([]errx.Kind, 0, len(m))
 		for kind, _ := range m {
 			slice = append(slice, *kind)
