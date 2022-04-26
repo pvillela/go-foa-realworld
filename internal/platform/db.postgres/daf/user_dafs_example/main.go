@@ -49,6 +49,9 @@ func main() {
 	util.PanicOnError(err)
 	fmt.Println("userFromDb:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx)
+
+	//err = ctxConn.Commit(ctx)
+	//util.PanicOnError(err)
 }
 
 // UserGetByNameDaf implements a stereotype instance of type
@@ -57,21 +60,18 @@ var UserGetByNameDaf fs.UserGetByNameDafT = func(
 	ctx context.Context,
 	userName string,
 ) (model.User, fs.RecCtxUser, error) {
-	conn, err := dbpgx.GetCtxConn(ctx)
+	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
 		return model.User{}, fs.RecCtxUser{}, err
 	}
-	rows, err := conn.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
+	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
 	if err != nil {
 		return model.User{}, fs.RecCtxUser{}, err
 	}
 	pwUser := fs.PwUser{}
-	//user := model.User{}
 	err = pgxscan.ScanOne(&pwUser, rows)
-	//err = pgxscan.ScanOne(&user, rows)
 	util.PanicOnError(err)
 	return pwUser.Entity, pwUser.RecCtx, nil
-	//return user, fs.RecCtxUser{}, nil
 }
 
 //// UserGetByEmailDaf implements a stereotype instance of type
