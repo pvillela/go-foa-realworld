@@ -9,12 +9,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -34,105 +33,28 @@ func main() {
 	connStr := "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
 	pool, err := pgxpool.Connect(ctx, connStr)
 	util.PanicOnError(err)
-	ctxConn := dbpgx.CtxPgx{pool}
-	ctx, err = ctxConn.SetPool(ctx)
+	ctxDb := dbpgx.CtxPgx{pool}
+	ctx, err = ctxDb.SetPool(ctx)
 	util.PanicOnError(err)
-	ctx, err = ctxConn.Begin(ctx)
+
+	ctx, err = ctxDb.Begin(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
 
-	recCtx, err := UserCreateDaf(ctx, user)
+	recCtx, err := newdaf.UserCreateDaf(ctx, user)
 	util.PanicOnError(err)
 	fmt.Println("recCtx from Create:", recCtx)
 
-	userFromDb, recCtx, err := UserGetByNameDaf(ctx, "pvillela")
+	userFromDb, recCtx, err := newdaf.UserGetByNameDaf(ctx, "pvillela")
 	util.PanicOnError(err)
-	fmt.Println("userFromDb:", userFromDb)
+	fmt.Println("\nUserGetByNameDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx)
 
-	//err = ctxConn.Commit(ctx)
+	userFromDb, recCtx, err = newdaf.UserGetByEmailDaf(ctx, "foo@bar.com")
+	util.PanicOnError(err)
+	fmt.Println("\nUserGetByEmailDaf:", userFromDb)
+	fmt.Println("recCtx from Read:", recCtx)
+
+	//err = ctxDb.Commit(ctx)
 	//util.PanicOnError(err)
 }
-
-// UserGetByNameDaf implements a stereotype instance of type
-// fs.UserGetByNameDafT.
-var UserGetByNameDaf fs.UserGetByNameDafT = func(
-	ctx context.Context,
-	userName string,
-) (model.User, fs.RecCtxUser, error) {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, err
-	}
-	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
-	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, err
-	}
-	pwUser := fs.PwUser{}
-	err = pgxscan.ScanOne(&pwUser, rows)
-	util.PanicOnError(err)
-	return pwUser.Entity, pwUser.RecCtx, nil
-}
-
-//// UserGetByEmailDaf implements a stereotype instance of type
-//// fs.UserGetByEmailDafT.
-//var UserGetByEmailDaf fs.UserGetByEmailDafT = func(
-//	ctx context.Context,
-//	email string,
-//) (model.User, fs.RecCtxUser, error) {
-//	conn := GetCtxConn(ctx)
-//	rows, err := conn.Query(ctx, "SELECT * FROM users WHERE email = $1", email)
-//	util.PanicOnError(err)
-//	user := model.User{}
-//	err = pgxscan.ScanOne(&user, rows)
-//	util.PanicOnError(err)
-//	return user, fs.RecCtxUser{}, nil // TODO: RecCtx is empty; decide if it needs a non-empty value or should be discarded
-//}
-
-// UserCreateDaf implements a stereotype instance of type
-// fs.UserCreateDafT.
-var UserCreateDaf fs.UserCreateDafT = func(
-	ctx context.Context,
-	user model.User,
-) (fs.RecCtxUser, error) {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return fs.RecCtxUser{}, err
-	}
-	sql := `
-	INSERT INTO users (username, email, password_hash, bio, image)
-	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id, created_at, updated_at
-	`
-	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
-	row := tx.QueryRow(ctx, sql, args...)
-	var recCtx fs.RecCtxUser
-	err = row.Scan(&recCtx.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
-	if err != nil {
-		return recCtx, err
-	}
-	return recCtx, nil
-}
-
-//// UserUpdateDafC is the function that constructs a stereotype instance of type
-//// fs.UserUpdateDafT.
-//func UserUpdateDafC(
-//	userDb mapdb.MapDb,
-//) fs.UserUpdateDafT {
-//	return func(user model.User, recCtx fs.RecCtxUser, txn db.Txn) (fs.RecCtxUser, error) {
-//		if userByEmail, _, err := getByEmail(userDb, user.Email); err == nil && userByEmail.Name != user.Username {
-//			return fs.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
-//		}
-//
-//		pw := fs.PwUser{RecCtx: recCtx, Entity: user}
-//		err := userDb.Update(user.Username, pw, txn)
-//		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-//			return fs.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Username)
-//		}
-//		if err != nil {
-//			return fs.RecCtxUser{}, err // this can only be a transaction error
-//		}
-//
-//		return recCtx, nil
-//	}
-//}

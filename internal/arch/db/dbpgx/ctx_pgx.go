@@ -28,7 +28,7 @@ type CtxPgx struct {
 }
 
 func checkInterface(p CtxPgx) {
-	var foo = func(cc db.CtxConn) {}
+	var foo = func(cc db.CtxDb) {}
 	foo(p)
 }
 

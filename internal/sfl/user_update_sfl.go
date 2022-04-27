@@ -21,7 +21,7 @@ type UserUpdateSflT = func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOu
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT.
 func UserUpdateSflC(
-	ctxConn db.CtxConn,
+	ctxConn db.CtxDb,
 	userGetByNameDaf fs.UserGetByNameDafT,
 	userUpdateDaf fs.UserUpdateDafT,
 ) UserUpdateSflT {

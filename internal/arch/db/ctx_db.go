@@ -8,7 +8,7 @@ package db
 
 import "context"
 
-type CtxConn interface {
+type CtxDb interface {
 	SetConn(ctx context.Context) (context.Context, error)
 	ReleaseConn(ctx context.Context) error
 	DeferredReleaseConn(ctx context.Context)
