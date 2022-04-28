@@ -75,31 +75,36 @@ var UserCreateDaf fs.UserCreateDafT = func(
 	row := tx.QueryRow(ctx, sql, args...)
 	var recCtx fs.RecCtxUser
 	err = row.Scan(&recCtx.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
-	if err != nil {
-		return recCtx, errx.ErrxOf(err)
-	}
-	return recCtx, nil
+	return recCtx, errx.ErrxOf(err)
 }
 
-//// UserUpdateDafC is the function that constructs a stereotype instance of type
-//// fs.UserUpdateDafT.
-//func UserUpdateDafC(
-//	userDb mapdb.MapDb,
-//) fs.UserUpdateDafT {
-//	return func(user model.User, recCtx fs.RecCtxUser, txn db.Txn) (fs.RecCtxUser, error) {
-//		if userByEmail, _, err := getByEmail(userDb, user.Email); err == nil && userByEmail.Name != user.Username {
-//			return fs.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
-//		}
-//
-//		pw := fs.PwUser{RecCtx: recCtx, Entity: user}
-//		err := userDb.Update(user.Username, pw, txn)
-//		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-//			return fs.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Username)
-//		}
-//		if err != nil {
-//			return fs.RecCtxUser{}, err // this can only be a transaction error
-//		}
-//
-//		return recCtx, nil
-//	}
-//}
+// UserUpdateDafC is the function that constructs a stereotype instance of type
+// fs.UserUpdateDafT.
+var UserUpdateDaf fs.UserUpdateDafT = func(
+	ctx context.Context,
+	user model.User,
+	recCtx fs.RecCtxUser,
+) (fs.RecCtxUser, error) {
+	tx, err := dbpgx.GetCtxTx(ctx)
+	if err != nil {
+		return fs.RecCtxUser{}, errx.ErrxOf(err)
+	}
+	sql := `
+	UPDATE users 
+	SET username = $1, email = $2, bio = $3, image = $4, password_hash = $5, updated_at = NOW()
+	WHERE id = $6 AND updated_at = $7
+	RETURNING updated_at
+	`
+	args := []interface{}{
+		user.Username,
+		user.Email,
+		user.Bio,
+		user.ImageLink,
+		user.PasswordHash,
+		recCtx.Id,
+		recCtx.UpdatedAt,
+	}
+	row := tx.QueryRow(ctx, sql, args...)
+	err = row.Scan(&recCtx.UpdatedAt)
+	return recCtx, errx.ErrxOf(err)
+}

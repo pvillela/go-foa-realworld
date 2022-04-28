@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,14 +28,14 @@ type CtxPgx struct {
 	Pool *pgxpool.Pool
 }
 
-func checkInterface(p CtxPgx) {
-	var foo = func(cc db.CtxDb) {}
-	foo(p)
+// Interface verification
+func _(p CtxPgx) {
+	func(cdb db.CtxDb) {}(p)
 }
 
 func (p CtxPgx) SetPool(ctx context.Context) (context.Context, error) {
 	if ctx.Value(CtxPgxPoolKey) != nil {
-		return ctx, errors.New("ctx already has a Pool value")
+		return ctx, errx.NewErrx(nil, "ctx already has a Pool value")
 	}
 	return context.WithValue(ctx, CtxPgxPoolKey, p.Pool), nil
 }
@@ -43,14 +44,14 @@ func GetCtxPool(ctx context.Context) (*pgxpool.Pool, error) {
 	pool, ok := ctx.Value(CtxPgxPoolKey).(*pgxpool.Pool)
 	var err error
 	if !ok {
-		err = errors.New("there is no Pool value in ctx")
+		err = errx.NewErrx(nil, "there is no Pool value in ctx")
 	}
 	return pool, err
 }
 
 func (CtxPgx) SetConn(ctx context.Context) (context.Context, error) {
 	if ctx.Value(CtxPgxConnKey) != nil {
-		return ctx, errors.New("ctx already has a connection value")
+		return ctx, errx.NewErrx(nil, "ctx already has a connection value")
 	}
 	pool, err := GetCtxPool(ctx)
 	if err != nil {
@@ -69,26 +70,38 @@ func GetCtxConn(ctx context.Context) (*pgxpool.Conn, error) {
 	if !ok {
 		err = errors.New("there is no connection value in ctx")
 	}
-	return conn, err
+	return conn, errx.ErrxOf(err)
 }
 
-func (CtxPgx) ReleaseConn(ctx context.Context) error {
+func (p CtxPgx) releaseConnOnly(ctx context.Context) (context.Context, error) {
 	conn, err := GetCtxConn(ctx)
 	if err != nil {
-		return err
+		return nil, errx.ErrxOf(err)
 	}
 	conn.Release()
-	return nil
+	ctx = context.WithValue(ctx, CtxPgxConnKey, nil)
+	return ctx, nil
+}
+
+func (p CtxPgx) ReleaseConn(ctx context.Context) (context.Context, error) {
+	_, errTxValue := GetCtxTx(ctx)
+
+	// There is a tx value in ctx
+	if errTxValue == nil {
+		return p.Rollback(ctx)
+	}
+
+	return p.releaseConnOnly(ctx)
 }
 
 func (p CtxPgx) DeferredReleaseConn(ctx context.Context) {
-	err := p.ReleaseConn(ctx)
+	_, err := p.ReleaseConn(ctx)
 	if err != nil {
 		log.Error("connection release failed ", err)
 	}
 }
 
-func (p CtxPgx) Begin(ctx context.Context) (context.Context, error) {
+func (p CtxPgx) BeginTx(ctx context.Context) (context.Context, error) {
 	if ctx.Value(CtxPgxConnKey) == nil {
 		var err error
 		ctx, err = p.SetConn(ctx)
@@ -100,7 +113,8 @@ func (p CtxPgx) Begin(ctx context.Context) (context.Context, error) {
 	if err != nil {
 		return ctx, err
 	}
-	tx, err := conn.Begin(ctx)
+
+	tx, err := conn.BeginTx(ctx, pgx.TxOptions{IsoLevel: "Serializable"})
 	if err != nil {
 		return ctx, err
 	}
@@ -116,24 +130,36 @@ func GetCtxTx(ctx context.Context) (pgx.Tx, error) {
 	return tx, err
 }
 
-func (CtxPgx) Commit(ctx context.Context) error {
+func (CtxPgx) Commit(ctx context.Context) (context.Context, error) {
 	tx, err := GetCtxTx(ctx)
 	if err != nil {
-		return err
+		return ctx, errx.ErrxOf(err)
 	}
-	return tx.Commit(ctx)
+	err = tx.Commit(ctx)
+	if err != nil {
+		return ctx, errx.ErrxOf(err)
+	}
+	ctx = context.WithValue(ctx, CtxPgxTxKey, nil)
+	ctx = context.WithValue(ctx, CtxPgxConnKey, nil)
+	return ctx, nil
 }
 
-func (CtxPgx) Rollback(ctx context.Context) error {
+func (CtxPgx) Rollback(ctx context.Context) (context.Context, error) {
 	tx, err := GetCtxTx(ctx)
 	if err != nil {
-		return err
+		return ctx, errx.ErrxOf(err)
 	}
-	return tx.Rollback(ctx)
+	err = tx.Rollback(ctx)
+	if err != nil {
+		return ctx, errx.ErrxOf(err)
+	}
+	ctx = context.WithValue(ctx, CtxPgxTxKey, nil)
+	ctx = context.WithValue(ctx, CtxPgxConnKey, nil)
+	return ctx, nil
 }
 
 func (p CtxPgx) DeferredRollback(ctx context.Context) {
-	err := p.Rollback(ctx)
+	ctx, err := p.Rollback(ctx)
 	if err != nil {
 		log.Error("rollback failed", err)
 		p.DeferredReleaseConn(ctx)

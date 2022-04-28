@@ -10,10 +10,10 @@ import "context"
 
 type CtxDb interface {
 	SetConn(ctx context.Context) (context.Context, error)
-	ReleaseConn(ctx context.Context) error
+	ReleaseConn(ctx context.Context) (context.Context, error)
 	DeferredReleaseConn(ctx context.Context)
-	Begin(ctx context.Context) (context.Context, error)
-	Commit(ctx context.Context) error
-	Rollback(ctx context.Context) error
+	BeginTx(ctx context.Context) (context.Context, error)
+	Commit(ctx context.Context) (context.Context, error)
+	Rollback(ctx context.Context) (context.Context, error)
 	DeferredRollback(ctx context.Context)
 }

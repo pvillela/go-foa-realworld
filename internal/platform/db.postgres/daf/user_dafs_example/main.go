@@ -10,12 +10,16 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 	log "github.com/sirupsen/logrus"
 )
+
+var cleanupOnly = false
 
 func main() {
 	defer util.PanicLog(log.Fatal)
@@ -37,7 +41,12 @@ func main() {
 	ctx, err = ctxDb.SetPool(ctx)
 	util.PanicOnError(err)
 
-	ctx, err = ctxDb.Begin(ctx)
+	if cleanupOnly {
+		cleanup(ctx, ctxDb, user)
+		return
+	}
+
+	ctx, err = ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
 
@@ -55,6 +64,47 @@ func main() {
 	fmt.Println("\nUserGetByEmailDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx)
 
-	//err = ctxDb.Commit(ctx)
-	//util.PanicOnError(err)
+	ctx, err = ctxDb.Commit(ctx)
+	util.PanicOnError(err)
+
+	ctx, err = ctxDb.BeginTx(ctx)
+	util.PanicOnError(err)
+
+	user.ImageLink = "https://xyz.com"
+	recCtx, err = newdaf.UserUpdateDaf(ctx, user, recCtx)
+	util.PanicOnError(err)
+	fmt.Println("\nUserUpdateDaf:", user)
+	fmt.Println("recCtx from Update:", recCtx)
+
+	_, err = ctxDb.Commit(ctx)
+	util.PanicOnError(err)
+
+	cleanup(ctx, ctxDb, user)
+}
+
+func cleanup(ctx context.Context, ctxDb db.CtxDb, user model.User) {
+	ctx, err := ctxDb.BeginTx(ctx)
+	util.PanicOnError(err)
+
+	err = userDeleteDaf(ctx, user.Username)
+	util.PanicOnError(err)
+
+	_, err = ctxDb.Commit(ctx)
+	util.PanicOnError(err)
+}
+
+func userDeleteDaf(
+	ctx context.Context,
+	username string,
+) error {
+	tx, err := dbpgx.GetCtxTx(ctx)
+	if err != nil {
+		return errx.ErrxOf(err)
+	}
+	sql := `
+	DELETE FROM users
+	WHERE username = $1
+	`
+	_, err = tx.Exec(ctx, sql, username)
+	return errx.ErrxOf(err)
 }

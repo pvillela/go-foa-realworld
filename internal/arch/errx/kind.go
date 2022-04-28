@@ -36,6 +36,9 @@ func NewErrx(cause error, msg string) Errx {
 }
 
 func ErrxOf(err error) Errx {
+	if err == nil {
+		return nil
+	}
 	errX, ok := err.(Errx)
 	if !ok {
 		msg := fmt.Sprintf("ErrxOf: %v", err)
