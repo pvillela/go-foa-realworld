@@ -21,19 +21,18 @@ type UserUpdateSflT = func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOu
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT.
 func UserUpdateSflC(
-	ctxConn db.CtxDb,
+	ctxDb db.CtxDb,
 	userGetByNameDaf fs.UserGetByNameDafT,
 	userUpdateDaf fs.UserUpdateDafT,
 ) UserUpdateSflT {
 	return func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 
-		ctx, err := ctxConn.BeginConnTx(ctx)
+		ctx, err := ctxDb.BeginTx(ctx)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}
-
-		defer ctxConn.DeferredRollback(ctx)
+		defer ctxDb.DeferredRollback(ctx)
 
 		user, rc, err := userGetByNameDaf(ctx, username)
 		if err != nil {
@@ -47,7 +46,7 @@ func UserUpdateSflC(
 			return rpc.UserOut{}, err
 		}
 
-		err = ctxConn.Commit(ctx)
+		_, err = ctxDb.Commit(ctx)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}
@@ -55,6 +54,6 @@ func UserUpdateSflC(
 		token := web.ContextToRequestContext(ctx).Token
 
 		userOut := rpc.UserOut_FromModel(user, token.Raw)
-		return userOut, err
+		return userOut, nil
 	}
 }

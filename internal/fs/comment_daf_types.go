@@ -20,7 +20,7 @@ type RecCtxComment = db.RecCtx[model.Comment]
 type PwComment = db.Pw[model.Comment, RecCtxComment]
 
 // CommentGetByIdDafT is the type of the stereotype instance for the DAF that
-// retrieves a comment by ID.
+// retrieves a comment by Id.
 type CommentGetByIdDafT = func(articleUuid util.Uuid, id int) (model.Comment, RecCtxComment, error)
 
 // CommentCreateDafT is the type of the stereotype instance for the DAF that

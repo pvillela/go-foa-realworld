@@ -6,10 +6,8 @@
 
 package model
 
-type Following struct {
-	Id         uint
-	FollowerID uint
-	//Follower *User
-	FolloweeID uint
-	//Followee *User
+type Favorite struct {
+	Id          uint
+	ArticleId   uint
+	FavoritedBy uint
 }

@@ -10,7 +10,7 @@ package db
 // The type parameter E can either be a domain entity type or the pointer type thereof,
 // depending on whether the DAF returns / receives by value or by pointer.
 // RecCtx holds platform-specific context information about the database record,
-// e.g., an optimistic locking token and/or a record ID.
+// e.g., an optimistic locking token and/or a record Id.
 type Pw[E any, R any] struct {
 	Entity E `db:""`
 	RecCtx R `db:""`

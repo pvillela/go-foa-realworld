@@ -23,33 +23,32 @@ type ArticleGetSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, er
 // ArticleGetSflC is the function that constructs a stereotype instance of type
 // ArticleGetSflT.
 func ArticleGetSflC(
-	beginTxn func(context string) db.Txn,
+	ctxDb db.CtxDb,
 	userGetByNameDaf fs.UserGetByNameDafT,
 	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
 ) ArticleGetSflT {
 	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
-
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
-
-		var zero rpc.ArticleOut
-		var user model.User
-		var err error
-
-		if username != "" {
-			user, _, err = userGetByNameDaf(username)
-			if err != nil {
-				return zero, err
-			}
+		ctx, err := ctxDb.BeginTx(ctx)
+		if err != nil {
+			return rpc.ArticleOut{}, err
 		}
+		defer ctxDb.DeferredRollback(ctx)
 
 		article, _, err := articleGetBySlugDaf(slug)
 		if err != nil {
-			return zero, err
+			return rpc.ArticleOut{}, err
 		}
 
-		articleOut := rpc.ArticleOut_FromModel(user, article)
+		username := web.ContextToRequestContext(ctx).Username
+		var user model.User
+		if username != "" {
+			user, _, err = userGetByNameDaf(ctx, username)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+		}
+
+		articleOut := rpc.ArticleOut_FromModel(article, followsAuthor, likesArticle)
 
 		return articleOut, err
 	}

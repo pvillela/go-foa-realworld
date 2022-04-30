@@ -71,7 +71,7 @@ func ArticleUpdateSflC0(
 			return zero, err
 		}
 
-		updateSrc := model.ArticleUpdateSrc{
+		updateSrc := model.ArticlePatch{
 			Title:       in.Article.Title,
 			Description: in.Article.Description,
 			Body:        in.Article.Body,

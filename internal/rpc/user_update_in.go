@@ -9,5 +9,5 @@ package rpc
 import "github.com/pvillela/go-foa-realworld/internal/model"
 
 type UserUpdateIn struct {
-	User model.UserUpdateSrc
+	User model.UserPatch
 }

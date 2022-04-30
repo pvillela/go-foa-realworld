@@ -47,7 +47,7 @@ func CommentAddSflC(
 			return zero, err
 		}
 
-		rawComment := in.ToComment(article.Uuid, commentAuthor)
+		rawComment := in.ToComment(article.Id, commentAuthor)
 
 		insertedComment, _, err := commentCreateDaf(rawComment, txn)
 		if err != nil {

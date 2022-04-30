@@ -55,11 +55,11 @@ func (CtxPgx) SetConn(ctx context.Context) (context.Context, error) {
 	}
 	pool, err := GetCtxPool(ctx)
 	if err != nil {
-		return ctx, err
+		return ctx, errx.ErrxOf(err)
 	}
 	conn, err := pool.Acquire(ctx)
 	if err != nil {
-		return ctx, err
+		return ctx, errx.ErrxOf(err)
 	}
 	return context.WithValue(ctx, CtxPgxConnKey, conn), nil
 }
@@ -116,7 +116,7 @@ func (p CtxPgx) BeginTx(ctx context.Context) (context.Context, error) {
 
 	tx, err := conn.BeginTx(ctx, pgx.TxOptions{IsoLevel: "Serializable"})
 	if err != nil {
-		return ctx, err
+		return ctx, errx.ErrxOf(err)
 	}
 	return context.WithValue(ctx, CtxPgxTxKey, tx), nil
 }
@@ -125,7 +125,7 @@ func GetCtxTx(ctx context.Context) (pgx.Tx, error) {
 	tx, ok := ctx.Value(CtxPgxTxKey).(pgx.Tx)
 	var err error
 	if !ok {
-		err = errors.New("there is no transaction value in ctx")
+		err = errx.NewErrx(nil, "there is no transaction value in ctx")
 	}
 	return tx, err
 }

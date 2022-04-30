@@ -11,7 +11,6 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
@@ -32,7 +31,9 @@ var UserGetByNameDaf fs.UserGetByNameDafT = func(
 	}
 	pwUser := fs.PwUser{}
 	err = pgxscan.ScanOne(&pwUser, rows)
-	util.PanicOnError(err)
+	if err != nil {
+		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+	}
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
@@ -52,7 +53,9 @@ var UserGetByEmailDaf fs.UserGetByEmailDafT = func(
 	}
 	pwUser := fs.PwUser{}
 	err = pgxscan.ScanOne(&pwUser, rows)
-	util.PanicOnError(err)
+	if err != nil {
+		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+	}
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
@@ -74,7 +77,7 @@ var UserCreateDaf fs.UserCreateDafT = func(
 	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
 	row := tx.QueryRow(ctx, sql, args...)
 	var recCtx fs.RecCtxUser
-	err = row.Scan(&recCtx.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
+	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
 	return recCtx, errx.ErrxOf(err)
 }
 
@@ -101,7 +104,7 @@ var UserUpdateDaf fs.UserUpdateDafT = func(
 		user.Bio,
 		user.ImageLink,
 		user.PasswordHash,
-		recCtx.Id,
+		user.Id,
 		recCtx.UpdatedAt,
 	}
 	row := tx.QueryRow(ctx, sql, args...)

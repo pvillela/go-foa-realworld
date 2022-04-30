@@ -20,7 +20,7 @@ import (
 )
 
 func commentKey(comment model.Comment) string {
-	return commentKey0(comment.ArticleUuid, comment.ID)
+	return commentKey0(comment.ArticleId, comment.Id)
 }
 
 func commentKey0(articleUuid util.Uuid, id int) string {
@@ -63,7 +63,7 @@ func nextId(commentDb mapdb.MapDb, articleUuid util.Uuid) int {
 // fs.CommentCreateDafT.
 func CommentCreateDafC(commentDb mapdb.MapDb) fs.CommentCreateDafT {
 	return func(comment model.Comment, txn db.Txn) (model.Comment, fs.RecCtxComment, error) {
-		comment.ID = nextId(commentDb, comment.ArticleUuid)
+		comment.Id = nextId(commentDb, comment.ArticleId)
 		pw := fs.PwComment{fs.RecCtxComment{}, comment}
 		if err := commentDb.Create(commentKey(comment), pw, txn); err != nil {
 			return model.Comment{}, fs.RecCtxComment{}, err // can only be an invalid txn token due to first line above

@@ -41,7 +41,7 @@ var mapDb = mapdb.MapDb{
 
 var userGetByNameDaf = daf.UserGetByEmailDafC(mapDb)
 var userUpdateDaf = daf.UserUpdateDafC(mapDb)
-var userFollowFl = fs.UserFollowFlC(userGetByNameDaf, userUpdateDaf)
+var userFollowFl = fs.UserStartFollowingFlC(userGetByNameDaf, userUpdateDaf)
 var userCreateDaf = daf.UserCreateDafC(mapDb)
 
 var articleCreateDaf = daf.ArticleCreateDafC(mapDb)

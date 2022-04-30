@@ -12,21 +12,20 @@ import (
 
 // User represents a user account in the system
 type User struct {
-	// Below added to daf.RecCtx
-	//Id           uint    `json:"-"`
+	Id           uint    `json:"-"`
 	Username     string  `json:"username"`
 	Email        string  `json:"email"`
 	PasswordHash string  `json:"-"`
 	Bio          *string `json:"bio,omitempty"`
 	ImageLink    string  `json:"image,omitempty" db:"image"`
-	Followees    []*User `json:"-"`
-	Followers    []*User `json:"-"`
+	//Followees    []*User `json:"-"`
+	//Followers    []*User `json:"-"`
 	// Below added to daf.RecCtx
 	//CreatedAt time.Time `json:"-"`
 	//UpdatedAt time.Time `json:"-"`
 }
 
-type UserUpdateSrc struct {
+type UserPatch struct {
 	Username  *string
 	Email     *string
 	Password  *string
@@ -50,7 +49,7 @@ func User_Create(
 	}
 }
 
-func (s User) Update(v UserUpdateSrc) User {
+func (s User) Update(v UserPatch) User {
 	if v.Username != nil {
 		s.Username = *v.Username
 	}

@@ -19,7 +19,7 @@ type ProfileOut struct {
 	Profile Profile
 }
 
-func Profile_FromModel(user model.User, follows bool) Profile {
+func Profile_FromModel(user *model.User, follows bool) Profile {
 	s := Profile{}
 	if user.Bio != nil {
 		s.Bio = user.Bio
@@ -38,7 +38,7 @@ func Profile_FromModel(user model.User, follows bool) Profile {
 	return s
 }
 
-func ProfileOut_FromModel(user model.User, follows bool) ProfileOut {
+func ProfileOut_FromModel(user *model.User, follows bool) ProfileOut {
 	s := ProfileOut{}
 	s.Profile = Profile_FromModel(user, follows)
 	return s

@@ -49,9 +49,9 @@ func ArticleCreateDafC(articleDb mapdb.MapDb) fs.ArticleCreateDafT {
 		}
 
 		pw := fs.PwArticle{fs.RecCtxArticle{}, article}
-		err = articleDb.Create(article.Uuid, pw, txn)
+		err = articleDb.Create(article.Id, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
-			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleUuid.Make(err, article.Uuid)
+			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleUuid.Make(err, article.Id)
 		}
 		if err != nil {
 			return fs.RecCtxArticle{}, err // this can only be a transaction error
@@ -89,14 +89,14 @@ func ArticleGetBySlugDafC(articleDb mapdb.MapDb) fs.ArticleGetBySlugDafT {
 // fs.ArticleUpdateDafT.
 func ArticleUpdateDafC(articleDb mapdb.MapDb) fs.ArticleUpdateDafT {
 	return func(article model.Article, recCtx fs.RecCtxArticle, txn db.Txn) (fs.RecCtxArticle, error) {
-		if artBySlug, _, err := (myMapDb{articleDb}.getBySlug(article.Slug)); err == nil && artBySlug.Uuid != article.Uuid {
+		if artBySlug, _, err := (myMapDb{articleDb}.getBySlug(article.Slug)); err == nil && artBySlug.Id != article.Id {
 			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
 		}
 
 		pw := fs.PwArticle{recCtx, article}
-		err := articleDb.Update(article.Uuid, pw, txn)
+		err := articleDb.Update(article.Id, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-			return fs.RecCtxArticle{}, fs.ErrArticleNotFound.Make(err, article.Uuid)
+			return fs.RecCtxArticle{}, fs.ErrArticleNotFound.Make(err, article.Id)
 		}
 		if err != nil {
 			return fs.RecCtxArticle{}, err // this can only be a transaction error
@@ -115,7 +115,7 @@ func ArticleDeleteDafC(articleDb mapdb.MapDb) fs.ArticleDeleteDafT {
 			return err
 		}
 
-		err = articleDb.Delete(article.Uuid, txn)
+		err = articleDb.Delete(article.Id, txn)
 		if err != nil {
 			return err // this can only be a transaction error because article was found above
 		}

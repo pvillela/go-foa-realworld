@@ -14,7 +14,7 @@ var (
 	ErrDuplicateArticleSlug       = errx.NewKind("duplicate article slug \"%v\"")
 	ErrDuplicateArticleUuid       = errx.NewKind("duplicate article uuid %v")
 	ErrArticleSlugNotFound        = errx.NewKind("article slug \"%v\" not found")
-	ErrArticleNotFound            = errx.NewKind("article not found for Uuid %v")
+	ErrArticleNotFound            = errx.NewKind("article not found for Id %v")
 	ErrArticleCreateMissingFields = errx.NewKind("article has missing fields for Create operation")
 	ErrArticleUpdateMissingFields = errx.NewKind("article has missing fields for Update operation")
 	ErrCommentNotFound            = errx.NewKind("comment not found for articleUuid %v and id %")

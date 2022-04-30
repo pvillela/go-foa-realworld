@@ -18,6 +18,7 @@ type ArticleOut struct {
 
 type articleOut0 = struct {
 	Slug           string   `json:"slug"`
+	Author         Profile  `json:"author"`
 	Title          string   `json:"title"`
 	Description    string   `json:"description"`
 	Body           *string  `json:"body"`
@@ -26,7 +27,6 @@ type articleOut0 = struct {
 	UpdatedAt      string   `json:"updatedAt"`
 	Favorited      bool     `json:"favorited"`
 	FavoritesCount int      `json:"favoritesCount"`
-	Author         Profile  `json:"author"`
 }
 
 type ArticlesOut struct {
@@ -34,23 +34,7 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
-func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
-	isFollowingAuthor := false
-	for _, userName := range user.Followees {
-		if userName == article.Author.Username {
-			isFollowingAuthor = true
-			break
-		}
-	}
-
-	favorite := false
-	for _, favUser := range article.FavoritedBy {
-		if user.Username == favUser.Username {
-			favorite = true
-			break
-		}
-	}
-
+func ArticleOut_FromModel(article model.Article, followsAuthor bool, likesArticle bool) ArticleOut {
 	articleOut0 := articleOut0{
 		Slug:           article.Slug,
 		Title:          article.Title,
@@ -58,20 +42,23 @@ func ArticleOut_FromModel(user model.User, article model.Article) ArticleOut {
 		Body:           article.Body,
 		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-		Author:         Profile_FromModel(article.Author, isFollowingAuthor),
+		Author:         Profile_FromModel(article.Author, followsAuthor),
 		TagList:        article.TagList,
-		Favorited:      favorite,
-		FavoritesCount: len(article.FavoritedBy),
+		Favorited:      likesArticle,
+		FavoritesCount: article.FavoritesCount,
 	}
-
 	return ArticleOut{articleOut0}
 }
 
-func ArticlesOut_FromModel(user model.User, articles []model.Article) ArticlesOut {
+func ArticlesOut_FromModel(
+	articles []model.Article,
+	followsAuthors []bool,
+	likesArticles []bool,
+) ArticlesOut {
 	outs := []ArticleOut{} // return at least an empty array (not nil)
 
-	for _, article := range articles {
-		outs = append(outs, ArticleOut_FromModel(user, article))
+	for i, article := range articles {
+		outs = append(outs, ArticleOut_FromModel(article, followsAuthors[i], likesArticles[i]))
 	}
 
 	return ArticlesOut{outs, len(outs)}

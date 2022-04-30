@@ -11,16 +11,16 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// UserFollowFlT is the type of the stereotype instance for the flow that
+// UserStartFollowingFlT is the type of the stereotype instance for the flow that
 // causes the current user start following a given other user.
-type UserFollowFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, RecCtxUser, error)
+type UserStartFollowingFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, RecCtxUser, error)
 
-// UserFollowFlC is the function that constructs a stereotype instance of type
-// UserFollowFlT.
-func UserFollowFlC(
+// UserStartFollowingFlC is the function that constructs a stereotype instance of type
+// UserStartFollowingFlT.
+func UserStartFollowingFlC(
 	userGetByNameDaf UserGetByNameDafT,
 	userUpdateDaf UserUpdateDafT,
-) UserFollowFlT {
+) UserStartFollowingFlT {
 	return func(
 		username string,
 		followedUsername string,

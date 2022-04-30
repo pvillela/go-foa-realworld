@@ -23,7 +23,7 @@ type UserUnfollowSflT = func(ctx context.Context, followedUsername string) (rpc.
 // UserUnfollowSflT.
 func UserUnfollowSflC(
 	beginTxn func(context string) db.Txn,
-	userFollowFl fs.UserFollowFlT,
+	userFollowFl fs.UserStartFollowingFlT,
 ) UserUnfollowSflT {
 	return func(ctx context.Context, followedUsername string) (rpc.ProfileOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

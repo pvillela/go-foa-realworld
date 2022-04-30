@@ -39,7 +39,7 @@ func CommentDeleteSflC(
 		if err != nil {
 			return arch.Void, err
 		}
-		comment, _, err := commentGetByIdDaf(article.Uuid, in.Id)
+		comment, _, err := commentGetByIdDaf(article.Id, in.Id)
 		if err != nil {
 			return arch.Void, err
 		}
@@ -47,7 +47,7 @@ func CommentDeleteSflC(
 			return arch.Void, fs.ErrUnauthorizedUser.Make(nil, username)
 		}
 
-		if err := commentDeleteDaf(article.Uuid, in.Id, txn); err != nil {
+		if err := commentDeleteDaf(article.Id, in.Id, txn); err != nil {
 			return arch.Void, err
 		}
 
