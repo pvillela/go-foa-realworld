@@ -16,19 +16,21 @@ import (
 
 type UserGenTokenBfT = func(user model.User) (string, error)
 
-const tokenTimeToLive = time.Hour * 2
+func UserGenTokenBfC(
+	tokenTimeToLive time.Duration,
+) UserGenTokenBfT {
+	return func(user model.User) (string, error) {
+		if user.Username == "" {
+			return "", errors.New("can't generate token for empty user")
+		}
 
-var UserGenTokenBfI UserGenTokenBfT = func(user model.User) (string, error) {
-	if user.Username == "" {
-		return "", errors.New("can't generate token for empty user")
+		claims := jwt.RegisteredClaims{
+			Subject:   user.Username,
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTimeToLive)),
+			Issuer:    "real-world-demo-backend",
+		}
+
+		return jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
+			SignedString("") // TODO: use appropriate parameter
 	}
-
-	claims := jwt.RegisteredClaims{
-		Subject:   user.Username,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTimeToLive)),
-		Issuer:    "real-world-demo-backend",
-	}
-
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
-		SignedString("") // TODO: use appropriate parameter
 }
