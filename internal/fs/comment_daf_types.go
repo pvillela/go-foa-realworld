@@ -9,12 +9,13 @@ package fs
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // RecCtxArticle is a type alias
-type RecCtxComment = db.RecCtx[model.Comment]
+type RecCtxComment = dbpgx.RecCtx[model.Comment]
 
 // PwArticle is a type alias
 type PwComment = db.Pw[model.Comment, RecCtxComment]

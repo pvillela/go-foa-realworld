@@ -9,11 +9,14 @@ package fs
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
+// TODO: because this file depends on the type below, which depends on package dbpgx,
+//  this file should be moved to the same package as the platform-specific DAFs.
 // RecCtxUser is a type alias
-type RecCtxUser = db.RecCtx[model.User]
+type RecCtxUser = dbpgx.RecCtx[model.User]
 
 // PwUser is a type alias
 type PwUser = db.Pw[model.User, RecCtxUser]

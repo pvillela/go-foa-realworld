@@ -4,7 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package db
+package dbpgx
 
 import "time"
 
