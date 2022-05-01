@@ -12,6 +12,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 )
 
 // ArticleCreateDaf implements a stereotype instance of type
-// fs.ArticleCreateDafT.
+// ArticleCreateDafT.
 var ArticleCreateDaf ArticleCreateDafT = func(
 	ctx context.Context,
 	article *model.Article,
@@ -49,7 +50,7 @@ var ArticleCreateDaf ArticleCreateDafT = func(
 }
 
 // ArticleGetBySlugDaf implements a stereotype instance of type
-// fs.ArticleGetBySlugDafT.
+// ArticleGetBySlugDafT.
 var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	ctx context.Context,
 	slug string,
@@ -66,6 +67,8 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	if err != nil {
 		return model.Article{}, errx.ErrxOf(err)
 	}
+	defer rows.Close()
+
 	var article model.Article
 	err = pgxscan.ScanOne(&article, rows)
 	if err != nil {
@@ -75,7 +78,7 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 }
 
 // ArticleUpdateDaf implements a stereotype instance of type
-// fs.ArticleUpdateDafT.
+// ArticleUpdateDafT.
 var ArticleUpdateDaf ArticleUpdateDafT = func(
 	ctx context.Context,
 	article *model.Article,
@@ -103,7 +106,7 @@ var ArticleUpdateDaf ArticleUpdateDafT = func(
 }
 
 // ArticleDeleteDaf implements a stereotype instance of type
-// fs.ArticleDeleteDafT.
+// ArticleDeleteDafT.
 var ArticleDeleteDaf ArticleDeleteDafT = func(
 	ctx context.Context,
 	slug string,
@@ -118,4 +121,24 @@ var ArticleDeleteDaf ArticleDeleteDafT = func(
 	`
 	_, err = tx.Exec(ctx, sql, slug)
 	return errx.ErrxOf(err)
+}
+
+// ArticlesFeedDaf implements a stereotype instance of type
+// ArticlesFeedDafT.
+var ArticlesFeedDaf ArticlesFeedDafT = func(
+	ctx context.Context,
+	in rpc.ArticlesFeedIn,
+) (rpc.ArticlesOut, error) {
+	sql := `
+	
+	`
+}
+
+// ArticlesListDafT implements a stereotype instance of type
+// ArticlesListDafTT.
+var ArticlesListDaf ArticlesListDafT = func(
+	ctx context.Context,
+	in rpc.ArticlesListIn,
+) (rpc.ArticlesOut, error) {
+
 }

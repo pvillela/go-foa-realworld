@@ -24,10 +24,13 @@ var UserGetByNameDaf UserGetByNameDafT = func(
 	if err != nil {
 		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
+
 	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
 	if err != nil {
 		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
+	defer rows.Close()
+
 	pwUser := PwUser{}
 	err = pgxscan.ScanOne(&pwUser, rows)
 	if err != nil {
@@ -46,10 +49,13 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 	if err != nil {
 		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
+
 	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
 		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
+	defer rows.Close()
+
 	pwUser := PwUser{}
 	err = pgxscan.ScanOne(&pwUser, rows)
 	if err != nil {
