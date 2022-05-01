@@ -140,5 +140,5 @@ var ArticlesListDaf ArticlesListDafT = func(
 	ctx context.Context,
 	in rpc.ArticlesListIn,
 ) (rpc.ArticlesOut, error) {
-
+	
 }

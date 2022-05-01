@@ -8,7 +8,6 @@ package newdaf
 
 import (
 	"context"
-	"github.com/georgysavva/scany/pgxscan"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -18,23 +17,16 @@ import (
 // fs.UserGetByNameDafT.
 var UserGetByNameDaf UserGetByNameDafT = func(
 	ctx context.Context,
-	userName string,
+	username string,
 ) (model.User, RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, err
 	}
-
-	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
-	if err != nil {
-		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
-	}
-	defer rows.Close()
-
 	pwUser := PwUser{}
-	err = pgxscan.ScanOne(&pwUser, rows)
+	err = dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
 	if err != nil {
-		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, err
 	}
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
@@ -47,19 +39,12 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 ) (model.User, RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, err
 	}
-
-	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE email = $1", email)
-	if err != nil {
-		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
-	}
-	defer rows.Close()
-
 	pwUser := PwUser{}
-	err = pgxscan.ScanOne(&pwUser, rows)
+	err = dbpgx.ReadSingle(ctx, tx, "users", "email", email, &pwUser)
 	if err != nil {
-		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, err
 	}
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
