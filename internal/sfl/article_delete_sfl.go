@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
@@ -24,7 +25,7 @@ type ArticleDeleteSflT = func(ctx context.Context, slug string) (arch.Unit, erro
 func ArticleDeleteSflC(
 	beginTxn func(context string) db.Txn,
 	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
-	articleDeleteDaf fs.ArticleDeleteDafT,
+	articleDeleteDaf newdaf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
 	return func(ctx context.Context, slug string) (arch.Unit, error) {
 		username := web.ContextToRequestContext(ctx).Username

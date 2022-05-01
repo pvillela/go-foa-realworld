@@ -9,6 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -23,7 +24,7 @@ type ArticlesFeedSflT = func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.Ar
 // ArticlesFeedSflC is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT.
 func ArticlesFeedSflC(
-	userGetByNameDaf fs.UserGetByNameDafT,
+	userGetByNameDaf newdaf.UserGetByNameDafT,
 	articleGetRecentForAuthorsDaf fs.ArticleGetRecentForAuthorsDafT,
 ) ArticlesFeedSflT {
 	return func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {

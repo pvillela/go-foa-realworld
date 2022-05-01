@@ -11,63 +11,62 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // UserGetByNameDaf implements a stereotype instance of type
 // fs.UserGetByNameDafT.
-var UserGetByNameDaf fs.UserGetByNameDafT = func(
+var UserGetByNameDaf UserGetByNameDafT = func(
 	ctx context.Context,
 	userName string,
-) (model.User, fs.RecCtxUser, error) {
+) (model.User, RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
 	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE username = $1", userName)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
-	pwUser := fs.PwUser{}
+	pwUser := PwUser{}
 	err = pgxscan.ScanOne(&pwUser, rows)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
 // UserGetByEmailDaf implements a stereotype instance of type
 // fs.UserGetByEmailDafT.
-var UserGetByEmailDaf fs.UserGetByEmailDafT = func(
+var UserGetByEmailDaf UserGetByEmailDafT = func(
 	ctx context.Context,
 	email string,
-) (model.User, fs.RecCtxUser, error) {
+) (model.User, RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
 	rows, err := tx.Query(ctx, "SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
-	pwUser := fs.PwUser{}
+	pwUser := PwUser{}
 	err = pgxscan.ScanOne(&pwUser, rows)
 	if err != nil {
-		return model.User{}, fs.RecCtxUser{}, errx.ErrxOf(err)
+		return model.User{}, RecCtxUser{}, errx.ErrxOf(err)
 	}
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
 // UserCreateDaf implements a stereotype instance of type
 // fs.UserCreateDafT.
-var UserCreateDaf fs.UserCreateDafT = func(
+var UserCreateDaf UserCreateDafT = func(
 	ctx context.Context,
 	user model.User,
-) (fs.RecCtxUser, error) {
+) (RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return fs.RecCtxUser{}, errx.ErrxOf(err)
+		return RecCtxUser{}, errx.ErrxOf(err)
 	}
 	sql := `
 	INSERT INTO users (username, email, password_hash, bio, image)
@@ -76,21 +75,21 @@ var UserCreateDaf fs.UserCreateDafT = func(
 	`
 	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
 	row := tx.QueryRow(ctx, sql, args...)
-	var recCtx fs.RecCtxUser
+	var recCtx RecCtxUser
 	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
 	return recCtx, errx.ErrxOf(err)
 }
 
 // UserUpdateDafC is the function that constructs a stereotype instance of type
 // fs.UserUpdateDafT.
-var UserUpdateDaf fs.UserUpdateDafT = func(
+var UserUpdateDaf UserUpdateDafT = func(
 	ctx context.Context,
 	user model.User,
-	recCtx fs.RecCtxUser,
-) (fs.RecCtxUser, error) {
+	recCtx RecCtxUser,
+) (RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return fs.RecCtxUser{}, errx.ErrxOf(err)
+		return RecCtxUser{}, errx.ErrxOf(err)
 	}
 	sql := `
 	UPDATE users 

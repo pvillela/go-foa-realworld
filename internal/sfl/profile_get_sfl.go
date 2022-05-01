@@ -8,9 +8,9 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -21,7 +21,7 @@ type ProfileGetSflT = func(ctx context.Context, profileName string) (rpc.Profile
 // ProfileGetSflC is the function that constructs a stereotype instance of type
 // ProfileGetSflT.
 func ProfileGetSflC(
-	userGetByNameDaf fs.UserGetByNameDafT,
+	userGetByNameDaf newdaf.UserGetByNameDafT,
 ) ProfileGetSflT {
 	return func(ctx context.Context, profileName string) (rpc.ProfileOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

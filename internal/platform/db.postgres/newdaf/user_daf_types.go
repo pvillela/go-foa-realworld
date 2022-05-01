@@ -1,10 +1,10 @@
 /*
- * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Copyright © 2022 Paulo Villela. All rights reserved.
  * Use of this source code is governed by the Apache 2.0 license
  * that can be found in the LICENSE file.
  */
 
-package fs
+package newdaf
 
 import (
 	"context"
@@ -13,8 +13,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// TODO: because this file depends on the type below, which depends on package dbpgx,
-//  this file should be moved to the same package as the platform-specific DAFs.
 // RecCtxUser is a type alias
 type RecCtxUser = dbpgx.RecCtx[model.User]
 

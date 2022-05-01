@@ -1,10 +1,10 @@
 /*
- * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Copyright © 2022 Paulo Villela. All rights reserved.
  * Use of this source code is governed by the Apache 2.0 license
  * that can be found in the LICENSE file.
  */
 
-package fs
+package newdaf
 
 import (
 	"context"
@@ -34,10 +34,11 @@ type ArticleUpdateDafT = func(ctx context.Context, article *model.Article) error
 // deletes an article.
 type ArticleDeleteDafT = func(ctx context.Context, slug string) error
 
-// ArticleGetRecentForAuthorsDafT is the type of the stereotype instance for the DAF that
-// retrieves recent articles for given authors.
-type ArticleGetRecentForAuthorsDafT = func(ctx context.Context, usernames []string, pLimit, pOffset *int) ([]model.Article, error)
+// ArticlesFeedDafT is the type of the stereotype instance for the DAF that
+// queries for all articles authored by other users followed by
+// the current user, with optional limit and offset pagination parameters.
+type ArticlesFeedDafT = func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error)
 
-// ArticleGetRecentFilteredDafT is the type of the stereotype instance for the DAF that
-// retrieves recent articles based on filter criteria.
-type ArticleGetRecentFilteredDafT = func(ctx context.Context, in rpc.ArticlesListIn) ([]model.Article, error)
+// ArticlesListDafT is the type of the stereotype instance for the DAF that
+// retrieve recent articles based on a set of query parameters.
+type ArticlesListDafT = func(ctx context.Context, in rpc.ArticlesListIn) (rpc.ArticlesOut, error)

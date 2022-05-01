@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -20,7 +20,7 @@ type TagsGetSflT = func(_ context.Context, _ arch.Unit) (rpc.TagsOut, error)
 // TagsGetSflC is the function that constructs a stereotype instance of type
 // TagsGetSflT.
 func TagsGetSflC(
-	tagGetAllDaf fs.TagGetAllDafT,
+	tagGetAllDaf newdaf.TagGetAllDafT,
 ) TagsGetSflT {
 	return func(_ context.Context, _ arch.Unit) (rpc.TagsOut, error) {
 		tags, err := tagGetAllDaf()

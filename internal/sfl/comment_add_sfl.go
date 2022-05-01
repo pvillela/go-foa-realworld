@@ -9,9 +9,9 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -23,10 +23,10 @@ type CommentAddSflT = func(ctx context.Context, in rpc.CommentAddIn) (rpc.Commen
 // CommentAddSflT.
 func CommentAddSflC(
 	beginTxn func(context string) db.Txn,
-	userGetByNameDaf fs.UserGetByNameDafT,
-	articleGetBySlugDaf fs.ArticleGetBySlugDafT,
-	commentCreateDaf fs.CommentCreateDafT,
-	articleUpdateDaf fs.ArticleUpdateDafT,
+	userGetByNameDaf newdaf.UserGetByNameDafT,
+	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
+	commentCreateDaf newdaf.CommentCreateDafT,
+	articleUpdateDaf newdaf.ArticleUpdateDafT,
 ) CommentAddSflT {
 	return func(ctx context.Context, in rpc.CommentAddIn) (rpc.CommentOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

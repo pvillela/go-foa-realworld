@@ -11,10 +11,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 const (
@@ -24,7 +21,7 @@ const (
 
 // ArticleCreateDaf implements a stereotype instance of type
 // fs.ArticleCreateDafT.
-var ArticleCreateDaf fs.ArticleCreateDafT = func(
+var ArticleCreateDaf ArticleCreateDafT = func(
 	ctx context.Context,
 	article *model.Article,
 ) error {
@@ -53,7 +50,7 @@ var ArticleCreateDaf fs.ArticleCreateDafT = func(
 
 // ArticleGetBySlugDaf implements a stereotype instance of type
 // fs.ArticleGetBySlugDafT.
-var ArticleGetBySlugDaf fs.ArticleGetBySlugDafT = func(
+var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	ctx context.Context,
 	slug string,
 ) (model.Article, error) {
@@ -79,7 +76,7 @@ var ArticleGetBySlugDaf fs.ArticleGetBySlugDafT = func(
 
 // ArticleUpdateDaf implements a stereotype instance of type
 // fs.ArticleUpdateDafT.
-var ArticleUpdateDaf fs.ArticleUpdateDafT = func(
+var ArticleUpdateDaf ArticleUpdateDafT = func(
 	ctx context.Context,
 	article *model.Article,
 ) error {
@@ -107,7 +104,7 @@ var ArticleUpdateDaf fs.ArticleUpdateDafT = func(
 
 // ArticleDeleteDaf implements a stereotype instance of type
 // fs.ArticleDeleteDafT.
-var ArticleDeleteDaf fs.ArticleDeleteDafT = func(
+var ArticleDeleteDaf ArticleDeleteDafT = func(
 	ctx context.Context,
 	slug string,
 ) error {
@@ -121,94 +118,4 @@ var ArticleDeleteDaf fs.ArticleDeleteDafT = func(
 	`
 	_, err = tx.Exec(ctx, sql, slug)
 	return errx.ErrxOf(err)
-}
-
-func selectAndOrderByMostRecent(
-	articleDb mapdb.MapDb,
-	pred func(key, value interface{}) bool,
-	pLimit, pOffset *int,
-) []model.Article {
-	limit := limitDefault
-	if pLimit != nil {
-		limit = *pLimit
-	}
-	offset := offsetDefault
-	if pOffset != nil {
-		offset = *pOffset
-	}
-
-	selected := articleDb.FindAll(pred)
-	less := func(i, j int) bool {
-		return articleFromDb(selected[i]).CreatedAt.After(articleFromDb(selected[j]).CreatedAt)
-	}
-	util.Sort(selected, less)
-	selected = util.SliceWindow(selected, limit, offset)
-
-	res := make([]model.Article, limit)
-	for i := range selected {
-		res[i] = articleFromDb(selected[i])
-	}
-
-	return res
-}
-
-// ArticleGetRecentForAuthorsDafC is a function that constructs a stereotype instance of type
-// fs.ArticleGetRecentForAuthorsDafT.
-func ArticleGetRecentForAuthorsDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentForAuthorsDafT {
-	return func(usernames []string, pLimit, pOffset *int) ([]model.Article, error) {
-		pred := func(_, value interface{}) bool {
-			article := articleFromDb(value)
-			for _, name := range usernames {
-				if name == article.Author.Username {
-					return true
-				}
-			}
-			return false
-		}
-		res := selectAndOrderByMostRecent(articleDb, pred, pLimit, pOffset)
-		return res, nil
-	}
-}
-
-// ArticleGetRecentFilteredDafC is a function that constructs a stereotype instance of type
-// fs.ArticleGetRecentFilteredDafT.
-func ArticleGetRecentFilteredDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFilteredDafT {
-	return func(in rpc.ArticlesListIn) ([]model.Article, error) {
-		pred := func(_, value interface{}) bool {
-			article := articleFromDb(value)
-
-			findTag := func(tag string) bool {
-				for _, t := range article.TagList {
-					if t == tag {
-						return true
-					}
-				}
-				return false
-			}
-			if tag := in.Tag; tag != nil && !findTag(*tag) {
-				return false
-			}
-
-			if author := in.Author; author != nil && article.Author.Username != *author {
-				return false
-			}
-
-			findFavoritedBy := func(favoritedBy string) bool {
-				for _, user := range article.FavoritedBy {
-					if user.Username == favoritedBy {
-						return true
-					}
-				}
-				return false
-			}
-			if favorited := in.Favorited; favorited != nil && findFavoritedBy(*favorited) {
-				return false
-			}
-
-			return true
-		}
-
-		res := selectAndOrderByMostRecent(articleDb, pred, in.Limit, in.Offset)
-		return res, nil
-	}
 }
