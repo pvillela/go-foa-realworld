@@ -8,38 +8,12 @@ package rpc
 
 import "github.com/pvillela/go-foa-realworld/internal/model"
 
-type Profile struct {
-	Username  string  `json:"username"`
-	Bio       *string `json:"bio"`
-	Image     *string `json:"image"`
-	Following bool    `json:"following"`
-}
-
 type ProfileOut struct {
-	Profile Profile
-}
-
-func Profile_FromModel(user *model.User, follows bool) Profile {
-	s := Profile{}
-	if user.Bio != nil {
-		s.Bio = user.Bio
-	} else {
-		empty := ""
-		s.Bio = &empty
-	}
-
-	if user.ImageLink != "" {
-		s.Image = &user.ImageLink
-	}
-
-	s.Username = user.Username
-	s.Following = follows
-
-	return s
+	Profile model.Profile
 }
 
 func ProfileOut_FromModel(user *model.User, follows bool) ProfileOut {
 	s := ProfileOut{}
-	s.Profile = Profile_FromModel(user, follows)
+	s.Profile = model.ProfileFromUser(user, follows)
 	return s
 }

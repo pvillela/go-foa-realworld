@@ -8,41 +8,32 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticlesListSflT is the type of the stereotype instance for the service flow that
 // retrieve recent articles based on a set of query parameters.
-type ArticlesListSflT = func(ctx context.Context, in rpc.ArticlesListIn) (rpc.ArticlesOut, error)
+type ArticlesListSflT = func(ctx context.Context, in model.ArticleCriteria) (rpc.ArticlesOut, error)
 
 // ArticlesListSflC is the function that constructs a stereotype instance of type
 // ArticlesListSflT.
 func ArticlesListSflC(
-	userGetByNameDaf daf.UserGetByNameDafT,
-	articleGetRecentFilteredDaf fs.ArticleGetRecentFilteredDafT,
+	db dbpgx.Db,
+	articlesListDaf daf.ArticlesListDafT,
 ) ArticlesListSflT {
-	return func(ctx context.Context, in rpc.ArticlesListIn) (rpc.ArticlesOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
-
-		var zero rpc.ArticlesOut
-		var user model.User
-		var err error
-
-		if username != "" {
-			user, _, err = userGetByNameDaf(username)
-			if err != nil {
-				return zero, err
-			}
+	return func(ctx context.Context, in model.ArticleCriteria) (rpc.ArticlesOut, error) {
+		tx, err := db.BeginTx(ctx)
+		if err != nil {
+			return rpc.ArticlesOut{}, err
 		}
 
-		articles, err := articleGetRecentFilteredDaf(in)
+		articles, err := articlesListDaf(ctx, tx, in)
 		if err != nil {
-			return zero, err
+			return rpc.ArticlesOut{}, err
 		}
 
 		articlesOut := rpc.ArticlesOut_FromModel(user, articles)

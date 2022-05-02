@@ -14,10 +14,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// TODO: think about when to pass model.User by value vs by pointer. If User is cheap to copy
-//  then we should always pass it by value unless we need to mutate the argument as in the case
-//  of UserCreateDaf.
-
 // UserGetByNameDaf implements a stereotype instance of type
 // UserGetByNameDafT.
 var UserGetByNameDaf UserGetByNameDafT = func(

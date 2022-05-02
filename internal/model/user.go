@@ -25,6 +25,13 @@ type User struct {
 	//UpdatedAt time.Time `json:"-"`
 }
 
+type Profile struct {
+	Username  string  `json:"username"`
+	Bio       *string `json:"bio"`
+	Image     *string `json:"image"`
+	Following bool    `json:"following" db:"-"`
+}
+
 type UserPatch struct {
 	Username  *string
 	Email     *string
@@ -99,3 +106,22 @@ func (s User) Update(v UserPatch) User {
 //	}
 //	return s
 //}
+
+func ProfileFromUser(user *User, follows bool) Profile {
+	s := Profile{}
+	if user.Bio != nil {
+		s.Bio = user.Bio
+	} else {
+		empty := ""
+		s.Bio = &empty
+	}
+
+	if user.ImageLink != "" {
+		s.Image = &user.ImageLink
+	}
+
+	s.Username = user.Username
+	s.Following = follows
+
+	return s
+}

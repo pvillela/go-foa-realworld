@@ -16,7 +16,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 const (
@@ -175,7 +174,7 @@ func ArticleGetRecentForAuthorsDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFo
 // ArticleGetRecentFilteredDafC is a function that constructs a stereotype instance of type
 // fs.ArticleGetRecentFilteredDafT.
 func ArticleGetRecentFilteredDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFilteredDafT {
-	return func(in rpc.ArticlesListIn) ([]model.Article, error) {
+	return func(in model.ArticleCriteria) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
 			article := articleFromDb(value)
 

@@ -15,27 +15,30 @@ import (
 type Article struct {
 	Id             uint
 	AuthorId       uint
-	Author         *User
+	Author         *User ` db:"-"`
 	Title          string
 	Slug           string
 	Description    string
 	Body           *string
 	FavoritesCount int
 	//FavoritedBy    []*User
-	TagList   []string
-	Comments  []Comment
+	TagList   []string  ` db:"-"`
+	Comments  []Comment ` db:"-"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
 
-type Comment struct {
-	ArticleId uint
-	Id        uint
-	AuthorId  uint
-	Author    *User
-	Body      *string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+type ArticlePlus = struct {
+	Slug           string    `json:"slug"`
+	Author         Profile   `json:"author"`
+	Title          string    `json:"title"`
+	Description    string    `json:"description"`
+	Body           *string   `json:"body"`
+	TagList        []string  `json:"tagList"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+	Favorited      bool      `json:"favorited"`
+	FavoritesCount int       `json:"favoritesCount"`
 }
 
 type ArticlePatch struct {
@@ -81,21 +84,4 @@ func (s Article) Update(src ArticlePatch) Article {
 	s.Slug = util.Slug(s.Title)
 
 	return s
-}
-
-func Comment_Create(
-	articleId uint,
-	body *string,
-	author *User,
-) Comment {
-	now := time.Now()
-	comment := Comment{
-		ArticleId: articleId,
-		Id:        0,
-		CreatedAt: now,
-		UpdatedAt: now,
-		Body:      body,
-		Author:    author,
-	}
-	return comment
 }

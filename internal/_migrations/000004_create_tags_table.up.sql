@@ -2,7 +2,8 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS tags (
     id serial primary KEY,
-    name citext unique NOT NULL
+--    name citext unique NOT NULL
+    name VARCHAR(255) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS article_tags (

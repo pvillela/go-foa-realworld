@@ -13,20 +13,7 @@ import (
 const dateLayout = "2006-01-02T15:04:05.999Z"
 
 type ArticleOut struct {
-	Article articleOut0
-}
-
-type articleOut0 = struct {
-	Slug           string   `json:"slug"`
-	Author         Profile  `json:"author"`
-	Title          string   `json:"title"`
-	Description    string   `json:"description"`
-	Body           *string  `json:"body"`
-	TagList        []string `json:"tagList"`
-	CreatedAt      string   `json:"createdAt"`
-	UpdatedAt      string   `json:"updatedAt"`
-	Favorited      bool     `json:"favorited"`
-	FavoritesCount int      `json:"favoritesCount"`
+	Article model.ArticlePlus
 }
 
 type ArticlesOut struct {
@@ -34,22 +21,24 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
+// TODO
 func ArticleOut_FromModel(article model.Article, followsAuthor bool, likesArticle bool) ArticleOut {
-	articleOut0 := articleOut0{
+	articlePlus := model.ArticlePlus{
 		Slug:           article.Slug,
 		Title:          article.Title,
 		Description:    article.Description,
 		Body:           article.Body,
 		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
 		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-		Author:         Profile_FromModel(article.Author, followsAuthor),
+		Author:         model.ProfileFromUser(article.Author, followsAuthor),
 		TagList:        article.TagList,
 		Favorited:      likesArticle,
 		FavoritesCount: article.FavoritesCount,
 	}
-	return ArticleOut{articleOut0}
+	return ArticleOut{articlePlus}
 }
 
+// TODO
 func ArticlesOut_FromModel(
 	articles []model.Article,
 	followsAuthors []bool,

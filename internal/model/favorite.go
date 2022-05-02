@@ -9,5 +9,5 @@ package model
 type Favorite struct {
 	Id          uint
 	ArticleId   uint
-	FavoritedBy uint
+	FavoritedBy uint `db:"user_id"`
 }

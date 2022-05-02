@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS articles (
     description TEXT,
     slug VARCHAR(255) NOT NULL UNIQUE,
     author_id  INT NOT NULL,
+    favorites_count numeric NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_author FOREIGN KEY(author_id) REFERENCES users(id)
