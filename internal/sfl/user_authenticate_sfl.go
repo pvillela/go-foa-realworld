@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -20,7 +20,7 @@ type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT with hard-wired BF dependencies.
 func UserAuthenticateSflC(
-	userGetByEmailDaf newdaf.UserGetByEmailDafT,
+	userGetByEmailDaf daf.UserGetByEmailDafT,
 ) UserAuthenticateSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	userAuthenticateBf := fs.UserAuthenticateBfI
@@ -34,7 +34,7 @@ func UserAuthenticateSflC(
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT without hard-wired BF dependencies.
 func UserAuthenticateSflC0(
-	userGetByEmailDaf newdaf.UserGetByEmailDafT,
+	userGetByEmailDaf daf.UserGetByEmailDafT,
 	userGenTokenBf fs.UserGenTokenBfT,
 	userAuthenticateBf fs.UserAuthenticateBfT,
 ) UserAuthenticateSflT {

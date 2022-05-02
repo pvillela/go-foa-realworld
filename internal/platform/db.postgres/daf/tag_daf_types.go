@@ -4,7 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package newdaf
+package daf
 
 // TagGetAllDafT is the type of the stereotype instance for the DAF that
 // retrieves all tags.

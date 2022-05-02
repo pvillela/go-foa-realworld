@@ -4,17 +4,22 @@
  * that can be found in the LICENSE file.
  */
 
-package newdaf
+package daf
 
 import (
 	"context"
+	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
+// TODO: think about when to pass model.User by value vs by pointer. If User is cheap to copy
+//  then we should always pass it by value unless we need to mutate the argument as in the case
+//  of UserCreateDaf.
+
 // UserGetByNameDaf implements a stereotype instance of type
-// fs.UserGetByNameDafT.
+// UserGetByNameDafT.
 var UserGetByNameDaf UserGetByNameDafT = func(
 	ctx context.Context,
 	username string,
@@ -32,7 +37,7 @@ var UserGetByNameDaf UserGetByNameDafT = func(
 }
 
 // UserGetByEmailDaf implements a stereotype instance of type
-// fs.UserGetByEmailDafT.
+// UserGetByEmailDafT.
 var UserGetByEmailDaf UserGetByEmailDafT = func(
 	ctx context.Context,
 	email string,
@@ -50,10 +55,10 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 }
 
 // UserCreateDaf implements a stereotype instance of type
-// fs.UserCreateDafT.
+// UserCreateDafT.
 var UserCreateDaf UserCreateDafT = func(
 	ctx context.Context,
-	user model.User,
+	user *model.User,
 ) (RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
@@ -72,7 +77,7 @@ var UserCreateDaf UserCreateDafT = func(
 }
 
 // UserUpdateDafC is the function that constructs a stereotype instance of type
-// fs.UserUpdateDafT.
+// UserUpdateDafT.
 var UserUpdateDaf UserUpdateDafT = func(
 	ctx context.Context,
 	user model.User,
@@ -97,7 +102,25 @@ var UserUpdateDaf UserUpdateDafT = func(
 		user.Id,
 		recCtx.UpdatedAt,
 	}
+	fmt.Println("UserUpdateDaf sql:", sql)
+	fmt.Println("UserUpdateDaf args:", args)
 	row := tx.QueryRow(ctx, sql, args...)
 	err = row.Scan(&recCtx.UpdatedAt)
 	return recCtx, errx.ErrxOf(err)
+}
+
+func userDeleteByUsernameDaf(
+	ctx context.Context,
+	username string,
+) error {
+	tx, err := dbpgx.GetCtxTx(ctx)
+	if err != nil {
+		return errx.ErrxOf(err)
+	}
+	sql := `
+	DELETE FROM users
+	WHERE username = $1
+	`
+	_, err = tx.Exec(ctx, sql, username)
+	return errx.ErrxOf(err)
 }

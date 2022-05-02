@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -23,7 +23,7 @@ type ArticlesListSflT = func(ctx context.Context, in rpc.ArticlesListIn) (rpc.Ar
 // ArticlesListSflC is the function that constructs a stereotype instance of type
 // ArticlesListSflT.
 func ArticlesListSflC(
-	userGetByNameDaf newdaf.UserGetByNameDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
 	articleGetRecentFilteredDaf fs.ArticleGetRecentFilteredDafT,
 ) ArticlesListSflT {
 	return func(ctx context.Context, in rpc.ArticlesListIn) (rpc.ArticlesOut, error) {

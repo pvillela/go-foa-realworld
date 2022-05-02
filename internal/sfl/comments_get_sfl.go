@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -20,7 +20,7 @@ type CommentsGetSflT = func(ctx context.Context, slug string) (rpc.CommentsOut, 
 // CommentsGetSflC is the function that constructs a stereotype instance of type
 // CommentsGetSflT.
 func CommentsGetSflC(
-	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
+	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 ) CommentsGetSflT {
 	return func(_ context.Context, slug string) (rpc.CommentsOut, error) {
 		var zero rpc.CommentsOut

@@ -67,7 +67,17 @@ func ReadSingle[R any, F any](
 
 func ReadMany[R any](
 	ctx context.Context,
-	query string,
+	tx pgx.Tx,
+	sql string,
+	args ...any,
 ) ([]R, error) {
+	rows, err := tx.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, errx.ErrxOf(err)
+	}
+	defer rows.Close()
 
+	var dest []R
+	err = pgxscan.ScanAll(&dest, rows)
+	return dest, errx.ErrxOf(err)
 }

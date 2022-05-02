@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/fs"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -22,7 +22,7 @@ type UserRegisterSflT = func(_ context.Context, in rpc.UserRegisterIn) (rpc.User
 // UserRegisterSflT with hard-wired BF dependencies.
 func UserRegisterSflC(
 	beginTxn func(context string) db.Txn,
-	userCreateDaf newdaf.UserCreateDafT,
+	userCreateDaf daf.UserCreateDafT,
 ) UserRegisterSflT {
 	userGenTokenBf := fs.UserGenTokenBfI
 	return UserRegisterSflC0(
@@ -36,7 +36,7 @@ func UserRegisterSflC(
 // UserRegisterSflT without hard-wired BF dependencies.
 func UserRegisterSflC0(
 	beginTxn func(context string) db.Txn,
-	userCreateDaf newdaf.UserCreateDafT,
+	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf fs.UserGenTokenBfT,
 ) UserRegisterSflT {
 	return func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error) {

@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -24,9 +24,9 @@ type ArticleCreateSflT = func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.
 // ArticleCreateSflT with hard-wired BF dependencies.
 func ArticleCreateSflC(
 	beginTxn func(context string) db.Txn,
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	articleCreateDaf newdaf.ArticleCreateDafT,
-	tagAddDaf newdaf.TagAddDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	articleCreateDaf daf.ArticleCreateDafT,
+	tagAddDaf daf.TagAddDafT,
 ) ArticleCreateSflT {
 	articleValidateBeforeCreateBf := fs.ArticleValidateBeforeCreateBfI
 	return ArticleCreateSflC0(
@@ -42,9 +42,9 @@ func ArticleCreateSflC(
 // ArticleCreateSflT without hard-wired BF dependencies..
 func ArticleCreateSflC0(
 	beginTxn func(context string) db.Txn,
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	articleCreateDaf newdaf.ArticleCreateDafT,
-	tagAddDaf newdaf.TagAddDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	articleCreateDaf daf.ArticleCreateDafT,
+	tagAddDaf daf.TagAddDafT,
 	articleValidateBeforeCreateBf fs.ArticleValidateBeforeCreateBfT,
 ) ArticleCreateSflT {
 	return func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {

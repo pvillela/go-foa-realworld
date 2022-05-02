@@ -4,7 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package daf
+package olddaf
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/fs"

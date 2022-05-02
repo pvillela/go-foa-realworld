@@ -8,7 +8,7 @@ package daf
 
 import (
 	"fmt"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -17,8 +17,8 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-func pwUserFromDb(value interface{}) newdaf.PwUser {
-	pw, ok := value.(newdaf.PwUser)
+func pwUserFromDb(value interface{}) daf.PwUser {
+	pw, ok := value.(daf.PwUser)
 	if !ok {
 		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap user"))
 	}
@@ -32,10 +32,10 @@ func userFromDb(value interface{}) model.User {
 func getByName(
 	userDb mapdb.MapDb,
 	username string,
-) (model.User, newdaf.RecCtxUser, error) {
+) (model.User, daf.RecCtxUser, error) {
 	value, err := userDb.Read(username)
 	if err != nil {
-		return model.User{}, newdaf.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, username)
+		return model.User{}, daf.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, username)
 	}
 	pw := pwUserFromDb(value)
 	return pw.Entity, pw.RecCtx, nil
@@ -45,13 +45,13 @@ func getByName(
 // fs.UserGetByNameDafT.
 func UserGetByNameDafC(
 	userDb mapdb.MapDb,
-) newdaf.UserGetByNameDafT {
-	return func(userName string) (model.User, newdaf.RecCtxUser, error) {
+) daf.UserGetByNameDafT {
+	return func(userName string) (model.User, daf.RecCtxUser, error) {
 		return getByName(userDb, userName)
 	}
 }
 
-func getByEmail(userDb mapdb.MapDb, email string) (model.User, newdaf.RecCtxUser, error) {
+func getByEmail(userDb mapdb.MapDb, email string) (model.User, daf.RecCtxUser, error) {
 	pred := func(_, value interface{}) bool {
 		if userFromDb(value).Email == email {
 			return true
@@ -61,7 +61,7 @@ func getByEmail(userDb mapdb.MapDb, email string) (model.User, newdaf.RecCtxUser
 
 	value, found := userDb.FindFirst(pred)
 	if !found {
-		return model.User{}, newdaf.RecCtxUser{}, fs.ErrUserEmailNotFound.Make(nil, email)
+		return model.User{}, daf.RecCtxUser{}, fs.ErrUserEmailNotFound.Make(nil, email)
 	}
 	pw := pwUserFromDb(value)
 	return pw.Entity, pw.RecCtx, nil
@@ -71,8 +71,8 @@ func getByEmail(userDb mapdb.MapDb, email string) (model.User, newdaf.RecCtxUser
 // fs.UserGetByEmailDafT.
 func UserGetByEmailDafC(
 	userDb mapdb.MapDb,
-) newdaf.UserGetByEmailDafT {
-	return func(email string) (model.User, newdaf.RecCtxUser, error) {
+) daf.UserGetByEmailDafT {
+	return func(email string) (model.User, daf.RecCtxUser, error) {
 		return getByEmail(userDb, email)
 	}
 }
@@ -81,19 +81,19 @@ func UserGetByEmailDafC(
 // fs.UserCreateDafT.
 func UserCreateDafC(
 	userDb mapdb.MapDb,
-) newdaf.UserCreateDafT {
-	return func(user model.User, txn db.Txn) (newdaf.RecCtxUser, error) {
+) daf.UserCreateDafT {
+	return func(user model.User, txn db.Txn) (daf.RecCtxUser, error) {
 		if _, _, err := getByEmail(userDb, user.Email); err == nil {
-			return newdaf.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
+			return daf.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
 		}
 
-		pwUser := newdaf.PwUser{RecCtx: newdaf.RecCtxUser{}, Entity: user}
+		pwUser := daf.PwUser{RecCtx: daf.RecCtxUser{}, Entity: user}
 		err := userDb.Create(user.Username, pwUser, txn)
 		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
-			return newdaf.RecCtxUser{}, fs.ErrDuplicateUserName.Make(err, user.Username)
+			return daf.RecCtxUser{}, fs.ErrDuplicateUserName.Make(err, user.Username)
 		}
 		if err != nil {
-			return newdaf.RecCtxUser{}, err
+			return daf.RecCtxUser{}, err
 		}
 
 		return pwUser.RecCtx, nil
@@ -104,19 +104,19 @@ func UserCreateDafC(
 // fs.UserUpdateDafT.
 func UserUpdateDafC(
 	userDb mapdb.MapDb,
-) newdaf.UserUpdateDafT {
-	return func(user model.User, recCtx newdaf.RecCtxUser, txn db.Txn) (newdaf.RecCtxUser, error) {
+) daf.UserUpdateDafT {
+	return func(user model.User, recCtx daf.RecCtxUser, txn db.Txn) (daf.RecCtxUser, error) {
 		if userByEmail, _, err := getByEmail(userDb, user.Email); err == nil && userByEmail.Username != user.Username {
-			return newdaf.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
+			return daf.RecCtxUser{}, fs.ErrDuplicateUserEmail.Make(nil, user.Email)
 		}
 
-		pw := newdaf.PwUser{RecCtx: recCtx, Entity: user}
+		pw := daf.PwUser{RecCtx: recCtx, Entity: user}
 		err := userDb.Update(user.Username, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-			return newdaf.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Username)
+			return daf.RecCtxUser{}, fs.ErrUserNameNotFound.Make(err, user.Username)
 		}
 		if err != nil {
-			return newdaf.RecCtxUser{}, err // this can only be a transaction error
+			return daf.RecCtxUser{}, err // this can only be a transaction error
 		}
 
 		return recCtx, nil

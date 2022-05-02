@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 
@@ -27,11 +27,11 @@ type ArticleUpdateSflT = func(context.Context, rpc.ArticleUpdateIn) (rpc.Article
 func ArticleUpdateSflC(
 	beginTxn func(context string) db.Txn,
 	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	articleUpdateDaf newdaf.ArticleUpdateDafT,
-	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
-	articleCreateDaf newdaf.ArticleCreateDafT,
-	articleDeleteDaf newdaf.ArticleDeleteDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	articleUpdateDaf daf.ArticleUpdateDafT,
+	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
+	articleCreateDaf daf.ArticleCreateDafT,
+	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleUpdateSflT {
 	articleValidateBeforeUpdateBf := fs.ArticleValidateBeforeUpdateBfI
 	return ArticleUpdateSflC0(
@@ -51,11 +51,11 @@ func ArticleUpdateSflC(
 func ArticleUpdateSflC0(
 	beginTxn func(context string) db.Txn,
 	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	articleUpdateDaf newdaf.ArticleUpdateDafT,
-	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
-	articleCreateDaf newdaf.ArticleCreateDafT,
-	articleDeleteDaf newdaf.ArticleDeleteDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	articleUpdateDaf daf.ArticleUpdateDafT,
+	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
+	articleCreateDaf daf.ArticleCreateDafT,
+	articleDeleteDaf daf.ArticleDeleteDafT,
 	articleValidateBeforeUpdateBf fs.ArticleValidateBeforeUpdateBfT,
 ) ArticleUpdateSflT {
 	return func(ctx context.Context, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {

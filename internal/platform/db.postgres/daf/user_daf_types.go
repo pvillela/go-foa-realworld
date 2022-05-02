@@ -4,7 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package newdaf
+package daf
 
 import (
 	"context"
@@ -29,7 +29,7 @@ type UserGetByEmailDafT = func(reqCtx context.Context, email string) (model.User
 
 // UserCreateDafT is the type of the stereotype instance for the DAF that
 // creates a user.
-type UserCreateDafT = func(reqCtx context.Context, user model.User) (RecCtxUser, error)
+type UserCreateDafT = func(reqCtx context.Context, user *model.User) (RecCtxUser, error)
 
 // UserUpdateDafT is the type of the stereotype instance for the DAF that
 // updates a user.

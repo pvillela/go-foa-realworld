@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -24,8 +24,8 @@ type ArticleGetSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, er
 // ArticleGetSflT.
 func ArticleGetSflC(
 	ctxDb db.CtxDb,
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 ) ArticleGetSflT {
 	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
 		ctx, err := ctxDb.BeginTx(ctx)

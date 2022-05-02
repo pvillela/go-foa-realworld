@@ -9,34 +9,34 @@ package fs
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
 // UserStartFollowingFlT is the type of the stereotype instance for the flow that
 // causes the current user start following a given other user.
-type UserStartFollowingFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, newdaf.RecCtxUser, error)
+type UserStartFollowingFlT = func(username string, followedUsername string, follow bool, txn db.Txn) (model.User, daf.RecCtxUser, error)
 
 // UserStartFollowingFlC is the function that constructs a stereotype instance of type
 // UserStartFollowingFlT.
 func UserStartFollowingFlC(
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	userUpdateDaf newdaf.UserUpdateDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	userUpdateDaf daf.UserUpdateDafT,
 ) UserStartFollowingFlT {
 	return func(
 		username string,
 		followedUsername string,
 		follow bool,
 		txn db.Txn,
-	) (model.User, newdaf.RecCtxUser, error) {
+	) (model.User, daf.RecCtxUser, error) {
 		user, rc, err := userGetByNameDaf(username)
 		if err != nil {
-			return model.User{}, newdaf.RecCtxUser{}, err
+			return model.User{}, daf.RecCtxUser{}, err
 		}
 
 		user = user.UpdateFollowees(followedUsername, follow)
 
 		if rc, err = userUpdateDaf(user, rc, txn); err != nil {
-			return model.User{}, newdaf.RecCtxUser{}, err
+			return model.User{}, daf.RecCtxUser{}, err
 		}
 
 		return user, rc, nil

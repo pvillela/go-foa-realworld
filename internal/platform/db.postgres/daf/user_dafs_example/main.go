@@ -9,17 +9,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	log "github.com/sirupsen/logrus"
 )
-
-var cleanupOnly = false
 
 func main() {
 	defer util.PanicLog(log.Fatal)
@@ -41,28 +38,34 @@ func main() {
 	ctx, err = ctxDb.SetPool(ctx)
 	util.PanicOnError(err)
 
-	if cleanupOnly {
-		cleanup(ctx, ctxDb, user)
-		return
-	}
-
 	ctx, err = ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
 
-	recCtx, err := newdaf.UserCreateDaf(ctx, user)
+	tx, err := dbpgx.GetCtxTx(ctx)
+	util.PanicOnError(err)
+	cleanupTable(ctx, tx, "users")
+
+	recCtx, err := daf.UserCreateDaf(ctx, &user)
 	util.PanicOnError(err)
 	fmt.Println("recCtx from Create:", recCtx)
 
-	userFromDb, recCtx, err := newdaf.UserGetByNameDaf(ctx, "pvillela")
+	userFromDb, recCtx, err := daf.UserGetByNameDaf(ctx, "pvillela")
 	util.PanicOnError(err)
 	fmt.Println("\nUserGetByNameDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx)
 
-	userFromDb, recCtx, err = newdaf.UserGetByEmailDaf(ctx, "foo@bar.com")
+	userFromDb, recCtx, err = daf.UserGetByEmailDaf(ctx, "foo@bar.com")
 	util.PanicOnError(err)
 	fmt.Println("\nUserGetByEmailDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx)
+
+	readManySql := "SELECT * FROM users"
+	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql)
+	fmt.Println("pwUsers:", pwUsers)
+	pwUserPtrs, err := dbpgx.ReadMany[*daf.PwUser](ctx, tx, readManySql)
+	fmt.Println("pwUserPtrs:", pwUserPtrs)
+	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0])
 
 	ctx, err = ctxDb.Commit(ctx)
 	util.PanicOnError(err)
@@ -71,40 +74,17 @@ func main() {
 	util.PanicOnError(err)
 
 	user.ImageLink = "https://xyz.com"
-	recCtx, err = newdaf.UserUpdateDaf(ctx, user, recCtx)
+	recCtx, err = daf.UserUpdateDaf(ctx, user, recCtx)
 	util.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)
 	fmt.Println("recCtx from Update:", recCtx)
 
 	_, err = ctxDb.Commit(ctx)
 	util.PanicOnError(err)
-
-	cleanup(ctx, ctxDb, user)
 }
 
-func cleanup(ctx context.Context, ctxDb db.CtxDb, user model.User) {
-	ctx, err := ctxDb.BeginTx(ctx)
+func cleanupTable(ctx context.Context, tx pgx.Tx, table string) {
+	sql := fmt.Sprintf("TRUNCATE %v", table)
+	_, err := tx.Exec(ctx, sql)
 	util.PanicOnError(err)
-
-	err = userDeleteDaf(ctx, user.Username)
-	util.PanicOnError(err)
-
-	_, err = ctxDb.Commit(ctx)
-	util.PanicOnError(err)
-}
-
-func userDeleteDaf(
-	ctx context.Context,
-	username string,
-) error {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return errx.ErrxOf(err)
-	}
-	sql := `
-	DELETE FROM users
-	WHERE username = $1
-	`
-	_, err = tx.Exec(ctx, sql, username)
-	return errx.ErrxOf(err)
 }

@@ -8,14 +8,14 @@ package daf
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
 // TagGetAllDafC is the function that constructs a stereotype instance of type
 // fs.TagGetAllDafT.
 func TagGetAllDafC(
 	tagDb mapdb.MapDb,
-) newdaf.TagGetAllDafT {
+) daf.TagGetAllDafT {
 	return func() ([]string, error) {
 		var ret []string
 
@@ -36,7 +36,7 @@ func TagGetAllDafC(
 // fs.TagAddDafT.
 func TagAddDafC(
 	tagDb mapdb.MapDb,
-) newdaf.TagAddDafT {
+) daf.TagAddDafT {
 	return func(newTags []string) error {
 		for _, tag := range newTags {
 			tagDb.Store.Store(tag, true)

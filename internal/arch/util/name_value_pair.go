@@ -6,7 +6,7 @@
 
 package util
 
-type NameValuePair[N any, V any] = struct {
+type NameValuePair[N any, V any] struct {
 	Name  N
 	Value V
 }

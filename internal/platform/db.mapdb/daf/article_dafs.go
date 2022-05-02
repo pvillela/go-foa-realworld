@@ -8,7 +8,7 @@ package daf
 
 import (
 	"fmt"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -42,7 +42,7 @@ func articleFromDb(value interface{}) model.Article {
 
 // ArticleCreateDafC is a function that constructs a stereotype instance of type
 // fs.ArticleCreateDafT.
-func ArticleCreateDafC(articleDb mapdb.MapDb) newdaf.ArticleCreateDafT {
+func ArticleCreateDafC(articleDb mapdb.MapDb) daf.ArticleCreateDafT {
 	return func(article model.Article, txn db.Txn) (fs.RecCtxArticle, error) {
 		_, _, err := myMapDb{articleDb}.getBySlug(article.Slug)
 		if err == nil {
@@ -82,13 +82,13 @@ func (s myMapDb) getBySlug(slug string) (model.Article, fs.RecCtxArticle, error)
 
 // ArticleGetBySlugDafC is a function that constructs a stereotype instance of type
 // fs.ArticleGetBySlugDafT.
-func ArticleGetBySlugDafC(articleDb mapdb.MapDb) newdaf.ArticleGetBySlugDafT {
+func ArticleGetBySlugDafC(articleDb mapdb.MapDb) daf.ArticleGetBySlugDafT {
 	return myMapDb{articleDb}.getBySlug
 }
 
 // ArticleUpdateDafC is a function that constructs a stereotype instance of type
 // fs.ArticleUpdateDafT.
-func ArticleUpdateDafC(articleDb mapdb.MapDb) newdaf.ArticleUpdateDafT {
+func ArticleUpdateDafC(articleDb mapdb.MapDb) daf.ArticleUpdateDafT {
 	return func(article model.Article, recCtx fs.RecCtxArticle, txn db.Txn) (fs.RecCtxArticle, error) {
 		if artBySlug, _, err := (myMapDb{articleDb}.getBySlug(article.Slug)); err == nil && artBySlug.Id != article.Id {
 			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
@@ -109,7 +109,7 @@ func ArticleUpdateDafC(articleDb mapdb.MapDb) newdaf.ArticleUpdateDafT {
 
 // ArticleDeleteDafC is a function that constructs a stereotype instance of type
 // fs.ArticleDeleteDafT.
-func ArticleDeleteDafC(articleDb mapdb.MapDb) newdaf.ArticleDeleteDafT {
+func ArticleDeleteDafC(articleDb mapdb.MapDb) daf.ArticleDeleteDafT {
 	return func(slug string, txn db.Txn) error {
 		article, _, err := myMapDb{articleDb}.getBySlug(slug)
 		if err != nil {

@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -22,7 +22,7 @@ type UserGetCurrentSflT = func(ctx context.Context, _ arch.Unit) (rpc.UserOut, e
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT.
 func UserGetCurrentSflC(
-	userGetByNameDaf newdaf.UserGetByNameDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {
 	return func(ctx context.Context, _ arch.Unit) (rpc.UserOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

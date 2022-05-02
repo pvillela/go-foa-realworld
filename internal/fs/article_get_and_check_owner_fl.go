@@ -8,7 +8,7 @@ package fs
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
 // ArticleGetAndCheckOwnerFlT is the type of the stereotype instance for the flow that
@@ -18,7 +18,7 @@ type ArticleGetAndCheckOwnerFlT = func(username, slug string) (model.Article, Re
 // ArticleGetAndCheckOwnerFlC is the function that constructs a stereotype instance of type
 // ArticleGetAndCheckOwnerFlT with hard-wired BF dependencies.
 func ArticleGetAndCheckOwnerFlC(
-	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
+	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 ) ArticleGetAndCheckOwnerFlT {
 	articleCheckOwnerBf := ArticleCheckOwnerBfI
 	return ArticleGetAndCheckOwnerFlC0(
@@ -30,7 +30,7 @@ func ArticleGetAndCheckOwnerFlC(
 // ArticleGetAndCheckOwnerFlC0 is the function that constructs a stereotype instance of type
 // ArticleGetAndCheckOwnerFlT without hard-wired BF dependencies.
 func ArticleGetAndCheckOwnerFlC0(
-	articleGetBySlugDaf newdaf.ArticleGetBySlugDafT,
+	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 	articleCheckOwnerBf ArticleCheckOwnerBfT,
 ) ArticleGetAndCheckOwnerFlT {
 	return func(slug string, username string) (model.Article, RecCtxArticle, error) {

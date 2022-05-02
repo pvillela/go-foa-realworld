@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -22,8 +22,8 @@ type UserUpdateSflT = func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOu
 // UserUpdateSflT.
 func UserUpdateSflC(
 	ctxDb db.CtxDb,
-	userGetByNameDaf newdaf.UserGetByNameDafT,
-	userUpdateDaf newdaf.UserUpdateDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	userUpdateDaf daf.UserUpdateDafT,
 ) UserUpdateSflT {
 	return func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

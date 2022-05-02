@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/newdaf"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
@@ -25,10 +25,10 @@ type CommentDeleteSflT = func(ctx context.Context, in rpc.CommentDeleteIn) (arch
 // CommentDeleteSflT.
 func CommentDeleteSflC(
 	beginTxn func(context string) db.Txn,
-	commentGetByIdDaf newdaf.CommentGetByIdDafT,
-	commentDeleteDaf newdaf.CommentDeleteDafT,
-	articleGetBySlugdDaf newdaf.ArticleGetBySlugDafT,
-	articleUpdateDaf newdaf.ArticleUpdateDafT,
+	commentGetByIdDaf daf.CommentGetByIdDafT,
+	commentDeleteDaf daf.CommentDeleteDafT,
+	articleGetBySlugdDaf daf.ArticleGetBySlugDafT,
+	articleUpdateDaf daf.ArticleUpdateDafT,
 ) CommentDeleteSflT {
 	return func(ctx context.Context, in rpc.CommentDeleteIn) (arch.Unit, error) {
 		username := web.ContextToRequestContext(ctx).Username
