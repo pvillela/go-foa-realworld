@@ -63,7 +63,7 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	// See selectJoin query string in function readArticles
 	whereTuples := []util.Tuple2[string, any]{
 		{"a.slug = $%d", slug},
-		{"ufa2.username = $%d", "#"}, // use invalid username to force null join
+		{"ufa2.username = $%d", ""}, // use invalid username to force null join
 	}
 
 	where, whereArgs := whereClauseFromTuples(whereTuples)
@@ -136,7 +136,7 @@ var ArticlesFeedDaf ArticlesFeedDafT = func(
 	// See selectJoin query string in function readArticles
 	whereTuples := []util.Tuple2[string, any]{
 		{"fo.follower_id = $%d", currUserId},
-		{"ufa2.username = $%d", "#"}, // use invalid username to force null join
+		{"ufa2.username = $%d", ""}, // use invalid username to force null join
 	}
 
 	where, whereArgs := whereClauseFromTuples(whereTuples)
@@ -169,7 +169,7 @@ var ArticlesListDaf ArticlesListDafT = func(
 		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", *v})
 	} else {
 		// use invalid username to force null join
-		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", "#"})
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", ""})
 	}
 
 	where, whereArgs := whereClauseFromTuples(whereTuples)
