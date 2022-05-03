@@ -24,7 +24,7 @@ type ArticleCreateDafT = func(ctx context.Context, tx pgx.Tx, article *model.Art
 
 // ArticleGetBySlugDafT is the type of the stereotype instance for the DAF that
 // retrieves an article by slug.
-type ArticleGetBySlugDafT = func(ctx context.Context, tx pgx.Tx, slug string) (model.ArticlePlus, error)
+type ArticleGetBySlugDafT = func(ctx context.Context, tx pgx.Tx, user model.User, slug string) (model.ArticlePlus, error)
 
 // ArticleUpdateDafT is the type of the stereotype instance for the DAF that
 // updates an article.
@@ -41,4 +41,4 @@ type ArticlesFeedDafT = func(ctx context.Context, tx pgx.Tx, user model.User, op
 
 // ArticlesListDafT is the type of the stereotype instance for the DAF that
 // retrieve recent articles based on a set of query parameters.
-type ArticlesListDafT = func(ctx context.Context, tx pgx.Tx, criteria model.ArticleCriteria) ([]model.ArticlePlus, error)
+type ArticlesListDafT = func(ctx context.Context, tx pgx.Tx, user model.User, criteria model.ArticleCriteria) ([]model.ArticlePlus, error)

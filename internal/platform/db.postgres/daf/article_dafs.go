@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -169,7 +168,7 @@ var ArticleDeleteDaf ArticleDeleteDafT = func(
 
 // ArticlesFeedDaf implements a stereotype instance of type
 // ArticlesFeedDafT.
-var ArticlesFeedDaf0 ArticlesFeedDafT = func(
+var ArticlesFeedDaf ArticlesFeedDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	user model.User,
@@ -183,7 +182,7 @@ var ArticlesFeedDaf0 ArticlesFeedDafT = func(
 	`
 	args := []any{user.Id}
 
-	return readArticles(ctx, tx, mainSql, optLimit, optOffset, args...)
+	return readArticles0(ctx, tx, mainSql, optLimit, optOffset, args...)
 }
 
 // SQL WHERE clauses used by ArticlesListDaf
@@ -206,7 +205,7 @@ var ArticlesListDaf ArticlesListDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	criteria model.ArticleCriteria,
-) ([]model.Article, error) {
+) ([]model.ArticlePlus, error) {
 	namedArgs := make([]util.Tuple2[string, any], 0)
 	if v := criteria.Tag; v != nil {
 		namedArgs = append(namedArgs, util.Tuple2[string, any]{"tag", *v})
@@ -229,26 +228,172 @@ var ArticlesListDaf ArticlesListDafT = func(
 		where = " WHERE " + where
 	}
 
-	mainSql := "SELECT * from articles" + where + " ORDER BY created_at DESC"
+	results, err := readArticles(ctx, tx, where, criteria.Limit, criteria.Offset, args...)
+	if err != nil {
+		return nil, err
+	}
 
-	return readArticles(ctx, tx, mainSql, criteria.Limit, criteria.Offset, args...)
+	articlePluses := make([]model.ArticlePlus, len(results))
+	for i, a := range results {
+		articlePluses[i] = a.articlePlus
+	}
+
+	return articlePluses, nil
+}
+
+type resultT struct {
+	articlePlus      model.ArticlePlus
+	favoritesUserIds []uint
 }
 
 func readArticles(
 	ctx context.Context,
 	tx pgx.Tx,
-	mainSql string,
+	where string,
 	optLimit *int,
 	optOffset *int,
 	args ...any,
-) ([]model.Article, error) {
+) ([]resultT, error) {
+	// Construct SQL
+	selectJoin := `
+	SELECT a.*, u.username, u.bio, u.image, f1.user_id as favorited, f2.user_id as favorites_user_id, 
+		fo.follower_id as following, t.name 
+		FROM articles a
+	LEFT JOIN users u ON a.author_id = u.id
+	LEFT JOIN favorites f1 ON a.id = f1.article_id AND $1 = f1.user_id -- no product effect
+	LEFT JOIN favorites f2 ON a.id = f2.article_id -- product effect
+	LEFT JOIN followings fo ON fo.follower_id = $1 AND a.author_id = fo.followee_id -- no product effect
+	LEFT JOIN article_tags at ON a.id = at.article_id -- product effect
+	LEFT JOIN tags t ON at.tag_id = t.id
+	`
+	orderBy := `
+	ORDER BY a.created_at DESC, t.name, favorites_user_id
+	`
+	sql := selectJoin + where + orderBy
 	limit := limitDefault
 	if optLimit != nil {
 		limit = *optLimit
+		sql += fmt.Sprintf(" LIMIT %d", limit)
 	}
 	offset := offsetDefault
 	if optOffset != nil {
 		offset = *optOffset
+		sql += fmt.Sprintf(" OFFSET %d", offset)
 	}
-	return dbpgx.ReadMany[model.Article](ctx, tx, mainSql, limit, offset, args...)
+
+	// Retrieve rows
+	rows, err := tx.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, errx.ErrxOf(err)
+	}
+	defer rows.Close()
+
+	// Data structures to receive data
+	results := []resultT{}
+	tags := []string{}
+	favoritesUserIds := []uint{}
+	var curRecord struct {
+		article         model.Article `db:""`
+		profile         model.Profile `db:""`
+		following       *uint
+		favorited       *uint
+		tag             *string `db:"name"`
+		favoritesUserId *uint
+	}
+	var prevRecord struct {
+		article         model.Article `db:""`
+		profile         model.Profile `db:""`
+		following       *uint
+		favorited       *uint
+		tag             *string `db:"name"`
+		favoritesUserId *uint
+	}
+
+	// Functions to put data in data structures
+
+	fresh := true // true when first encountering a new article
+
+	articleChanged := func() bool {
+		return !fresh && curRecord.article.Id != prevRecord.article.Id
+	}
+
+	tagChanged := func() bool {
+		return fresh ||
+			(curRecord.tag == nil && prevRecord.tag != nil) ||
+			(curRecord.tag != nil && prevRecord.tag == nil) ||
+			(*curRecord.tag != *prevRecord.tag)
+	}
+
+	favoritesUserIdChanged := func() bool {
+		return fresh ||
+			(curRecord.favoritesUserId == nil && prevRecord.favoritesUserId != nil) ||
+			(curRecord.favoritesUserId != nil && prevRecord.favoritesUserId == nil) ||
+			(*curRecord.favoritesUserId != *prevRecord.favoritesUserId)
+	}
+
+	// Move data into results slice
+	updateResults := func() {
+		ra := &prevRecord.article
+		rp := &prevRecord.profile
+		if prevRecord.following != nil {
+			rp.Following = true
+		}
+		favorited := false
+		if prevRecord.favorited != nil {
+			favorited = true
+		}
+		articlePlus := model.ArticlePlus{
+			Slug: ra.Slug,
+			Author: model.Profile{
+				Username:  rp.Username,
+				Bio:       rp.Bio,
+				Image:     rp.Image,
+				Following: rp.Following,
+			},
+			Title:          ra.Title,
+			Description:    ra.Description,
+			Body:           ra.Body,
+			TagList:        tags,
+			CreatedAt:      ra.CreatedAt,
+			UpdatedAt:      ra.UpdatedAt,
+			Favorited:      favorited,
+			FavoritesCount: ra.FavoritesCount,
+		}
+		result := resultT{
+			articlePlus:      articlePlus,
+			favoritesUserIds: favoritesUserIds,
+		}
+		results = append(results, result)
+		tags = []string{}
+		favoritesUserIds = []uint{}
+	}
+
+	// Main processing loop
+	for rows.Next() {
+		err = pgxscan.ScanRow(&curRecord, rows)
+		if err != nil {
+			return nil, errx.ErrxOf(err)
+		}
+
+		if articleChanged() {
+			updateResults()
+			fresh = true
+		}
+
+		if tagChanged() && curRecord.tag != nil {
+			tags = append(tags, *curRecord.tag)
+		}
+
+		if favoritesUserIdChanged() && curRecord.favoritesUserId != nil {
+			favoritesUserIds = append(favoritesUserIds, *curRecord.favoritesUserId)
+		}
+
+		prevRecord = curRecord
+		fresh = false
+	}
+	if !fresh {
+		updateResults()
+	}
+
+	return results, nil
 }
