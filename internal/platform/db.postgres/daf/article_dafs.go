@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Copyright © 2022 Paulo Villela. All rights reserved.
  * Use of this source code is governed by the Apache 2.0 license
  * that can be found in the LICENSE file.
  */
@@ -74,7 +74,7 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	}
 
 	if len(articlePluses) == 0 {
-		return model.ArticlePlus{}, fs.ErrArticleNotFound.Make(nil)
+		return model.ArticlePlus{}, fs.ErrArticleSlugNotFound.Make(nil, slug)
 	}
 	if len(articlePluses) > 1 {
 		util.PanicOnError(errx.NewErrx(nil,
