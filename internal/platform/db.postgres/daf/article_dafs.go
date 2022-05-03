@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"strings"
 )
@@ -52,78 +53,35 @@ var ArticleCreateDaf ArticleCreateDafT = func(
 var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
-	user model.User,
+	currUserId uint,
 	slug string,
 ) (model.ArticlePlus, error) {
-	selectJoin := `
-	SELECT a.*, u.username, u.bio, u.image, f1.user_id as favorited, fo.follower_id as following, t.name 
-		FROM articles a
-	LEFT JOIN users u ON a.author_id = u.id
-	LEFT JOIN favorites f1 ON a.id = f1.article_id AND $1 = f1.user_id -- no product effect
-	LEFT JOIN favorites f2 ON a.id = f2.article_id AND $2 = f2.user_id -- no product effect
-	LEFT JOIN followings fo ON fo.follower_id = $1 AND a.author_id = fo.followee_id -- no product effect
-	LEFT JOIN article_tags at ON a.id = at.article_id -- product effect
-	LEFT JOIN tags t ON at.tag_id = t.id
-	`
-	where := `
-	WHERE slug = $2 -- AND f2.user_id IS NOT NULL
-	`
-	orderBy := `
-	ORDER BY a.created_at DESC, t.name
-	`
-	sql := selectJoin + where + orderBy
-	args := []any{user.Id, user.Id, slug}
+	// This implementation uses the readArticles helper function. Although a simpler direct
+	// implementation is clearly possible, the required SQL query and data mapping logic are
+	// sufficiently complex that it is best to deal with those things only once.
 
-	rows, err := tx.Query(ctx, sql, args...)
+	// See selectJoin query string in function readArticles
+	whereTuples := []util.Tuple2[string, any]{
+		{"a.slug = $%d", slug},
+		{"ufa2.username = $%d", "#"}, // use invalid username to force null join
+	}
+
+	where, whereArgs := whereClauseFromTuples(whereTuples)
+
+	articlePluses, _, err := readArticles(ctx, tx, currUserId, where, nil, nil, whereArgs...)
 	if err != nil {
-		return model.ArticlePlus{}, errx.ErrxOf(err)
-	}
-	defer rows.Close()
-
-	tags := []string{}
-	var record struct {
-		article   model.Article `db:""`
-		profile   model.Profile `db:""`
-		following *uint
-		favorited *uint
-		tag       string `db:"t.name"`
-	}
-	for rows.Next() {
-		err = pgxscan.ScanRow(&record, rows)
-		if err != nil {
-			return model.ArticlePlus{}, errx.ErrxOf(err)
-		}
-		tags = append(tags, record.tag)
+		return model.ArticlePlus{}, err
 	}
 
-	ra := &record.article
-	rp := &record.profile
-	if record.following != nil {
-		rp.Following = true
+	if len(articlePluses) == 0 {
+		return model.ArticlePlus{}, fs.ErrArticleNotFound.Make(nil)
 	}
-	favorited := false
-	if record.favorited != nil {
-		favorited = true
-	}
-	articlePlus := model.ArticlePlus{
-		Slug: ra.Slug,
-		Author: model.Profile{
-			Username:  rp.Username,
-			Bio:       rp.Bio,
-			Image:     rp.Image,
-			Following: rp.Following,
-		},
-		Title:          ra.Title,
-		Description:    ra.Description,
-		Body:           ra.Body,
-		TagList:        tags,
-		CreatedAt:      ra.CreatedAt,
-		UpdatedAt:      ra.UpdatedAt,
-		Favorited:      favorited,
-		FavoritesCount: ra.FavoritesCount,
+	if len(articlePluses) > 1 {
+		util.PanicOnError(errx.NewErrx(nil,
+			fmt.Sprintf("Found multiple articles with same slug '%v'", slug)))
 	}
 
-	return articlePlus, nil
+	return articlePluses[0], nil
 }
 
 // ArticleUpdateDaf implements a stereotype instance of type
@@ -175,52 +133,20 @@ var ArticlesFeedDaf ArticlesFeedDafT = func(
 	optLimit *int,
 	optOffset *int,
 ) ([]model.ArticlePlus, error) {
-	mainSql := `
-	SELECT a.* from articles a
-	INNER JOIN followings f ON $1 = f.follower_id AND a.author_id = f.followee_id
-	ORDER BY created_at DESC
-	`
-	namedArgs := make([]util.Tuple2[string, any], 0)
-	if v := criteria.Tag; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"tag", *v})
-	}
-	if v := criteria.Author; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"aurhor", *v})
-	}
-	if v := criteria.FavoritedBy; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"favoritedBy", *v})
+	// See selectJoin query string in function readArticles
+	whereTuples := []util.Tuple2[string, any]{
+		{"fo.follower_id = $%d", currUserId},
+		{"ufa2.username = $%d", "#"}, // use invalid username to force null join
 	}
 
-	wheres := make([]string, len(namedArgs))
-	whereArgs := make([]any, len(namedArgs))
-	for i, nv := range namedArgs {
-		wheres[i] = fmt.Sprintf(clauses[nv.X1], i+2)
-		whereArgs[i] = nv.X2
-	}
-	where := strings.Join(wheres, " AND ")
-	if len(wheres) != 0 {
-		where = " WHERE " + where
-	}
+	where, whereArgs := whereClauseFromTuples(whereTuples)
 
-	articlePluses, _, err := readArticles(ctx, tx, currUserId, where, criteria.Limit, criteria.Offset,
-		whereArgs...)
+	articlePluses, _, err := readArticles(ctx, tx, currUserId, where, optLimit, optOffset, whereArgs...)
 	if err != nil {
 		return nil, err
 	}
 
 	return articlePluses, nil
-}
-
-// SQL WHERE clauses used by ArticlesListDaf
-var clauses = map[string]string{
-	"tag": `
-		name = $%d`,
-	"author": `
-		author_id = (select id from users where username = $%d)`,
-	"favoritedBy": `
-		id IN (select article_id from favorites where user_id = (
-			select id from users where username = $%d)
-		)`,
 }
 
 // ArticlesListDafT implements a stereotype instance of type
@@ -231,27 +157,22 @@ var ArticlesListDaf ArticlesListDafT = func(
 	currUserId uint,
 	criteria model.ArticleCriteria,
 ) ([]model.ArticlePlus, error) {
-	namedArgs := make([]util.Tuple2[string, any], 0)
+	// See selectJoin query string in function readArticles
+	whereTuples := make([]util.Tuple2[string, any], 0)
 	if v := criteria.Tag; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"tag", *v})
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"t.name = $%d", *v})
 	}
 	if v := criteria.Author; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"aurhor", *v})
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ua.username = $%d", *v})
 	}
 	if v := criteria.FavoritedBy; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"favorited_by", *v})
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", *v})
+	} else {
+		// use invalid username to force null join
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", "#"})
 	}
 
-	wheres := make([]string, len(namedArgs))
-	whereArgs := make([]any, len(namedArgs))
-	for i, nv := range namedArgs {
-		wheres[i] = fmt.Sprintf(clauses[nv.X1], i+2)
-		whereArgs[i] = nv.X2
-	}
-	where := strings.Join(wheres, " AND ")
-	if len(wheres) != 0 {
-		where = " WHERE " + where
-	}
+	where, whereArgs := whereClauseFromTuples(whereTuples)
 
 	articlePluses, _, err := readArticles(ctx, tx, currUserId, where, criteria.Limit, criteria.Offset,
 		whereArgs...)
@@ -262,17 +183,36 @@ var ArticlesListDaf ArticlesListDafT = func(
 	return articlePluses, nil
 }
 
-// readArticles queries for articles, returning two slices and an error.
+/////////////////////
+// Helper functions
+
+func whereClauseFromTuples(whereTuples []util.Tuple2[string, any]) (where string, whereArgs []any) {
+	wheres := make([]string, len(whereTuples))
+	whereArgs = make([]any, len(whereTuples))
+	for i, nv := range whereTuples {
+		wheres[i] = fmt.Sprintf(nv.X1, i+2)
+		whereArgs[i] = nv.X2
+	}
+	where = strings.Join(wheres, " AND ")
+	if len(wheres) != 0 {
+		where = " WHERE " + where
+	}
+	return where, whereArgs
+}
+
+// readArticles queries for articles, returning slice of model.ArticlePlus and an error.
 // The first slice contains model.ArticlePlus items.
 // The second slice contains, for each item, a slice of the user IDs of all users that have
-// favorited the article with the same index in the first slice.
+// favorited the article with the same index in the first slice. This second slice is not
+// very useful, except maybe for debugging purposes.
 //
 // currUserId is the user ID of the currently logged-in user.
 //
 // where is a WHERE clause string that filters the query. The argument placeholders in `where`
 // must start with $2 as $1 is reserved for `currUserId`. The query, implemented inside this
 // function, provides a denormalized holistic view of articles by joining the tables: articles,
-// users (twice), favorites (twice), followings, and tags.
+// users (twice), favorites (twice), followings, and tags. The double joins are required to
+// support the where clauses from the DAFs that call this function.
 //
 // optLimit and optOffset are optional limit and offset parameters for the result set.
 //
@@ -288,13 +228,13 @@ func readArticles(
 ) ([]model.ArticlePlus, [][]uint, error) {
 	// Construct SQL
 	selectJoin := `
-	SELECT a.*, u1.username, u1.bio, u1.image, f1.user_id as favorited, f2.user_id as favorited_by, 
+	SELECT a.*, ua.username, ua.bio, ua.image, fa1.user_id as favorited, fa2.user_id as favorites_user_id, 
 		fo.follower_id as following, t.name 
 		FROM articles a
-	LEFT JOIN users u1 ON a.author_id = u1.id
-	LEFT JOIN users u2 ON f2.user_id = u2.id -- product effect, same as f2
-	LEFT JOIN favorites f1 ON a.id = f1.article_id AND $1 = f1.user_id -- no product effect
-	LEFT JOIN favorites f2 ON a.id = f2.article_id -- product effect
+	LEFT JOIN users ua ON a.author_id = ua.id
+	LEFT JOIN users ufa2 ON fa2.user_id = ufa2.id -- product effect, same as fa2
+	LEFT JOIN favorites fa1 ON a.id = fa1.article_id AND $1 = fa1.user_id -- no product effect
+	LEFT JOIN favorites fa2 ON a.id = fa2.article_id -- product effect
 	LEFT JOIN followings fo ON fo.follower_id = $1 AND a.author_id = fo.followee_id -- no product effect
 	LEFT JOIN article_tags at ON a.id = at.article_id -- product effect
 	LEFT JOIN tags t ON at.tag_id = t.id
