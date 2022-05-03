@@ -37,8 +37,8 @@ type ArticleDeleteDafT = func(ctx context.Context, tx pgx.Tx, slug string) error
 // ArticlesFeedDafT is the type of the stereotype instance for the DAF that
 // queries for all articles authored by other users followed by
 // the current user, with optional limit and offset pagination parameters.
-type ArticlesFeedDafT = func(ctx context.Context, tx pgx.Tx, user model.User, optLimit *int, optOffset *int) ([]model.ArticlePlus, error)
+type ArticlesFeedDafT = func(ctx context.Context, tx pgx.Tx, currUserId uint, optLimit *int, optOffset *int) ([]model.ArticlePlus, error)
 
 // ArticlesListDafT is the type of the stereotype instance for the DAF that
 // retrieve recent articles based on a set of query parameters.
-type ArticlesListDafT = func(ctx context.Context, tx pgx.Tx, user model.User, criteria model.ArticleCriteria) ([]model.ArticlePlus, error)
+type ArticlesListDafT = func(ctx context.Context, tx pgx.Tx, currUserId uint, criteria model.ArticleCriteria) ([]model.ArticlePlus, error)

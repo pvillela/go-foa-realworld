@@ -171,26 +171,50 @@ var ArticleDeleteDaf ArticleDeleteDafT = func(
 var ArticlesFeedDaf ArticlesFeedDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
-	user model.User,
+	currUserId uint,
 	optLimit *int,
 	optOffset *int,
-) ([]model.Article, error) {
+) ([]model.ArticlePlus, error) {
 	mainSql := `
 	SELECT a.* from articles a
 	INNER JOIN followings f ON $1 = f.follower_id AND a.author_id = f.followee_id
 	ORDER BY created_at DESC
 	`
-	args := []any{user.Id}
+	namedArgs := make([]util.Tuple2[string, any], 0)
+	if v := criteria.Tag; v != nil {
+		namedArgs = append(namedArgs, util.Tuple2[string, any]{"tag", *v})
+	}
+	if v := criteria.Author; v != nil {
+		namedArgs = append(namedArgs, util.Tuple2[string, any]{"aurhor", *v})
+	}
+	if v := criteria.FavoritedBy; v != nil {
+		namedArgs = append(namedArgs, util.Tuple2[string, any]{"favoritedBy", *v})
+	}
 
-	return readArticles0(ctx, tx, mainSql, optLimit, optOffset, args...)
+	wheres := make([]string, len(namedArgs))
+	whereArgs := make([]any, len(namedArgs))
+	for i, nv := range namedArgs {
+		wheres[i] = fmt.Sprintf(clauses[nv.X1], i+2)
+		whereArgs[i] = nv.X2
+	}
+	where := strings.Join(wheres, " AND ")
+	if len(wheres) != 0 {
+		where = " WHERE " + where
+	}
+
+	articlePluses, _, err := readArticles(ctx, tx, currUserId, where, criteria.Limit, criteria.Offset,
+		whereArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	return articlePluses, nil
 }
 
 // SQL WHERE clauses used by ArticlesListDaf
 var clauses = map[string]string{
 	"tag": `
-		id IN (select article_id from article_tags where tag_id in (
-			select id from tags where name = $%d)
-		)`,
+		name = $%d`,
 	"author": `
 		author_id = (select id from users where username = $%d)`,
 	"favoritedBy": `
@@ -204,6 +228,7 @@ var clauses = map[string]string{
 var ArticlesListDaf ArticlesListDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
+	currUserId uint,
 	criteria model.ArticleCriteria,
 ) ([]model.ArticlePlus, error) {
 	namedArgs := make([]util.Tuple2[string, any], 0)
@@ -214,52 +239,60 @@ var ArticlesListDaf ArticlesListDafT = func(
 		namedArgs = append(namedArgs, util.Tuple2[string, any]{"aurhor", *v})
 	}
 	if v := criteria.FavoritedBy; v != nil {
-		namedArgs = append(namedArgs, util.Tuple2[string, any]{"favoritedBy", *v})
+		namedArgs = append(namedArgs, util.Tuple2[string, any]{"favorited_by", *v})
 	}
 
 	wheres := make([]string, len(namedArgs))
-	args := make([]any, len(namedArgs))
+	whereArgs := make([]any, len(namedArgs))
 	for i, nv := range namedArgs {
-		wheres[i] = fmt.Sprintf(clauses[nv.X1], i+1)
-		args[i] = nv.X2
+		wheres[i] = fmt.Sprintf(clauses[nv.X1], i+2)
+		whereArgs[i] = nv.X2
 	}
 	where := strings.Join(wheres, " AND ")
 	if len(wheres) != 0 {
 		where = " WHERE " + where
 	}
 
-	results, err := readArticles(ctx, tx, where, criteria.Limit, criteria.Offset, args...)
+	articlePluses, _, err := readArticles(ctx, tx, currUserId, where, criteria.Limit, criteria.Offset,
+		whereArgs...)
 	if err != nil {
 		return nil, err
-	}
-
-	articlePluses := make([]model.ArticlePlus, len(results))
-	for i, a := range results {
-		articlePluses[i] = a.articlePlus
 	}
 
 	return articlePluses, nil
 }
 
-type resultT struct {
-	articlePlus      model.ArticlePlus
-	favoritesUserIds []uint
-}
-
+// readArticles queries for articles, returning two slices and an error.
+// The first slice contains model.ArticlePlus items.
+// The second slice contains, for each item, a slice of the user IDs of all users that have
+// favorited the article with the same index in the first slice.
+//
+// currUserId is the user ID of the currently logged-in user.
+//
+// where is a WHERE clause string that filters the query. The argument placeholders in `where`
+// must start with $2 as $1 is reserved for `currUserId`. The query, implemented inside this
+// function, provides a denormalized holistic view of articles by joining the tables: articles,
+// users (twice), favorites (twice), followings, and tags.
+//
+// optLimit and optOffset are optional limit and offset parameters for the result set.
+//
+// whereArgs are arguments for the where clause.
 func readArticles(
 	ctx context.Context,
 	tx pgx.Tx,
+	currUserId uint,
 	where string,
 	optLimit *int,
 	optOffset *int,
-	args ...any,
-) ([]resultT, error) {
+	whereArgs ...any,
+) ([]model.ArticlePlus, [][]uint, error) {
 	// Construct SQL
 	selectJoin := `
-	SELECT a.*, u.username, u.bio, u.image, f1.user_id as favorited, f2.user_id as favorites_user_id, 
+	SELECT a.*, u1.username, u1.bio, u1.image, f1.user_id as favorited, f2.user_id as favorited_by, 
 		fo.follower_id as following, t.name 
 		FROM articles a
-	LEFT JOIN users u ON a.author_id = u.id
+	LEFT JOIN users u1 ON a.author_id = u1.id
+	LEFT JOIN users u2 ON f2.user_id = u2.id -- product effect, same as f2
 	LEFT JOIN favorites f1 ON a.id = f1.article_id AND $1 = f1.user_id -- no product effect
 	LEFT JOIN favorites f2 ON a.id = f2.article_id -- product effect
 	LEFT JOIN followings fo ON fo.follower_id = $1 AND a.author_id = fo.followee_id -- no product effect
@@ -282,17 +315,22 @@ func readArticles(
 	}
 
 	// Retrieve rows
+	args := append([]any{currUserId}, whereArgs...)
 	rows, err := tx.Query(ctx, sql, args...)
 	if err != nil {
-		return nil, errx.ErrxOf(err)
+		return nil, nil, errx.ErrxOf(err)
 	}
 	defer rows.Close()
 
 	// Data structures to receive data
+	type resultT struct {
+		articlePlus      model.ArticlePlus
+		favoritesUserIds []uint
+	}
 	results := []resultT{}
 	tags := []string{}
 	favoritesUserIds := []uint{}
-	var curRecord struct {
+	var currRecord struct {
 		article         model.Article `db:""`
 		profile         model.Profile `db:""`
 		following       *uint
@@ -314,21 +352,21 @@ func readArticles(
 	fresh := true // true when first encountering a new article
 
 	articleChanged := func() bool {
-		return !fresh && curRecord.article.Id != prevRecord.article.Id
+		return !fresh && currRecord.article.Id != prevRecord.article.Id
 	}
 
 	tagChanged := func() bool {
 		return fresh ||
-			(curRecord.tag == nil && prevRecord.tag != nil) ||
-			(curRecord.tag != nil && prevRecord.tag == nil) ||
-			(*curRecord.tag != *prevRecord.tag)
+			(currRecord.tag == nil && prevRecord.tag != nil) ||
+			(currRecord.tag != nil && prevRecord.tag == nil) ||
+			(*currRecord.tag != *prevRecord.tag)
 	}
 
 	favoritesUserIdChanged := func() bool {
 		return fresh ||
-			(curRecord.favoritesUserId == nil && prevRecord.favoritesUserId != nil) ||
-			(curRecord.favoritesUserId != nil && prevRecord.favoritesUserId == nil) ||
-			(*curRecord.favoritesUserId != *prevRecord.favoritesUserId)
+			(currRecord.favoritesUserId == nil && prevRecord.favoritesUserId != nil) ||
+			(currRecord.favoritesUserId != nil && prevRecord.favoritesUserId == nil) ||
+			(*currRecord.favoritesUserId != *prevRecord.favoritesUserId)
 	}
 
 	// Move data into results slice
@@ -370,9 +408,9 @@ func readArticles(
 
 	// Main processing loop
 	for rows.Next() {
-		err = pgxscan.ScanRow(&curRecord, rows)
+		err = pgxscan.ScanRow(&currRecord, rows)
 		if err != nil {
-			return nil, errx.ErrxOf(err)
+			return nil, nil, errx.ErrxOf(err)
 		}
 
 		if articleChanged() {
@@ -380,20 +418,27 @@ func readArticles(
 			fresh = true
 		}
 
-		if tagChanged() && curRecord.tag != nil {
-			tags = append(tags, *curRecord.tag)
+		if tagChanged() && currRecord.tag != nil {
+			tags = append(tags, *currRecord.tag)
 		}
 
-		if favoritesUserIdChanged() && curRecord.favoritesUserId != nil {
-			favoritesUserIds = append(favoritesUserIds, *curRecord.favoritesUserId)
+		if favoritesUserIdChanged() && currRecord.favoritesUserId != nil {
+			favoritesUserIds = append(favoritesUserIds, *currRecord.favoritesUserId)
 		}
 
-		prevRecord = curRecord
+		prevRecord = currRecord
 		fresh = false
 	}
 	if !fresh {
 		updateResults()
 	}
 
-	return results, nil
+	articlePluses := make([]model.ArticlePlus, len(results))
+	favoritesUserIdSliceSlice := make([][]uint, len(results))
+	for i, r := range results {
+		articlePluses[i] = r.articlePlus
+		favoritesUserIdSliceSlice[i] = r.favoritesUserIds
+	}
+
+	return articlePluses, favoritesUserIdSliceSlice, nil
 }
