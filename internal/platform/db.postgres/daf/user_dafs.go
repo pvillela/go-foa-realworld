@@ -98,7 +98,7 @@ var UserUpdateDaf UserUpdateDafT = func(
 		user.Id,
 		recCtx.UpdatedAt,
 	}
-	fmt.Println("UserUpdateDaf sql:", sql)
+	fmt.Println("\nUserUpdateDaf sql:", sql)
 	fmt.Println("UserUpdateDaf args:", args)
 	row := tx.QueryRow(ctx, sql, args...)
 	err = row.Scan(&recCtx.UpdatedAt)

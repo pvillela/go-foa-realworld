@@ -16,22 +16,32 @@ import (
 )
 
 func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
-	myBio := "I am me."
-	user := model.User{
-		Username:     "pvillela",
-		Email:        "foo@bar.com",
-		PasswordHash: "dakfljads0fj",
-		Bio:          &myBio,
-		ImageLink:    "",
+	users := []model.User{
+		{
+			Username:     "pvillela",
+			Email:        "foo@bar.com",
+			PasswordHash: "dakfljads0fj",
+			Bio:          util.PointerFromValue("I am me."),
+			ImageLink:    "",
+		},
+		{
+			Username:     "joebloe",
+			Email:        "joe@bloe.com",
+			PasswordHash: "9zdakfljads0",
+			Bio:          util.PointerFromValue("Famous person."),
+			ImageLink:    "https://myimage.com",
+		},
 	}
 
 	ctx, err := ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
 
-	recCtx, err := daf.UserCreateDaf(ctx, &user)
-	util.PanicOnError(err)
-	fmt.Println("recCtx from Create:", recCtx)
+	for i, _ := range users {
+		recCtx, err := daf.UserCreateDaf(ctx, &users[i])
+		util.PanicOnError(err)
+		fmt.Println("recCtx from Create:", recCtx)
+	}
 
 	userFromDb, recCtx, err := daf.UserGetByNameDaf(ctx, "pvillela")
 	util.PanicOnError(err)
@@ -47,7 +57,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	util.PanicOnError(err)
 	readManySql := "SELECT * FROM users"
 	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql, -1, -1)
-	fmt.Println("pwUsers:", pwUsers)
+	fmt.Println("\npwUsers:", pwUsers)
 	pwUserPtrs, err := dbpgx.ReadMany[*daf.PwUser](ctx, tx, readManySql, -1, -1)
 	fmt.Println("pwUserPtrs:", pwUserPtrs)
 	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0])
@@ -58,6 +68,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	ctx, err = ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 
+	user := users[0]
 	user.ImageLink = "https://xyz.com"
 	recCtx, err = daf.UserUpdateDaf(ctx, user, recCtx)
 	util.PanicOnError(err)
