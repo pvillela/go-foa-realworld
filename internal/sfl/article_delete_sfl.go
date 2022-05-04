@@ -8,12 +8,12 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 )
 
 // ArticleDeleteSflT is the type of the stereotype instance for the service flow that
@@ -24,7 +24,7 @@ type ArticleDeleteSflT = func(ctx context.Context, slug string) (arch.Unit, erro
 // ArticleDeleteSflT.
 func ArticleDeleteSflC(
 	beginTxn func(context string) db.Txn,
-	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
+	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
 	return func(ctx context.Context, slug string) (arch.Unit, error) {

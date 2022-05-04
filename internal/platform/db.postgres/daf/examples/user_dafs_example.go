@@ -9,17 +9,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-	log "github.com/sirupsen/logrus"
 )
 
-func main() {
-	defer util.PanicLog(log.Fatal)
+func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	myBio := "I am me."
 	user := model.User{
 		Username:     "pvillela",
@@ -29,22 +25,9 @@ func main() {
 		ImageLink:    "",
 	}
 
-	ctx := context.Background()
-
-	connStr := "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
-	pool, err := pgxpool.Connect(ctx, connStr)
-	util.PanicOnError(err)
-	ctxDb := dbpgx.CtxPgx{pool}
-	ctx, err = ctxDb.SetPool(ctx)
-	util.PanicOnError(err)
-
-	ctx, err = ctxDb.BeginTx(ctx)
+	ctx, err := ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
-
-	tx, err := dbpgx.GetCtxTx(ctx)
-	util.PanicOnError(err)
-	cleanupTable(ctx, tx, "users")
 
 	recCtx, err := daf.UserCreateDaf(ctx, &user)
 	util.PanicOnError(err)
@@ -60,10 +43,12 @@ func main() {
 	fmt.Println("\nUserGetByEmailDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx)
 
+	tx, err := dbpgx.GetCtxTx(ctx)
+	util.PanicOnError(err)
 	readManySql := "SELECT * FROM users"
-	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql)
+	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql, -1, -1)
 	fmt.Println("pwUsers:", pwUsers)
-	pwUserPtrs, err := dbpgx.ReadMany[*daf.PwUser](ctx, tx, readManySql)
+	pwUserPtrs, err := dbpgx.ReadMany[*daf.PwUser](ctx, tx, readManySql, -1, -1)
 	fmt.Println("pwUserPtrs:", pwUserPtrs)
 	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0])
 
@@ -80,11 +65,5 @@ func main() {
 	fmt.Println("recCtx from Update:", recCtx)
 
 	_, err = ctxDb.Commit(ctx)
-	util.PanicOnError(err)
-}
-
-func cleanupTable(ctx context.Context, tx pgx.Tx, table string) {
-	sql := fmt.Sprintf("TRUNCATE %v", table)
-	_, err := tx.Exec(ctx, sql)
 	util.PanicOnError(err)
 }

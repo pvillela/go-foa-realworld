@@ -4,7 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package fs
+package bf
 
 import (
 	"time"
@@ -15,7 +15,7 @@ import (
 type ArticleValidateBeforeCreateBfT = func(article model.Article) error
 
 var ArticleValidateBeforeCreateBfI ArticleValidateBeforeCreateBfT = func(article model.Article) error {
-	if article.Id == "" || article.Slug == "" || article.Title == "" ||
+	if article.Id == 0 || article.Slug == "" || article.Title == "" ||
 		article.Description == "" || article.Body == nil {
 		return ErrArticleCreateMissingFields.Make(nil)
 	}
@@ -25,7 +25,7 @@ var ArticleValidateBeforeCreateBfI ArticleValidateBeforeCreateBfT = func(article
 type ArticleValidateBeforeUpdateBfT = func(article model.Article) error
 
 var ArticleValidateBeforeUpdateBfI ArticleValidateBeforeUpdateBfT = func(article model.Article) error {
-	if article.Id == "" || article.Slug == "" || article.Title == "" ||
+	if article.Id == 0 || article.Slug == "" || article.Title == "" ||
 		article.Description == "" || article.Body == nil ||
 		article.CreatedAt == (time.Time{}) {
 		return ErrArticleUpdateMissingFields.Make(nil)

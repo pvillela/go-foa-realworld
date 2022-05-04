@@ -16,7 +16,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -37,12 +37,12 @@ func pwCommentFromDb(value interface{}) daf.PwComment {
 }
 
 // CommentGetByIdDafC is the function that constructs a stereotype instance of type
-// fs.CommentGetByIdDafT.
+// bf.CommentGetByIdDafT.
 func CommentGetByIdDafC(commentDb mapdb.MapDb) daf.CommentGetByIdDafT {
 	return func(articleUuid util.Uuid, id int) (model.Comment, daf.RecCtxComment, error) {
 		value, err := commentDb.Read(commentKey0(articleUuid, id))
 		if err != nil {
-			return model.Comment{}, daf.RecCtxComment{}, fs.ErrCommentNotFound.Make(err, articleUuid, id)
+			return model.Comment{}, daf.RecCtxComment{}, bf.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
 		pw := pwCommentFromDb(value)
 		return pw.Entity, pw.RecCtx, nil
@@ -61,7 +61,7 @@ func nextId(commentDb mapdb.MapDb, articleUuid util.Uuid) int {
 }
 
 // CommentCreateDafC is the function that constructs a stereotype instance of type
-// fs.CommentCreateDafT.
+// bf.CommentCreateDafT.
 func CommentCreateDafC(commentDb mapdb.MapDb) daf.CommentCreateDafT {
 	return func(comment model.Comment, txn db.Txn) (model.Comment, daf.RecCtxComment, error) {
 		comment.Id = nextId(commentDb, comment.ArticleId)
@@ -75,12 +75,12 @@ func CommentCreateDafC(commentDb mapdb.MapDb) daf.CommentCreateDafT {
 }
 
 // CommentDeleteDafC is the function that constructs a stereotype instance of type
-// fs.CommentDeleteDafT.
+// bf.CommentDeleteDafT.
 func CommentDeleteDafC(commentDb mapdb.MapDb) daf.CommentDeleteDafT {
 	return func(articleUuid util.Uuid, id int, txn db.Txn) error {
 		err := commentDb.Delete(commentKey0(articleUuid, id), txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-			return fs.ErrCommentNotFound.Make(err, articleUuid, id)
+			return bf.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
 		return err
 	}

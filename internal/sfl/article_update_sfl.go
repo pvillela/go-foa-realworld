@@ -8,12 +8,13 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -26,14 +27,14 @@ type ArticleUpdateSflT = func(context.Context, rpc.ArticleUpdateIn) (rpc.Article
 // ArticleUpdateSflT with hard-wired BF dependencies.
 func ArticleUpdateSflC(
 	beginTxn func(context string) db.Txn,
-	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
+	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleUpdateSflT {
-	articleValidateBeforeUpdateBf := fs.ArticleValidateBeforeUpdateBfI
+	articleValidateBeforeUpdateBf := bf.ArticleValidateBeforeUpdateBfI
 	return ArticleUpdateSflC0(
 		beginTxn,
 		articleGetAndCheckOwnerFl,
@@ -50,13 +51,13 @@ func ArticleUpdateSflC(
 // ArticleUpdateSflT without hard-wired BF dependencies.
 func ArticleUpdateSflC0(
 	beginTxn func(context string) db.Txn,
-	articleGetAndCheckOwnerFl fs.ArticleGetAndCheckOwnerFlT,
+	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
-	articleValidateBeforeUpdateBf fs.ArticleValidateBeforeUpdateBfT,
+	articleValidateBeforeUpdateBf bf.ArticleValidateBeforeUpdateBfT,
 ) ArticleUpdateSflT {
 	return func(ctx context.Context, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

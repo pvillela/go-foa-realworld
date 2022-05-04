@@ -1,12 +1,13 @@
 /*
- * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Copyright © 2022 Paulo Villela. All rights reserved.
  * Use of this source code is governed by the Apache 2.0 license
  * that can be found in the LICENSE file.
  */
 
-package fs
+package fl
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
@@ -20,7 +21,7 @@ type ArticleGetAndCheckOwnerFlT = func(username, slug string) (model.Article, Re
 func ArticleGetAndCheckOwnerFlC(
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 ) ArticleGetAndCheckOwnerFlT {
-	articleCheckOwnerBf := ArticleCheckOwnerBfI
+	articleCheckOwnerBf := bf.ArticleCheckOwnerBfI
 	return ArticleGetAndCheckOwnerFlC0(
 		articleGetBySlugDaf,
 		articleCheckOwnerBf,
@@ -31,7 +32,7 @@ func ArticleGetAndCheckOwnerFlC(
 // ArticleGetAndCheckOwnerFlT without hard-wired BF dependencies.
 func ArticleGetAndCheckOwnerFlC0(
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
-	articleCheckOwnerBf ArticleCheckOwnerBfT,
+	articleCheckOwnerBf bf.ArticleCheckOwnerBfT,
 ) ArticleGetAndCheckOwnerFlT {
 	return func(slug string, username string) (model.Article, RecCtxArticle, error) {
 		article, rc, err := articleGetBySlugDaf(slug)

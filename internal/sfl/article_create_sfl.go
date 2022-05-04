@@ -12,7 +12,7 @@ import (
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -28,7 +28,7 @@ func ArticleCreateSflC(
 	articleCreateDaf daf.ArticleCreateDafT,
 	tagAddDaf daf.TagAddDafT,
 ) ArticleCreateSflT {
-	articleValidateBeforeCreateBf := fs.ArticleValidateBeforeCreateBfI
+	articleValidateBeforeCreateBf := bf.ArticleValidateBeforeCreateBfI
 	return ArticleCreateSflC0(
 		beginTxn,
 		userGetByNameDaf,
@@ -45,7 +45,7 @@ func ArticleCreateSflC0(
 	userGetByNameDaf daf.UserGetByNameDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	tagAddDaf daf.TagAddDafT,
-	articleValidateBeforeCreateBf fs.ArticleValidateBeforeCreateBfT,
+	articleValidateBeforeCreateBf bf.ArticleValidateBeforeCreateBfT,
 ) ArticleCreateSflT {
 	return func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

@@ -11,7 +11,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -25,7 +25,7 @@ type ArticlesFeedSflT = func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.Ar
 // ArticlesFeedSflT.
 func ArticlesFeedSflC(
 	userGetByNameDaf daf.UserGetByNameDafT,
-	articleGetRecentForAuthorsDaf fs.ArticleGetRecentForAuthorsDafT,
+	articleGetRecentForAuthorsDaf bf.ArticleGetRecentForAuthorsDafT,
 ) ArticlesFeedSflT {
 	return func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
@@ -35,7 +35,7 @@ func ArticlesFeedSflC(
 		var err error
 
 		if username == "" {
-			return zero, fs.ErrNotAuthenticated.Make(nil)
+			return zero, bf.ErrNotAuthenticated.Make(nil)
 		}
 
 		user, _, err = userGetByNameDaf(username)

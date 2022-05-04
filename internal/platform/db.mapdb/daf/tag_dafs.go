@@ -12,7 +12,7 @@ import (
 )
 
 // TagGetAllDafC is the function that constructs a stereotype instance of type
-// fs.TagGetAllDafT.
+// bf.TagGetAllDafT.
 func TagGetAllDafC(
 	tagDb mapdb.MapDb,
 ) daf.TagGetAllDafT {
@@ -33,7 +33,7 @@ func TagGetAllDafC(
 }
 
 // TagAddDafC is the function that constructs a stereotype instance of type
-// fs.TagAddDafT.
+// bf.TagAddDafT.
 func TagAddDafC(
 	tagDb mapdb.MapDb,
 ) daf.TagAddDafT {

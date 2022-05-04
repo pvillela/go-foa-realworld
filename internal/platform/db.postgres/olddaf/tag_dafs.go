@@ -7,14 +7,14 @@
 package olddaf
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 )
 
 // TagGetAllDafC is the function that constructs a stereotype instance of type
-// fs.TagGetAllDafT.
+// bf.TagGetAllDafT.
 func TagGetAllDafC(
 	tagDb mapdb.MapDb,
-) fs.TagGetAllDafT {
+) bf.TagGetAllDafT {
 	return func() ([]string, error) {
 		var ret []string
 
@@ -32,10 +32,10 @@ func TagGetAllDafC(
 }
 
 // TagAddDafC is the function that constructs a stereotype instance of type
-// fs.TagAddDafT.
+// bf.TagAddDafT.
 func TagAddDafC(
 	tagDb mapdb.MapDb,
-) fs.TagAddDafT {
+) bf.TagAddDafT {
 	return func(newTags []string) error {
 		for _, tag := range newTags {
 			tagDb.Store.Store(tag, true)

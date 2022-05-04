@@ -14,7 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -27,8 +27,8 @@ type myMapDb struct {
 	mapdb.MapDb
 }
 
-func pwArticleFromDb(value interface{}) fs.PwArticle {
-	pw, ok := value.(fs.PwArticle)
+func pwArticleFromDb(value interface{}) bf.PwArticle {
+	pw, ok := value.(bf.PwArticle)
 	if !ok {
 		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap article"))
 	}
@@ -40,28 +40,28 @@ func articleFromDb(value interface{}) model.Article {
 }
 
 // ArticleCreateDafC is a function that constructs a stereotype instance of type
-// fs.ArticleCreateDafT.
+// bf.ArticleCreateDafT.
 func ArticleCreateDafC(articleDb mapdb.MapDb) daf.ArticleCreateDafT {
-	return func(article model.Article, txn db.Txn) (fs.RecCtxArticle, error) {
+	return func(article model.Article, txn db.Txn) (bf.RecCtxArticle, error) {
 		_, _, err := myMapDb{articleDb}.getBySlug(article.Slug)
 		if err == nil {
-			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
+			return bf.RecCtxArticle{}, bf.ErrDuplicateArticleSlug.Make(nil, article.Slug)
 		}
 
-		pw := fs.PwArticle{fs.RecCtxArticle{}, article}
+		pw := bf.PwArticle{bf.RecCtxArticle{}, article}
 		err = articleDb.Create(article.Id, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrDuplicateKey {
-			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleUuid.Make(err, article.Id)
+			return bf.RecCtxArticle{}, bf.ErrDuplicateArticleUuid.Make(err, article.Id)
 		}
 		if err != nil {
-			return fs.RecCtxArticle{}, err // this can only be a transaction error
+			return bf.RecCtxArticle{}, err // this can only be a transaction error
 		}
 
-		return fs.RecCtxArticle{}, nil
+		return bf.RecCtxArticle{}, nil
 	}
 }
 
-func (s myMapDb) getBySlug(slug string) (model.Article, fs.RecCtxArticle, error) {
+func (s myMapDb) getBySlug(slug string) (model.Article, bf.RecCtxArticle, error) {
 	pred := func(_, value interface{}) bool {
 		article := articleFromDb(value)
 		if article.Slug == slug {
@@ -72,7 +72,7 @@ func (s myMapDb) getBySlug(slug string) (model.Article, fs.RecCtxArticle, error)
 
 	value, found := s.FindFirst(pred)
 	if !found {
-		return model.Article{}, fs.RecCtxArticle{}, fs.ErrArticleSlugNotFound.Make(nil, slug)
+		return model.Article{}, bf.RecCtxArticle{}, bf.ErrArticleSlugNotFound.Make(nil, slug)
 	}
 	pw := pwArticleFromDb(value)
 
@@ -80,26 +80,26 @@ func (s myMapDb) getBySlug(slug string) (model.Article, fs.RecCtxArticle, error)
 }
 
 // ArticleGetBySlugDafC is a function that constructs a stereotype instance of type
-// fs.ArticleGetBySlugDafT.
+// bf.ArticleGetBySlugDafT.
 func ArticleGetBySlugDafC(articleDb mapdb.MapDb) daf.ArticleGetBySlugDafT {
 	return myMapDb{articleDb}.getBySlug
 }
 
 // ArticleUpdateDafC is a function that constructs a stereotype instance of type
-// fs.ArticleUpdateDafT.
+// bf.ArticleUpdateDafT.
 func ArticleUpdateDafC(articleDb mapdb.MapDb) daf.ArticleUpdateDafT {
-	return func(article model.Article, recCtx fs.RecCtxArticle, txn db.Txn) (fs.RecCtxArticle, error) {
+	return func(article model.Article, recCtx bf.RecCtxArticle, txn db.Txn) (bf.RecCtxArticle, error) {
 		if artBySlug, _, err := (myMapDb{articleDb}.getBySlug(article.Slug)); err == nil && artBySlug.Id != article.Id {
-			return fs.RecCtxArticle{}, fs.ErrDuplicateArticleSlug.Make(nil, article.Slug)
+			return bf.RecCtxArticle{}, bf.ErrDuplicateArticleSlug.Make(nil, article.Slug)
 		}
 
-		pw := fs.PwArticle{recCtx, article}
+		pw := bf.PwArticle{recCtx, article}
 		err := articleDb.Update(article.Id, pw, txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-			return fs.RecCtxArticle{}, fs.ErrArticleNotFound.Make(err, article.Id)
+			return bf.RecCtxArticle{}, bf.ErrArticleNotFound.Make(err, article.Id)
 		}
 		if err != nil {
-			return fs.RecCtxArticle{}, err // this can only be a transaction error
+			return bf.RecCtxArticle{}, err // this can only be a transaction error
 		}
 
 		return recCtx, nil
@@ -107,7 +107,7 @@ func ArticleUpdateDafC(articleDb mapdb.MapDb) daf.ArticleUpdateDafT {
 }
 
 // ArticleDeleteDafC is a function that constructs a stereotype instance of type
-// fs.ArticleDeleteDafT.
+// bf.ArticleDeleteDafT.
 func ArticleDeleteDafC(articleDb mapdb.MapDb) daf.ArticleDeleteDafT {
 	return func(slug string, txn db.Txn) error {
 		article, _, err := myMapDb{articleDb}.getBySlug(slug)
@@ -154,8 +154,8 @@ func selectAndOrderByMostRecent(
 }
 
 // ArticleGetRecentForAuthorsDafC is a function that constructs a stereotype instance of type
-// fs.ArticleGetRecentForAuthorsDafT.
-func ArticleGetRecentForAuthorsDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentForAuthorsDafT {
+// bf.ArticleGetRecentForAuthorsDafT.
+func ArticleGetRecentForAuthorsDafC(articleDb mapdb.MapDb) bf.ArticleGetRecentForAuthorsDafT {
 	return func(usernames []string, pLimit, pOffset *int) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
 			article := articleFromDb(value)
@@ -172,8 +172,8 @@ func ArticleGetRecentForAuthorsDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFo
 }
 
 // ArticleGetRecentFilteredDafC is a function that constructs a stereotype instance of type
-// fs.ArticleGetRecentFilteredDafT.
-func ArticleGetRecentFilteredDafC(articleDb mapdb.MapDb) fs.ArticleGetRecentFilteredDafT {
+// bf.ArticleGetRecentFilteredDafT.
+func ArticleGetRecentFilteredDafC(articleDb mapdb.MapDb) bf.ArticleGetRecentFilteredDafT {
 	return func(in model.ArticleCriteria) ([]model.Article, error) {
 		pred := func(_, value interface{}) bool {
 			article := articleFromDb(value)

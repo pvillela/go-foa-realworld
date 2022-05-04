@@ -13,7 +13,7 @@ import (
 
 	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -45,7 +45,7 @@ func CommentDeleteSflC(
 			return arch.Void, err
 		}
 		if comment.Author.Username != username {
-			return arch.Void, fs.ErrUnauthorizedUser.Make(nil, username)
+			return arch.Void, bf.ErrUnauthorizedUser.Make(nil, username)
 		}
 
 		if err := commentDeleteDaf(article.Id, in.Id, txn); err != nil {

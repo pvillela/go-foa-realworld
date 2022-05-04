@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -22,8 +22,8 @@ type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (
 func UserAuthenticateSflC(
 	userGetByEmailDaf daf.UserGetByEmailDafT,
 ) UserAuthenticateSflT {
-	userGenTokenBf := fs.UserGenTokenBfI
-	userAuthenticateBf := fs.UserAuthenticateBfI
+	userGenTokenBf := bf.UserGenTokenBfI
+	userAuthenticateBf := bf.UserAuthenticateBfI
 	return UserAuthenticateSflC0(
 		userGetByEmailDaf,
 		userGenTokenBf,
@@ -35,8 +35,8 @@ func UserAuthenticateSflC(
 // UserAuthenticateSflT without hard-wired BF dependencies.
 func UserAuthenticateSflC0(
 	userGetByEmailDaf daf.UserGetByEmailDafT,
-	userGenTokenBf fs.UserGenTokenBfT,
-	userAuthenticateBf fs.UserAuthenticateBfT,
+	userGenTokenBf bf.UserGenTokenBfT,
+	userAuthenticateBf bf.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
 	return func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
@@ -51,7 +51,7 @@ func UserAuthenticateSflC0(
 
 		if !userAuthenticateBf(user, password) {
 			// I know the error info below is not secure but OK for now for debugging
-			return zero, fs.ErrAuthenticationFailed.Make(nil, user.Username, password)
+			return zero, bf.ErrAuthenticationFailed.Make(nil, user.Username, password)
 		}
 
 		token, err := userGenTokenBf(user)

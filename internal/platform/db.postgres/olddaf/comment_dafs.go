@@ -14,7 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -26,8 +26,8 @@ func commentKey0(articleUuid util.Uuid, id int) string {
 	return string(articleUuid) + "-" + strconv.Itoa(id)
 }
 
-func pwCommentFromDb(value interface{}) fs.PwComment {
-	pw, ok := value.(fs.PwComment)
+func pwCommentFromDb(value interface{}) bf.PwComment {
+	pw, ok := value.(bf.PwComment)
 	if !ok {
 		panic(fmt.Sprintln("database corrupted, value", pw, "does not wrap comment"))
 	}
@@ -35,12 +35,12 @@ func pwCommentFromDb(value interface{}) fs.PwComment {
 }
 
 // CommentGetByIdDafC is the function that constructs a stereotype instance of type
-// fs.CommentGetByIdDafT.
-func CommentGetByIdDafC(commentDb mapdb.MapDb) fs.CommentGetByIdDafT {
-	return func(articleUuid util.Uuid, id int) (model.Comment, fs.RecCtxComment, error) {
+// bf.CommentGetByIdDafT.
+func CommentGetByIdDafC(commentDb mapdb.MapDb) bf.CommentGetByIdDafT {
+	return func(articleUuid util.Uuid, id int) (model.Comment, bf.RecCtxComment, error) {
 		value, err := commentDb.Read(commentKey0(articleUuid, id))
 		if err != nil {
-			return model.Comment{}, fs.RecCtxComment{}, fs.ErrCommentNotFound.Make(err, articleUuid, id)
+			return model.Comment{}, bf.RecCtxComment{}, bf.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
 		pw := pwCommentFromDb(value)
 		return pw.Entity, pw.RecCtx, nil
@@ -59,26 +59,26 @@ func nextId(commentDb mapdb.MapDb, articleUuid util.Uuid) int {
 }
 
 // CommentCreateDafC is the function that constructs a stereotype instance of type
-// fs.CommentCreateDafT.
-func CommentCreateDafC(commentDb mapdb.MapDb) fs.CommentCreateDafT {
-	return func(comment model.Comment, txn db.Txn) (model.Comment, fs.RecCtxComment, error) {
+// bf.CommentCreateDafT.
+func CommentCreateDafC(commentDb mapdb.MapDb) bf.CommentCreateDafT {
+	return func(comment model.Comment, txn db.Txn) (model.Comment, bf.RecCtxComment, error) {
 		comment.ID = nextId(commentDb, comment.ArticleUuid)
-		pw := fs.PwComment{fs.RecCtxComment{}, comment}
+		pw := bf.PwComment{bf.RecCtxComment{}, comment}
 		if err := commentDb.Create(commentKey(comment), pw, txn); err != nil {
-			return model.Comment{}, fs.RecCtxComment{}, err // can only be an invalid txn token due to first line above
+			return model.Comment{}, bf.RecCtxComment{}, err // can only be an invalid txn token due to first line above
 		}
 
-		return comment, fs.RecCtxComment{}, nil
+		return comment, bf.RecCtxComment{}, nil
 	}
 }
 
 // CommentDeleteDafC is the function that constructs a stereotype instance of type
-// fs.CommentDeleteDafT.
-func CommentDeleteDafC(commentDb mapdb.MapDb) fs.CommentDeleteDafT {
+// bf.CommentDeleteDafT.
+func CommentDeleteDafC(commentDb mapdb.MapDb) bf.CommentDeleteDafT {
 	return func(articleUuid util.Uuid, id int, txn db.Txn) error {
 		err := commentDb.Delete(commentKey0(articleUuid, id), txn)
 		if errx.KindOf(err) == mapdb.ErrRecordNotFound {
-			return fs.ErrCommentNotFound.Make(err, articleUuid, id)
+			return bf.ErrCommentNotFound.Make(err, articleUuid, id)
 		}
 		return err
 	}

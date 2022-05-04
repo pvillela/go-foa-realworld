@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"strings"
 )
@@ -74,7 +74,7 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	}
 
 	if len(articlePluses) == 0 {
-		return model.ArticlePlus{}, fs.ErrArticleSlugNotFound.Make(nil, slug)
+		return model.ArticlePlus{}, bf.ErrArticleSlugNotFound.Make(nil, slug)
 	}
 	if len(articlePluses) > 1 {
 		util.PanicOnError(errx.NewErrx(nil,

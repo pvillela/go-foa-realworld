@@ -9,9 +9,9 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -23,7 +23,7 @@ type UserFollowSflT = func(ctx context.Context, followedUsername string) (rpc.Pr
 // UserFollowSflT.
 func UserFollowSflC(
 	beginTxn func(context string) db.Txn,
-	userFollowFl fs.UserStartFollowingFlT,
+	userFollowFl fl.UserStartFollowingFlT,
 ) UserFollowSflT {
 	return func(ctx context.Context, followedUsername string) (rpc.ProfileOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

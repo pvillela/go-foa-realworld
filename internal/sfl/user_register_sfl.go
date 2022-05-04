@@ -9,7 +9,7 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
@@ -24,7 +24,7 @@ func UserRegisterSflC(
 	beginTxn func(context string) db.Txn,
 	userCreateDaf daf.UserCreateDafT,
 ) UserRegisterSflT {
-	userGenTokenBf := fs.UserGenTokenBfI
+	userGenTokenBf := bf.UserGenTokenBfI
 	return UserRegisterSflC0(
 		beginTxn,
 		userCreateDaf,
@@ -37,7 +37,7 @@ func UserRegisterSflC(
 func UserRegisterSflC0(
 	beginTxn func(context string) db.Txn,
 	userCreateDaf daf.UserCreateDafT,
-	userGenTokenBf fs.UserGenTokenBfT,
+	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
 	return func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error) {
 		txn := beginTxn("UserRegisterSflT")

@@ -9,9 +9,9 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -23,7 +23,7 @@ type ArticleUnfavoriteSflT = func(ctx context.Context, slug string) (rpc.Article
 // ArticleUnfavoriteSflT.
 func ArticleUnfavoriteSflC(
 	beginTxn func(context string) db.Txn,
-	articleFavoriteFl fs.ArticleFavoriteFlT,
+	articleFavoriteFl fl.ArticleFavoriteFlT,
 ) ArticleUnfavoriteSflT {
 	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
 		username := web.ContextToRequestContext(ctx).Username

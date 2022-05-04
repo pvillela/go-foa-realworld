@@ -7,11 +7,11 @@
 package main
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"sync"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/mapdb"
-	"github.com/pvillela/go-foa-realworld/internal/fs"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.mapdb/daf"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 )
@@ -41,15 +41,15 @@ var mapDb = mapdb.MapDb{
 
 var userGetByNameDaf = daf.UserGetByEmailDafC(mapDb)
 var userUpdateDaf = daf.UserUpdateDafC(mapDb)
-var userFollowFl = fs.UserStartFollowingFlC(userGetByNameDaf, userUpdateDaf)
+var userFollowFl = fl.UserStartFollowingFlC(userGetByNameDaf, userUpdateDaf)
 var userCreateDaf = daf.UserCreateDafC(mapDb)
 
 var articleCreateDaf = daf.ArticleCreateDafC(mapDb)
 var articleGetBySlugDaf = daf.ArticleGetBySlugDafC(mapDb)
-var articleGetAndCheckOwnerFl = fs.ArticleGetAndCheckOwnerFlC(articleGetBySlugDaf)
+var articleGetAndCheckOwnerFl = fl.ArticleGetAndCheckOwnerFlC(articleGetBySlugDaf)
 var articleDeleteDaf = daf.ArticleDeleteDafC(mapDb)
 var articleUpdateDaf = daf.ArticleUpdateDafC(mapDb)
-var articleFavoriteFl = fs.ArticleFavoriteFlC(userGetByNameDaf, articleGetBySlugDaf, articleUpdateDaf)
+var articleFavoriteFl = fl.ArticleFavoriteFlC(userGetByNameDaf, articleGetBySlugDaf, articleUpdateDaf)
 var articleGetRecentForAuthorsDaf = daf.ArticleGetRecentForAuthorsDafC(mapDb)
 var articleGetRecentFilteredDaf = daf.ArticleGetRecentFilteredDafC(mapDb)
 
