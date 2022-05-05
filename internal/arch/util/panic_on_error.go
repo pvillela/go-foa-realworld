@@ -29,7 +29,7 @@ func PanicLog(logger func(args ...interface{})) {
 		case error:
 			str = r.(error).Error()
 		default:
-			str = fmt.Sprintf("%v", r)
+			str = fmt.Sprintf("%+v", r)
 		}
 		logger("panicked:", str)
 	}

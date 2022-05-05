@@ -32,10 +32,11 @@ var ArticleCreateDaf ArticleCreateDafT = func(
 ) error {
 	sql := `
 	INSERT INTO articles (author_id, title, slug, description, body, favorites_count) 
-	VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at, updated_at
+	VALUES ($1, $2, $3, $4, $5, $6) 
+	RETURNING id, created_at, updated_at
 	`
 	args := []any{
-		article.Author.Id,
+		article.AuthorId,
 		article.Title,
 		article.Slug,
 		article.Description,
@@ -63,7 +64,7 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	// See selectJoin query string in function readArticles
 	whereTuples := []util.Tuple2[string, any]{
 		{"a.slug = $%d", slug},
-		{"ufa2.username = $%d", ""}, // use invalid username to force null join
+		{"ufa2.username IS NULL", nil}, // force null join
 	}
 
 	where, whereArgs := whereClauseFromTuples(whereTuples)
@@ -136,7 +137,7 @@ var ArticlesFeedDaf ArticlesFeedDafT = func(
 	// See selectJoin query string in function readArticles
 	whereTuples := []util.Tuple2[string, any]{
 		{"fo.follower_id = $%d", currUserId},
-		{"ufa2.username = $%d", ""}, // use invalid username to force null join
+		{"ufa2.username IS NULL", nil}, // force null join
 	}
 
 	where, whereArgs := whereClauseFromTuples(whereTuples)
@@ -168,8 +169,8 @@ var ArticlesListDaf ArticlesListDafT = func(
 	if v := criteria.FavoritedBy; v != nil {
 		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", *v})
 	} else {
-		// use invalid username to force null join
-		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username = $%d", ""})
+		// force null join
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa2.username IS NULL", nil})
 	}
 
 	where, whereArgs := whereClauseFromTuples(whereTuples)
@@ -186,18 +187,37 @@ var ArticlesListDaf ArticlesListDafT = func(
 /////////////////////
 // Helper functions
 
+// Helper to whereClauseFromTuples; do not use it directly.
+func whereClauseFromSlices(wheres []string, nullableWhereArgs []any) (where string, whereArgs []any) {
+	if len(wheres) == 0 {
+		return "", nullableWhereArgs
+	}
+
+	wheresWithParams := make([]string, len(wheres))
+	whereArgs = make([]any, 0, len(wheres))
+	idx := 0
+	for i, w := range wheres {
+		if nullableWhereArgs[i] != nil {
+			wheresWithParams[i] = fmt.Sprintf(w, idx+2)
+			whereArgs = append(whereArgs, nullableWhereArgs[i])
+			idx++
+		} else {
+			wheresWithParams[i] = wheres[i]
+		}
+	}
+
+	where = "WHERE " + strings.Join(wheresWithParams, " AND ")
+	return where, whereArgs
+}
+
 func whereClauseFromTuples(whereTuples []util.Tuple2[string, any]) (where string, whereArgs []any) {
 	wheres := make([]string, len(whereTuples))
-	whereArgs = make([]any, len(whereTuples))
+	nullableWhereArgs := make([]any, len(whereTuples))
 	for i, nv := range whereTuples {
-		wheres[i] = fmt.Sprintf(nv.X1, i+2)
-		whereArgs[i] = nv.X2
+		wheres[i] = nv.X1
+		nullableWhereArgs[i] = nv.X2
 	}
-	where = strings.Join(wheres, " AND ")
-	if len(wheres) != 0 {
-		where = " WHERE " + where
-	}
-	return where, whereArgs
+	return whereClauseFromSlices(wheres, nullableWhereArgs)
 }
 
 // readArticles queries for articles, returning slice of model.ArticlePlus and an error.
@@ -232,9 +252,9 @@ func readArticles(
 		fo.follower_id as following, t.name 
 		FROM articles a
 	LEFT JOIN users ua ON a.author_id = ua.id
-	LEFT JOIN users ufa2 ON fa2.user_id = ufa2.id -- product effect, same as fa2
 	LEFT JOIN favorites fa1 ON a.id = fa1.article_id AND $1 = fa1.user_id -- no product effect
 	LEFT JOIN favorites fa2 ON a.id = fa2.article_id -- product effect
+	LEFT JOIN users ufa2 ON fa2.user_id = ufa2.id -- product effect, same as fa2
 	LEFT JOIN followings fo ON fo.follower_id = $1 AND a.author_id = fo.followee_id -- no product effect
 	LEFT JOIN article_tags at ON a.id = at.article_id -- product effect
 	LEFT JOIN tags t ON at.tag_id = t.id
@@ -254,6 +274,8 @@ func readArticles(
 		sql += fmt.Sprintf(" OFFSET %d", offset)
 	}
 
+	fmt.Println("Full sql:", sql)
+
 	// Retrieve rows
 	args := append([]any{currUserId}, whereArgs...)
 	rows, err := tx.Query(ctx, sql, args...)
@@ -263,6 +285,15 @@ func readArticles(
 	defer rows.Close()
 
 	// Data structures to receive data
+	type recordT struct {
+		Id              uint
+		Article         model.Article `db:""`
+		Profile         model.Profile `db:""`
+		Following       *uint
+		Favorited       *uint
+		Tag             *string `db:"name"`
+		FavoritesUserId *uint
+	}
 	type resultT struct {
 		articlePlus      model.ArticlePlus
 		favoritesUserIds []uint
@@ -270,54 +301,42 @@ func readArticles(
 	results := []resultT{}
 	tags := []string{}
 	favoritesUserIds := []uint{}
-	var currRecord struct {
-		article         model.Article `db:""`
-		profile         model.Profile `db:""`
-		following       *uint
-		favorited       *uint
-		tag             *string `db:"name"`
-		favoritesUserId *uint
-	}
-	var prevRecord struct {
-		article         model.Article `db:""`
-		profile         model.Profile `db:""`
-		following       *uint
-		favorited       *uint
-		tag             *string `db:"name"`
-		favoritesUserId *uint
-	}
+	var currRecord recordT
+	var prevRecord recordT
 
 	// Functions to put data in data structures
 
 	fresh := true // true when first encountering a new article
 
 	articleChanged := func() bool {
-		return !fresh && currRecord.article.Id != prevRecord.article.Id
+		return !fresh && currRecord.Id != prevRecord.Id
 	}
 
 	tagChanged := func() bool {
 		return fresh ||
-			(currRecord.tag == nil && prevRecord.tag != nil) ||
-			(currRecord.tag != nil && prevRecord.tag == nil) ||
-			(*currRecord.tag != *prevRecord.tag)
+			(currRecord.Tag == nil && prevRecord.Tag != nil) ||
+			(currRecord.Tag != nil && prevRecord.Tag == nil) ||
+			(currRecord.Tag != nil && prevRecord.Tag != nil &&
+				*currRecord.Tag != *prevRecord.Tag)
 	}
 
 	favoritesUserIdChanged := func() bool {
 		return fresh ||
-			(currRecord.favoritesUserId == nil && prevRecord.favoritesUserId != nil) ||
-			(currRecord.favoritesUserId != nil && prevRecord.favoritesUserId == nil) ||
-			(*currRecord.favoritesUserId != *prevRecord.favoritesUserId)
+			(currRecord.FavoritesUserId == nil && prevRecord.FavoritesUserId != nil) ||
+			(currRecord.FavoritesUserId != nil && prevRecord.FavoritesUserId == nil) ||
+			(currRecord.FavoritesUserId != nil && prevRecord.FavoritesUserId == nil &&
+				*currRecord.FavoritesUserId != *prevRecord.FavoritesUserId)
 	}
 
 	// Move data into results slice
 	updateResults := func() {
-		ra := &prevRecord.article
-		rp := &prevRecord.profile
-		if prevRecord.following != nil {
+		ra := &prevRecord.Article
+		rp := &prevRecord.Profile
+		if prevRecord.Following != nil {
 			rp.Following = true
 		}
 		favorited := false
-		if prevRecord.favorited != nil {
+		if prevRecord.Favorited != nil {
 			favorited = true
 		}
 		articlePlus := model.ArticlePlus{
@@ -358,12 +377,12 @@ func readArticles(
 			fresh = true
 		}
 
-		if tagChanged() && currRecord.tag != nil {
-			tags = append(tags, *currRecord.tag)
+		if tagChanged() && currRecord.Tag != nil {
+			tags = append(tags, *currRecord.Tag)
 		}
 
-		if favoritesUserIdChanged() && currRecord.favoritesUserId != nil {
-			favoritesUserIds = append(favoritesUserIds, *currRecord.favoritesUserId)
+		if favoritesUserIdChanged() && currRecord.FavoritesUserId != nil {
+			favoritesUserIds = append(favoritesUserIds, *currRecord.FavoritesUserId)
 		}
 
 		prevRecord = currRecord

@@ -15,24 +15,24 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
-func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
-	users := []model.User{
-		{
-			Username:     "pvillela",
-			Email:        "foo@bar.com",
-			PasswordHash: "dakfljads0fj",
-			Bio:          util.PointerFromValue("I am me."),
-			ImageLink:    "",
-		},
-		{
-			Username:     "joebloe",
-			Email:        "joe@bloe.com",
-			PasswordHash: "9zdakfljads0",
-			Bio:          util.PointerFromValue("Famous person."),
-			ImageLink:    "https://myimage.com",
-		},
-	}
+var users = []model.User{
+	{
+		Username:     "pvillela",
+		Email:        "foo@bar.com",
+		PasswordHash: "dakfljads0fj",
+		Bio:          util.PointerFromValue("I am me."),
+		ImageLink:    "",
+	},
+	{
+		Username:     "joebloe",
+		Email:        "joe@bloe.com",
+		PasswordHash: "9zdakfljads0",
+		Bio:          util.PointerFromValue("Famous person."),
+		ImageLink:    "https://myimage.com",
+	},
+}
 
+func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	ctx, err := ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
@@ -40,6 +40,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	for i, _ := range users {
 		recCtx, err := daf.UserCreateDaf(ctx, &users[i])
 		util.PanicOnError(err)
+		fmt.Println("user from Create:", users[i])
 		fmt.Println("recCtx from Create:", recCtx)
 	}
 
