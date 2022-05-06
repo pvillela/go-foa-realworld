@@ -8,10 +8,10 @@ package daf
 
 import (
 	"context"
-	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	log "github.com/sirupsen/logrus"
 )
 
 // UserGetByNameDaf implements a stereotype instance of type
@@ -98,8 +98,8 @@ var UserUpdateDaf UserUpdateDafT = func(
 		user.Id,
 		recCtx.UpdatedAt,
 	}
-	fmt.Println("\nUserUpdateDaf sql:", sql)
-	fmt.Println("UserUpdateDaf args:", args)
+	log.Debug("UserUpdateDaf sql: ", sql)
+	log.Debug("UserUpdateDaf args: ", args)
 	row := tx.QueryRow(ctx, sql, args...)
 	err = row.Scan(&recCtx.UpdatedAt)
 	return recCtx, errx.ErrxOf(err)

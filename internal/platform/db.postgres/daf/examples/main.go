@@ -20,6 +20,8 @@ import (
 func main() {
 	defer util.PanicLog(log.Fatal)
 
+	log.SetLevel(log.DebugLevel)
+
 	ctx := context.Background()
 
 	connStr := "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"

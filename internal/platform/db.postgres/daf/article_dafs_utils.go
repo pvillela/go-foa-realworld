@@ -95,10 +95,11 @@ func readArticles(
 		sql += fmt.Sprintf(" OFFSET %d", offset)
 	}
 
-	log.Debug("Full sql:", sql)
+	log.Debug("Full sql: ", sql)
 
 	// Retrieve rows
 	args := append([]any{currUserId}, additionalArgs...)
+	log.Debug("args: ", args)
 	rows, err := tx.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, errx.ErrxOf(err)
