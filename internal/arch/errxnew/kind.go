@@ -1,8 +1,8 @@
-package errx
+package errxnew
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
+	"github.com/go-errors/errors"
 )
 
 type Kind struct {
@@ -26,7 +26,7 @@ func (s *Kind) Make(cause error, args ...interface{}) Errx {
 	err := errxImpl{kind: s}
 	err.args = args
 	err.cause = cause
-	err.tracer = errors.WithStack(dummyError{}).(stackTracer)
+	err.err = errors.New(dummyError{})
 	return &err
 }
 
@@ -53,13 +53,6 @@ func ErrxOf(r any) Errx {
 		errX = kind.Make(err)
 	}
 	return errX
-}
-
-func (s *Kind) Decorate(cause Errx, args ...interface{}) Errx {
-	err := errxImpl{kind: s}
-	err.args = args
-	err.cause = cause
-	return &err
 }
 
 func put(m map[*Kind]struct{}, kind *Kind) {

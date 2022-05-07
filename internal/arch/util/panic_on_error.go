@@ -26,11 +26,17 @@ func PanicLog(logger func(args ...interface{})) {
 			str = fmt.Sprintf("%+v", r)
 		case *errors.Error:
 			str = r.(*errors.Error).ErrorStack()
-		case error:
-			str = r.(error).Error()
+		//case error:
+		//	err := errx.ErrxOf(r.(error))
+		//	str = fmt.Sprintf("%+v", err)
+		//	err := errors.New(r)
+		//	str = err.ErrorStack()
 		default:
-			str = fmt.Sprintf("%+v", r)
+			err := errx.ErrxOf(r.(error))
+			str = fmt.Sprintf("%+v", err)
+			//str = fmt.Sprintf("%+v", r)
+			//debug.PrintStack()
 		}
-		logger("panicked:", str)
+		logger("panicked: ", str)
 	}
 }
