@@ -49,9 +49,6 @@ func main() {
 	fmt.Println("\n---fmt.Println(error(fooErr)--------------------------------------------")
 	fmt.Println(error(fooErr))
 
-	fmt.Println("\n---fooErr)----------------------------------------------")
-	fmt.Printf("%+v\n", fooErr)
-
 	fmt.Println("\n---error(fooErr)--------------------------------------------")
 	fmt.Printf("%+v\n", error(fooErr))
 
@@ -90,9 +87,6 @@ func main() {
 
 	fmt.Println("\n---fmt.Println(bazErr)----------------------------------------------")
 	fmt.Println(bazErr)
-
-	fmt.Println("\n---bazErr)----------------------------------------------")
-	fmt.Printf("%+v\n", bazErr)
 
 	fmt.Println("\n---fmt.Println(errxnew.StackTrace(bazErr)--------------------------------------------")
 	fmt.Println(errxnew.StackTraceOf(bazErr))

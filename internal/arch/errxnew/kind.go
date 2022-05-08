@@ -26,7 +26,7 @@ func (s *Kind) Make(cause error, args ...interface{}) Errx {
 	err := errxImpl{kind: s}
 	err.args = args
 	err.cause = cause
-	err.err = errors.New(err.RecursiveMsg()) // recursive reference
+	err.err = errors.New(nil)
 	return &err
 }
 

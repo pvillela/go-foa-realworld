@@ -1,6 +1,7 @@
 package errxnew
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/go-errors/errors"
 )
@@ -10,17 +11,16 @@ import (
 
 type Errx interface {
 	error
-	Err() *errors.Error
 	Kind() *Kind
 	Cause() error
 	Args() []interface{}
 	Msg() string
 	RecursiveMsg() string
-	StackTrace() string
 	ErrxChain() []Errx
 	CauseChain() []error
 	InnermostCause() error
 	InnermostErrx() Errx
+	StackTrace() string
 }
 
 // Interface verification
@@ -42,10 +42,6 @@ type stackTracer interface {
 	StackTrace() string
 }
 
-type dummyError struct{}
-
-func (dummyError) Error() string { return "" }
-
 /////////////////////
 // Helper functions
 
@@ -61,17 +57,17 @@ func (e *errxImpl) msgWithArgs() string {
 	return fmt.Sprintf(e.kind.msg, e.args...)
 }
 
-func (errx *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool) {
-	e := errx
+func (e *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool) {
+	err := e
 	if !includeSelf {
-		e = castToErrx(e.cause)
+		err = castToErrx(err.cause)
 	}
-	for e != nil {
-		cont := f(e)
+	for err != nil {
+		cont := f(err)
 		if !cont {
 			return
 		}
-		e = castToErrx(e.cause)
+		err = castToErrx(err.cause)
 	}
 	return
 }
@@ -109,10 +105,6 @@ func (e *errxImpl) RecursiveMsg() string {
 		str = str + " -> " + cause.Error()
 	}
 	return str
-}
-
-func (e *errxImpl) StackTrace() string {
-	return e.err.ErrorStack()
 }
 
 func (e *errxImpl) ErrxChain() []Errx {
@@ -153,6 +145,23 @@ func (e *errxImpl) InnermostCause() error {
 	}
 	e.traverseErrxChain(true, f)
 	return cause
+}
+
+// Stack returns the callstack formatted the same way that go does
+// in runtime/debug.Stack()
+func (e *errxImpl) stack() []byte {
+	buf := bytes.Buffer{}
+
+	for _, frame := range e.err.StackFrames()[1:] {
+		buf.WriteString(frame.String())
+	}
+
+	return buf.Bytes()
+}
+
+func (e *errxImpl) StackTrace() string {
+	stack := e.stack()
+	return "errx.Errx: " + e.Error() + "\n" + string(stack)
 }
 
 /////////////////////
