@@ -2,8 +2,6 @@ package errx
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"io"
 )
 
 /////////////////////
@@ -16,12 +14,11 @@ type Errx interface {
 	Args() []interface{}
 	Msg() string
 	RecursiveMsg() string
-	StackTrace() StackTrace
-	DirectStackTrace() StackTrace
 	ErrxChain() []Errx
 	CauseChain() []error
 	InnermostCause() error
 	InnermostErrx() Errx
+	StackTrace() string
 }
 
 // Interface verification
@@ -29,31 +26,16 @@ func _() {
 	func(errx Errx) {}(&errxImpl{})
 }
 
-type StackTrace struct {
-	inner errors.StackTrace
-}
-
-func (s StackTrace) Format(state fmt.State, verb rune) {
-	s.inner.Format(state, verb)
-}
-
 /////////////////////
 // Private types
 
 type errxImpl struct {
-	kind   *Kind
-	args   []interface{}
-	cause  error
-	tracer stackTracer
+	kind                 *Kind
+	args                 []interface{}
+	cause                error
+	stack                []byte
+	stackLinesToSuppress int
 }
-
-type stackTracer interface {
-	StackTrace() errors.StackTrace
-}
-
-type dummyError struct{}
-
-func (dummyError) Error() string { return "" }
 
 /////////////////////
 // Helper functions
@@ -66,29 +48,21 @@ func castToErrx(err error) *errxImpl {
 	return nil
 }
 
-func stackTrace(err error) errors.StackTrace {
-	tracer, ok := err.(stackTracer)
-	if ok {
-		return tracer.StackTrace()
-	}
-	return nil
-}
-
 func (e *errxImpl) msgWithArgs() string {
 	return fmt.Sprintf(e.kind.msg, e.args...)
 }
 
-func (errx *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool) {
-	e := errx
+func (e *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool) {
+	err := e
 	if !includeSelf {
-		e = castToErrx(e.cause)
+		err = castToErrx(err.cause)
 	}
-	for e != nil {
-		cont := f(e)
+	for err != nil {
+		cont := f(err)
 		if !cont {
 			return
 		}
-		e = castToErrx(e.cause)
+		err = castToErrx(err.cause)
 	}
 	return
 }
@@ -122,36 +96,6 @@ func (e *errxImpl) RecursiveMsg() string {
 		str = str + " -> " + cause.Error()
 	}
 	return str
-}
-
-func (e *errxImpl) StackTrace() StackTrace {
-	var trace StackTrace
-	var cause error
-
-	f := func(e *errxImpl) bool {
-		if e.tracer != nil {
-			trace = StackTrace{e.tracer.StackTrace()}
-			return false
-		}
-		cause = e.cause
-		return true
-	}
-
-	e.traverseErrxChain(true, f)
-
-	if trace.inner != nil {
-		return trace
-	}
-
-	// The innermost cause in the chain may be a stackTracer
-	return StackTrace{stackTrace(cause)}
-}
-
-func (e *errxImpl) DirectStackTrace() StackTrace {
-	if e.tracer != nil {
-		return StackTrace{e.tracer.StackTrace()}
-	}
-	return StackTrace{}
 }
 
 func (e *errxImpl) ErrxChain() []Errx {
@@ -194,40 +138,52 @@ func (e *errxImpl) InnermostCause() error {
 	return cause
 }
 
-/////////////////////
-// For fmt.Printf support
-
-func (e errxImpl) Format(s fmt.State, verb rune) {
-	switch verb {
-	case 'v':
-		if s.Flag('+') {
-			for _, errx := range e.ErrxChain() {
-				_, _ = io.WriteString(s, errx.Msg())
-				if trace := errx.DirectStackTrace(); trace.inner != nil {
-					trace.Format(s, verb)
-				}
-				_, _ = io.WriteString(s, "\n")
-			}
-			return
+// Guaranteed to return a non-nil result because *errxImpl can only be instantiated with
+// the (*Kind).makeInternal constructor with sets a non-nil stack or with the (*Kind).Decorate
+// constructor which requires an existing Errx as the cause which already must have a non-nil
+// stack somewhere in its cause chain.
+func (e *errxImpl) firstErrWithStack() *errxImpl {
+	var err *errxImpl
+	f := func(e *errxImpl) bool {
+		if e.stack != nil {
+			err = e
+			return false
 		}
-		fallthrough
-	case 's':
-		_, _ = io.WriteString(s, e.Error())
-	case 'q':
-		_, _ = fmt.Fprintf(s, "%q", e.Error())
+		return true
 	}
+
+	e.traverseErrxChain(true, f)
+
+	return err
+}
+
+// StackTrace returns a string that contains both the
+// error message and the callstack.
+func (e *errxImpl) StackTrace() string {
+	ews := e.firstErrWithStack() // guaranteed to be non-nil
+	cutoffLineIndex := 0
+	newlineCount := 0
+	for i, b := range ews.stack {
+		cutoffLineIndex = i + 1
+		if b == '\n' {
+			newlineCount++
+		}
+		if newlineCount == ews.stackLinesToSuppress*2+1 {
+			break
+		}
+	}
+	trimmedStack := ews.stack[cutoffLineIndex:]
+	return "errx.Errx: " + e.Error() + "\n" + string(trimmedStack)
 }
 
 /////////////////////
 // Other public functions
 
-func StackTraceOf(err error) StackTrace {
+func StackTraceOf(err error) string {
 	switch e := err.(type) {
 	case Errx:
 		return e.StackTrace()
-	case stackTracer:
-		return StackTrace{e.StackTrace()}
 	default:
-		return StackTrace{}
+		return ""
 	}
 }

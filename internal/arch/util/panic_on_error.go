@@ -8,8 +8,8 @@ package util
 
 import (
 	"fmt"
-	"github.com/go-errors/errors"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"runtime/debug"
 )
 
 func PanicOnError(err error) {
@@ -20,23 +20,9 @@ func PanicOnError(err error) {
 
 func PanicLog(logger func(args ...interface{})) {
 	if r := recover(); r != nil {
-		var str string
-		switch r.(type) {
-		case errx.Errx:
-			str = fmt.Sprintf("%+v", r)
-		case *errors.Error:
-			str = r.(*errors.Error).ErrorStack()
-		//case error:
-		//	err := errx.ErrxOf(r.(error))
-		//	str = fmt.Sprintf("%+v", err)
-		//	err := errors.New(r)
-		//	str = err.ErrorStack()
-		default:
-			err := errx.ErrxOf(r.(error))
-			str = fmt.Sprintf("%+v", err)
-			//str = fmt.Sprintf("%+v", r)
-			//debug.PrintStack()
-		}
-		logger("panicked: ", str)
+		var errStr string
+		errStr = fmt.Sprintf("%v", r)
+		stack := debug.Stack()
+		logger("panicked: ", errStr+string(stack))
 	}
 }
