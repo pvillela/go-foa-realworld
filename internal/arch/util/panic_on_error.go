@@ -23,6 +23,6 @@ func PanicLog(logger func(args ...interface{})) {
 		var errStr string
 		errStr = fmt.Sprintf("%v", r)
 		stack := debug.Stack()
-		logger("panicked: ", errStr+string(stack))
+		logger("panicked: ", errStr, "\n", string(stack))
 	}
 }
