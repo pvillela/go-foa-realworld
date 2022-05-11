@@ -21,8 +21,8 @@ func main() {
 	defer util.PanicLog(log.Fatal)
 
 	log.SetLevel(log.DebugLevel)
-	var arr []any
-	fmt.Println(arr[0])
+	//var arr []any
+	//fmt.Println(arr[0])
 
 	ctx := context.Background()
 

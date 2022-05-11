@@ -1,0 +1,56 @@
+/*
+ * Copyright © 2022 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
+ */
+
+package daf
+
+import (
+	"context"
+	"github.com/cockroachdb/apd"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+)
+
+// TagGetAllDaf implements a stereotype instance of type
+// TagGetAllDafT.
+var TagGetAllDaf TagGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]string, error) {
+
+}
+
+// TagCreateDaf implements a stereotype instance of type
+// TagCreateDafT.
+var TagCreateDaf TagCreateDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	tag *model.Tag,
+) error {
+	tx, err := dbpgx.GetCtxTx(ctx)
+	if err != nil {
+		return RecCtxUser{}, errx.ErrxOf(err)
+	}
+	sql := `
+	INSERT INTO users (username, email, password_hash, bio, image)
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id, created_at, updated_at
+	`
+	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
+	row := tx.QueryRow(ctx, sql, args...)
+	var recCtx RecCtxUser
+	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
+	return recCtx, errx.ErrxOf(err)
+}
+
+// TagAddToArticle implements a stereotype instance of type
+// TagAddToArticleT.
+var TagAddToArticle TagAddToArticleT = func(
+	ctx apd.Context,
+	tx pgx.Tx,
+	tag model.Tag,
+	article model.Article,
+) error {
+
+}

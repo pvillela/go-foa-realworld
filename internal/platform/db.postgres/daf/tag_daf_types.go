@@ -6,10 +6,20 @@
 
 package daf
 
+import (
+	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+)
+
 // TagGetAllDafT is the type of the stereotype instance for the DAF that
 // retrieves all tags.
-type TagGetAllDafT = func() ([]string, error)
+type TagGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]string, error)
 
-// TagAddDafT is the type of the stereotype instance for the DAF that
-// adds a tag.
-type TagAddDafT = func(newTags []string) error
+// TagCreateDafT is the type of the stereotype instance for the DAF that
+// creates a new tag.
+type TagCreateDafT = func(ctx context.Context, tx pgx.Tx, tag *model.Tag) error
+
+// TagAddToArticleT is the type of the stereotype instance for the DAF that
+// associates a tag with an article.
+type TagAddToArticleT = func(ctx context.Context, tx pgx.Tx, tag model.Tag, article model.Article) error

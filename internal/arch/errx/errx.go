@@ -7,17 +7,43 @@ import (
 /////////////////////
 // Public types
 
+// Errx defines an error type with support for error kinds, a cause chain, recursive error
+// message, and a stack trace.
 type Errx interface {
 	error
+
+	// Kind returns the error's Kind
 	Kind() *Kind
+
+	// Cause returns the error's cause, which may be nil.
 	Cause() error
-	Args() []interface{}
+
+	// Args returns the arguments that are substituted into KindMsg().
+	Args() []any
+
+	// KindMsg returns the raw message for the error's kind, i.e., Kind().msg.
+	KindMsg() string
+
+	// Msg returns the error's message with arguments substituted.
 	Msg() string
+
+	// RecursiveMsg returns a message string that combines the error messages of all errors
+	// in the error's cause chain (which includes the error itself).
 	RecursiveMsg() string
+
+	// ErrxChain returns the error followed by all its preceding causes of type Errx.
 	ErrxChain() []Errx
+
+	// CauseChain returns the error followed by all its preceding causes.
 	CauseChain() []error
+
+	// InnermostCause returns the innermost cause in the error's cause chain.
 	InnermostCause() error
+
+	// InnermostErrx returns the innermost cause of type Errx in the error's cause chain.
 	InnermostErrx() Errx
+
+	// StackTrace returns a stack trace from the point where the error was created.
 	StackTrace() string
 }
 
@@ -31,7 +57,7 @@ func _() {
 
 type errxImpl struct {
 	kind                 *Kind
-	args                 []interface{}
+	args                 []any
 	cause                error
 	stack                []byte
 	stackLinesToSuppress int
@@ -82,8 +108,12 @@ func (e *errxImpl) Cause() error {
 	return e.cause
 }
 
-func (e *errxImpl) Args() []interface{} {
+func (e *errxImpl) Args() []any {
 	return e.args
+}
+
+func (e *errxImpl) KindMsg() string {
+	return e.kind.msg
 }
 
 func (e *errxImpl) Msg() string {
@@ -179,6 +209,7 @@ func (e *errxImpl) StackTrace() string {
 /////////////////////
 // Other public functions
 
+// StackTraceOf returns err.StackTrace() if err is of type Errx, an empty string otherwise.
 func StackTraceOf(err error) string {
 	switch e := err.(type) {
 	case Errx:

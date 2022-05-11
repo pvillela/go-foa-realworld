@@ -33,10 +33,10 @@ func TagGetAllDafC(
 }
 
 // TagAddDafC is the function that constructs a stereotype instance of type
-// bf.TagAddDafT.
+// bf.TagCreateDafT.
 func TagAddDafC(
 	tagDb mapdb.MapDb,
-) daf.TagAddDafT {
+) daf.TagCreateDafT {
 	return func(newTags []string) error {
 		for _, tag := range newTags {
 			tagDb.Store.Store(tag, true)

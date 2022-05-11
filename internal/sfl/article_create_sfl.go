@@ -26,7 +26,7 @@ func ArticleCreateSflC(
 	beginTxn func(context string) db.Txn,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
-	tagAddDaf daf.TagAddDafT,
+	tagAddDaf daf.TagCreateDafT,
 ) ArticleCreateSflT {
 	articleValidateBeforeCreateBf := bf.ArticleValidateBeforeCreateBfI
 	return ArticleCreateSflC0(
@@ -44,7 +44,7 @@ func ArticleCreateSflC0(
 	beginTxn func(context string) db.Txn,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
-	tagAddDaf daf.TagAddDafT,
+	tagAddDaf daf.TagCreateDafT,
 	articleValidateBeforeCreateBf bf.ArticleValidateBeforeCreateBfT,
 ) ArticleCreateSflT {
 	return func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
