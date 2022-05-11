@@ -8,7 +8,6 @@ package daf
 
 import (
 	"context"
-	"github.com/cockroachdb/apd"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -18,7 +17,10 @@ import (
 // TagGetAllDaf implements a stereotype instance of type
 // TagGetAllDafT.
 var TagGetAllDaf TagGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]string, error) {
-
+	mainSql := `
+	SELECT * FROM tags
+	`
+	return dbpgx.ReadMany[string](ctx, tx, mainSql, -1, -1)
 }
 
 // TagCreateDaf implements a stereotype instance of type
@@ -28,29 +30,30 @@ var TagCreateDaf TagCreateDafT = func(
 	tx pgx.Tx,
 	tag *model.Tag,
 ) error {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return RecCtxUser{}, errx.ErrxOf(err)
-	}
 	sql := `
-	INSERT INTO users (username, email, password_hash, bio, image)
-	VALUES ($1, $2, $3, $4, $5)
-	RETURNING id, created_at, updated_at
+	INSERT INTO tags (name)
+	VALUES ($1)
+	RETURNING id
 	`
-	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
+	args := []any{tag.Name}
 	row := tx.QueryRow(ctx, sql, args...)
-	var recCtx RecCtxUser
-	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
-	return recCtx, errx.ErrxOf(err)
+	err := row.Scan(&tag.Id)
+	return errx.ErrxOf(err)
 }
 
 // TagAddToArticle implements a stereotype instance of type
 // TagAddToArticleT.
 var TagAddToArticle TagAddToArticleT = func(
-	ctx apd.Context,
+	ctx context.Context,
 	tx pgx.Tx,
 	tag model.Tag,
 	article model.Article,
 ) error {
-
+	sql := `
+	INSERT INTO article_tags (article_id, tag_id)
+	VALUES ($1, $2)
+	`
+	args := []any{article.Id, tag.Id}
+	_, err := tx.Exec(ctx, sql, args...)
+	return errx.ErrxOf(err)
 }
