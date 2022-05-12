@@ -8,6 +8,7 @@ package model
 
 import "time"
 
+// TODO: remove if not used
 type Following struct {
 	FollowerID uint
 	FolloweeID uint
