@@ -12,6 +12,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"strings"
 )
 
 // TagGetAllDaf implements a stereotype instance of type
@@ -35,7 +36,7 @@ var TagCreateDaf TagCreateDafT = func(
 	VALUES ($1)
 	RETURNING id
 	`
-	args := []any{tag.Name}
+	args := []any{strings.ToUpper(tag.Name)}
 	row := tx.QueryRow(ctx, sql, args...)
 	err := row.Scan(&tag.Id)
 	return errx.ErrxOf(err)

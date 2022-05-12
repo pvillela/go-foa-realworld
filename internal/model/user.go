@@ -8,6 +8,7 @@ package model
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/crypto"
+	"strings"
 )
 
 // User represents a user account in the system
@@ -49,7 +50,7 @@ func User_Create(
 
 	return User{
 		Username:     username,
-		Email:        email,
+		Email:        strings.ToLower(email),
 		PasswordHash: passwordHash,
 		Bio:          nil,
 		ImageLink:    "",
@@ -61,7 +62,7 @@ func (s User) Update(v UserPatch) User {
 		s.Username = *v.Username
 	}
 	if v.Email != nil {
-		s.Email = *v.Email
+		s.Email = strings.ToLower(*v.Email)
 	}
 	if v.Password != nil {
 		password := *v.Password
@@ -77,35 +78,6 @@ func (s User) Update(v UserPatch) User {
 
 	return s
 }
-
-//func (user User) Follows(userName string) bool {
-//	if user.Followees == nil {
-//		return false
-//	}
-//
-//	sort.Strings(user.Followees)
-//	i := sort.SearchStrings(user.Followees, userName)
-//	return i < len(user.Followees) && user.Followees[i] == userName
-//}
-//
-//// UpdateFollowees appends or removes followee to current user according to follow param
-//func (s User) UpdateFollowees(followeeName string, follow bool) User {
-//	if follow {
-//		s.Followees = append(s.Followees, followeeName)
-//		return s
-//	}
-//
-//	for i := 0; i < len(s.Followees); i++ {
-//		if s.Followees[i] == followeeName {
-//			s.Followees = append(s.Followees[:i], s.Followees[i+1:]...) // TODO: memory leak ? https://github.com/golang/go/wiki/SliceTricks
-//			break
-//		}
-//	}
-//	if len(s.Followees) == 0 {
-//		s.Followees = nil
-//	}
-//	return s
-//}
 
 func ProfileFromUser(user *User, follows bool) Profile {
 	s := Profile{}

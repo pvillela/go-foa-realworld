@@ -12,6 +12,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 // UserGetByNameDaf implements a stereotype instance of type
@@ -43,7 +44,7 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 		return model.User{}, RecCtxUser{}, err
 	}
 	pwUser := PwUser{}
-	err = dbpgx.ReadSingle(ctx, tx, "users", "email", email, &pwUser)
+	err = dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &pwUser)
 	if err != nil {
 		return model.User{}, RecCtxUser{}, err
 	}
@@ -65,6 +66,7 @@ var UserCreateDaf UserCreateDafT = func(
 	VALUES ($1, $2, $3, $4, $5)
 	RETURNING id, created_at, updated_at
 	`
+	user.Email = strings.ToLower(user.Email)
 	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
 	row := tx.QueryRow(ctx, sql, args...)
 	var recCtx RecCtxUser
@@ -89,6 +91,7 @@ var UserUpdateDaf UserUpdateDafT = func(
 	WHERE id = $6 AND updated_at = $7
 	RETURNING updated_at
 	`
+	user.Email = strings.ToLower(user.Email)
 	args := []interface{}{
 		user.Username,
 		user.Email,
