@@ -33,6 +33,8 @@ var users = []model.User{
 }
 
 func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
+	fmt.Println("********** userDafsExample **********\n")
+
 	ctx, err := ctxDb.BeginTx(ctx)
 	util.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
@@ -41,27 +43,27 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 		recCtx, err := daf.UserCreateDaf(ctx, &users[i])
 		util.PanicOnError(err)
 		fmt.Println("user from Create:", users[i])
-		fmt.Println("recCtx from Create:", recCtx)
+		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
 
 	userFromDb, recCtx, err := daf.UserGetByNameDaf(ctx, "pvillela")
 	util.PanicOnError(err)
-	fmt.Println("\nUserGetByNameDaf:", userFromDb)
-	fmt.Println("recCtx from Read:", recCtx)
+	fmt.Println("UserGetByNameDaf:", userFromDb)
+	fmt.Println("recCtx from Read:", recCtx, "\n")
 
 	userFromDb, recCtx, err = daf.UserGetByEmailDaf(ctx, "foo@bar.com")
 	util.PanicOnError(err)
-	fmt.Println("\nUserGetByEmailDaf:", userFromDb)
-	fmt.Println("recCtx from Read:", recCtx)
+	fmt.Println("UserGetByEmailDaf:", userFromDb)
+	fmt.Println("recCtx from Read:", recCtx, "\n")
 
 	tx, err := dbpgx.GetCtxTx(ctx)
 	util.PanicOnError(err)
 	readManySql := "SELECT * FROM users"
 	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql, -1, -1)
-	fmt.Println("\npwUsers:", pwUsers)
+	fmt.Println("pwUsers:", pwUsers, "\n")
 	pwUserPtrs, err := dbpgx.ReadMany[*daf.PwUser](ctx, tx, readManySql, -1, -1)
-	fmt.Println("pwUserPtrs:", pwUserPtrs)
-	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0])
+	fmt.Println("pwUserPtrs:", pwUserPtrs, "\n")
+	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0], "\n")
 
 	ctx, err = ctxDb.Commit(ctx)
 	util.PanicOnError(err)
@@ -74,7 +76,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	recCtx, err = daf.UserUpdateDaf(ctx, user, recCtx)
 	util.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)
-	fmt.Println("recCtx from Update:", recCtx)
+	fmt.Println("recCtx from Update:", recCtx, "\n")
 
 	_, err = ctxDb.Commit(ctx)
 	util.PanicOnError(err)

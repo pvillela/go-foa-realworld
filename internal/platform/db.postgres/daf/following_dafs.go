@@ -20,7 +20,7 @@ func FollowingCreateDaf(ctx context.Context, tx pgx.Tx, followerId uint, followe
 	VALUES ($1, $2)
 	RETURNING followed_on
 	`
-	args := []any{followeeId, followeeId}
+	args := []any{followerId, followeeId}
 	_, err := tx.Exec(ctx, sql, args...)
 	return errx.ErrxOf(err)
 }
@@ -32,6 +32,7 @@ func FollowingDeleteDaf(ctx context.Context, tx pgx.Tx, followerId uint, followe
 	DELETE FROM followings
 	WHERE follower_id = $1 AND followee_id = $2
 	`
-	_, err := tx.Exec(ctx, sql, followerId, followeeId)
+	args := []any{followerId, followeeId}
+	_, err := tx.Exec(ctx, sql, args...)
 	return errx.ErrxOf(err)
 }

@@ -6,10 +6,10 @@
 
 package model
 
+import "time"
+
 type Following struct {
-	Id         uint
 	FollowerID uint
-	//Follower *User
 	FolloweeID uint
-	//Followee *User
+	followedOn time.Time
 }

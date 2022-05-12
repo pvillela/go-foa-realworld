@@ -37,6 +37,8 @@ var articles = []model.Article{
 }
 
 func articleDafsExample(ctx context.Context, db dbpgx.Db) {
+	fmt.Println("********** articleDafsExample **********\n")
+
 	tx, err := db.BeginTx(ctx)
 	util.PanicOnError(err)
 
@@ -44,7 +46,7 @@ func articleDafsExample(ctx context.Context, db dbpgx.Db) {
 		articles[i].AuthorId = users[1].Id
 		err := daf.ArticleCreateDaf(ctx, tx, &articles[i])
 		util.PanicOnError(err)
-		fmt.Println("\narticle from Create:", articles[i])
+		fmt.Println("article from Create:", articles[i], "\n")
 	}
 
 	err = tx.Commit(ctx)
@@ -64,21 +66,32 @@ func articleDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 	articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 	util.PanicOnError(err)
-	fmt.Println("\nArticlesListDaf:", articlePluses)
+	fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
+
+	criteria = model.ArticleCriteria{
+		Tag:         util.PointerFromValue("FOOTAG"),
+		Author:      nil,
+		FavoritedBy: nil,
+		Limit:       nil,
+		Offset:      nil,
+	}
+	articlePluses, err = daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
+	util.PanicOnError(err)
+	fmt.Println("\narticlesListDaf - by tag:", articlePluses, "\n")
 
 	articleFromDb, err := daf.ArticleGetBySlugDaf(ctx, tx, currUserId, articles[1].Slug)
 	util.PanicOnError(err)
-	fmt.Println("\nArticleGetBySlugDaf:", articleFromDb)
+	fmt.Println("\nArticleGetBySlugDaf:", articleFromDb, "\n")
 
 	pArticle := &articles[0]
 	pArticle.Title = "A very interesting subject"
 	err = daf.ArticleUpdateDaf(ctx, tx, pArticle)
 	util.PanicOnError(err)
-	fmt.Println("\nArticleUpdateDaf:", pArticle)
+	fmt.Println("ArticleUpdateDaf:", pArticle, "\n")
 
 	articlePluses, err = daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
 	util.PanicOnError(err)
-	fmt.Println("\nArticlesFeedDaf:", articlePluses)
+	fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
 
 	err = tx.Commit(ctx)
 	util.PanicOnError(err)

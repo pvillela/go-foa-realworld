@@ -16,7 +16,8 @@ type Errx interface {
 	Kind() *Kind
 
 	// Cause returns the error's cause, which may be nil.
-	Cause() error
+	// This method is named for consistency with Go's standard errors package.
+	Unwrap() error
 
 	// Args returns the arguments that are substituted into KindMsg().
 	Args() []any
@@ -104,7 +105,7 @@ func (e *errxImpl) Kind() *Kind {
 	return e.kind
 }
 
-func (e *errxImpl) Cause() error {
+func (e *errxImpl) Unwrap() error {
 	return e.cause
 }
 

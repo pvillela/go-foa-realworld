@@ -8,8 +8,10 @@ package dbpgx
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 )
@@ -61,4 +63,14 @@ func ReadMany[R any](
 	var dest []R
 	err = pgxscan.ScanAll(&dest, rows)
 	return dest, errx.ErrxOf(err)
+}
+
+// SqlState returns the the pgx SQLState() of err if err is wraps a *pgconn.PgError,
+// returns the empty string otherwise.
+func SqlState(err error) string {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.SQLState()
+	}
+	return ""
 }
