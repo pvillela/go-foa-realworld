@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"strings"
 )
 
 // ReadSingle reads a single record from a table.
@@ -73,4 +74,55 @@ func SqlState(err error) string {
 		return pgErr.SQLState()
 	}
 	return ""
+}
+
+var (
+	DbErrRuntimeEnvironment        = errx.NewKind("database error runtime environment")
+	DbErrInternalAppError          = errx.NewKind("database internal application error")
+	DbErrConnectionException       = errx.NewKind("database connection exception")
+	DbErrConstraintViolation       = errx.NewKind("database error constraint violation")
+	DbErrUniqueViolation           = errx.NewKind("database error unique violation", DbErrConstraintViolation)
+	DbErrInsufficientResources     = errx.NewKind("database error insufficient resources", DbErrRuntimeEnvironment)
+	DbErrOperatorIntervention      = errx.NewKind("database error operator intervention", DbErrRuntimeEnvironment)
+	DbErrExternalSystemError       = errx.NewKind("database external system error", DbErrRuntimeEnvironment)
+	DbErrEngineError               = errx.NewKind("database engine error", DbErrRuntimeEnvironment)
+	DbErrRecordNotFound            = errx.NewKind("database error record not found")
+	DbErrUnexpectedMultipleRecords = errx.NewKind("database error unexpected multiple records")
+)
+
+// ClassifyError returns an database-related *errx.Kind that corresponds to err.
+func ClassifyError(err error) *errx.Kind {
+	if ok := errors.As(err, &pgx.ErrNoRows); ok {
+		return DbErrRecordNotFound
+	}
+
+	sqlState := SqlState(err)
+	prefix := sqlState[:2]
+	switch prefix {
+	case "08":
+		return DbErrConnectionException
+	case "23":
+		return DbErrConstraintViolation
+	case "53":
+		return DbErrInsufficientResources
+	case "57":
+		return DbErrOperatorIntervention
+	case "58":
+		return DbErrExternalSystemError
+	case "XX":
+		return DbErrEngineError
+	}
+
+	if sqlState == "23505" {
+		return DbErrUniqueViolation
+	}
+
+	if strings.Contains(err.Error(), "scany") &&
+		strings.Contains(err.Error(), "expected") &&
+		strings.Contains(err.Error(), "row") &&
+		strings.Contains(err.Error(), "got") {
+		return DbErrUnexpectedMultipleRecords
+	}
+
+	return DbErrInternalAppError
 }

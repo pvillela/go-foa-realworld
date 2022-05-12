@@ -8,7 +8,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/jackc/pgconn"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -49,6 +51,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 
 		err = daf.TagCreateDaf(ctx, tx, &tags[0])
 		fmt.Println("Duplicate tag insert:", err)
+		fmt.Printf("pgconn.PgError: %+v", *errors.Unwrap(err).(*pgconn.PgError))
 		fmt.Println("SqlState(err):", dbpgx.SqlState(err), "\n")
 
 		err = tx.Commit(ctx)

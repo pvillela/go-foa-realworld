@@ -20,9 +20,16 @@ func PanicOnError(err error) {
 
 func PanicLog(logger func(args ...interface{})) {
 	if r := recover(); r != nil {
-		var errStr string
-		errStr = fmt.Sprintf("%v", r)
-		stack := debug.Stack()
-		logger("panicked: ", errStr, "\n", string(stack))
+		var str string
+		switch r.(type) {
+		case errx.Errx:
+			str = r.(errx.Errx).StackTrace()
+		default:
+			var errStr string
+			errStr = fmt.Sprintf("%v", r)
+			stack := debug.Stack()
+			str = errStr + "\n" + string(stack)
+		}
+		logger("panicked: ", str)
 	}
 }
