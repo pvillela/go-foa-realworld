@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
@@ -59,6 +60,8 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	fmt.Println("UserGetByNameDaf with invalid username")
 	fmt.Println("Error:", err)
 	fmt.Println("Error classification:", dbpgx.ClassifyError(err), "\n")
+	uerr := errors.Unwrap(err)
+	fmt.Printf("Unwrapped error: %+v\n\n", uerr)
 
 	userFromDb, recCtx, err = daf.UserGetByEmailDaf(ctx, "foo@bar.com")
 	util.PanicOnError(err)

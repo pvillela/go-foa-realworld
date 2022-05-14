@@ -15,7 +15,7 @@ type Errx interface {
 	// Kind returns the error's Kind
 	Kind() *Kind
 
-	// Cause returns the error's cause, which may be nil.
+	// Unwrap returns the error's immediate cause, which may be nil.
 	// This method is named for consistency with Go's standard errors package.
 	Unwrap() error
 
