@@ -15,7 +15,7 @@ type Errx interface {
 	// Kind returns the error's Kind
 	Kind() *Kind
 
-	// Unwrap returns the error's immediate cause, which may be nil.
+	// Cause returns the error's cause, which may be nil.
 	// This method is named for consistency with Go's standard errors package.
 	Unwrap() error
 
@@ -205,6 +205,49 @@ func (e *errxImpl) StackTrace() string {
 	}
 	trimmedStack := ews.stack[cutoffLineIndex:]
 	return "errx.Errx: " + e.Error() + "\n" + string(trimmedStack)
+}
+
+/////////////////////
+// Factory functions. See also kind.go for additional factory functions.
+
+// Helper method to create an Errx whose Kind is defined on-the-fly using msg.
+func newErrxInternal(cause error, msg string, stackLinesToSuppress int) Errx {
+	kind := NewKind(msg)
+	err := kind.makeInternal(cause, stackLinesToSuppress)
+	return err
+}
+
+// NewErrx creates an Errx whose Kind is defined on-the-fly using msg.
+func NewErrx(cause error, msg string) Errx {
+	return newErrxInternal(cause, msg, 4)
+}
+
+// ErrxOf creates an Errx from r.
+// If r is nil, nil is returned.
+// If r is an Errx, r is returned.
+// If r is an error, NewErrx is used to instantiate an Errx with r as its cause.
+// Otherwise, NewErrx is used to instantiate an Errx with nil as the cause argument
+// and r's string rendering as the msg argument.
+func ErrxOf(r any) Errx {
+	if r == nil {
+		return nil
+	}
+	var err error
+	switch r.(type) {
+	case error:
+		err = r.(error)
+	default:
+		err = nil
+	}
+	errX, ok := err.(Errx)
+	if !ok {
+		if err != nil {
+			errX = newErrxInternal(err, ".", 4)
+		} else {
+			errX = newErrxInternal(nil, fmt.Sprintf("%v", r), 4)
+		}
+	}
+	return errX
 }
 
 /////////////////////
