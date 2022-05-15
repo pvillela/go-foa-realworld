@@ -15,37 +15,26 @@ import (
 )
 
 // UserRegisterSflT is the type of the stereotype instance for the service flow that
-// represents the action of registering a user, with hard-wired BF dependencies.
-type UserRegisterSflT = func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error)
+// represents the action of registering a user.
+type UserRegisterSflT = func(ctx context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error)
 
 // UserRegisterSflC is the function that constructs a stereotype instance of type
-// UserRegisterSflT with hard-wired BF dependencies.
+// UserRegisterSflT.
 func UserRegisterSflC(
-	beginTxn func(context string) db.Txn,
-	userCreateDaf daf.UserCreateDafT,
-) UserRegisterSflT {
-	userGenTokenBf := bf.UserGenTokenBfI
-	return UserRegisterSflC0(
-		beginTxn,
-		userCreateDaf,
-		userGenTokenBf,
-	)
-}
-
-// UserRegisterSflC0 is the function that constructs a stereotype instance of type
-// UserRegisterSflT without hard-wired BF dependencies.
-func UserRegisterSflC0(
-	beginTxn func(context string) db.Txn,
+	ctxDb db.CtxDb,
 	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
-	return func(_ context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error) {
-		txn := beginTxn("UserRegisterSflT")
-		defer txn.End()
+	return func(ctx context.Context, in rpc.UserRegisterIn) (rpc.UserOut, error) {
+		ctx, err := ctxDb.BeginTx(ctx)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
+		defer ctxDb.DeferredRollback(ctx)
 
 		user := in.ToUser()
 
-		_, err := userCreateDaf(user, txn)
+		_, err = userCreateDaf(ctx, user)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

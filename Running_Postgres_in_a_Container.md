@@ -13,11 +13,15 @@ docker exec -ti realworld-pg psql -U postgres
 ### Create test database and test user at psql prompt
 postgres=# 
 ```bash
-create database testdb;
+CREATE DATABASE testdb;
 ```
 postgres=# 
 ```bash
-create role testuser with login password 'testpassword';
+CREATE ROLE testuser WITH LOGIN PASSWORD 'testpassword';
+```
+postgres=#
+```bash
+GRANT ALL PRIVILEGES ON DATABASE testdb TO testuser;
 ```
 
 #### Execute psql with test user on Postgres container

@@ -7,7 +7,7 @@
 package bf
 
 import (
-	"github.com/go-errors/errors"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -21,7 +21,7 @@ func UserGenTokenBfC(
 ) UserGenTokenBfT {
 	return func(user model.User) (string, error) {
 		if user.Username == "" {
-			return "", errors.New("can't generate token for empty user")
+			return "", errx.NewErrx(nil, "can't generate token for empty user")
 		}
 
 		claims := jwt.RegisteredClaims{
@@ -30,7 +30,11 @@ func UserGenTokenBfC(
 			Issuer:    "real-world-demo-backend",
 		}
 
-		return jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
+		sig, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
 			SignedString("") // TODO: use appropriate parameter
+		if err != nil {
+			return "", errx.ErrxOf(err)
+		}
+		return sig, nil
 	}
 }

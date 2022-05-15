@@ -4,7 +4,7 @@ import (
 	"runtime/debug"
 )
 
-// Kind encapsulates an error messag string (possibly with argument placeholders) and a list
+// Kind encapsulates an error message string (possibly with argument placeholders) and a list
 // of direct super-kinds it is to be considered to be related to.
 type Kind struct {
 	msg              string
@@ -49,7 +49,7 @@ func (s *Kind) Make(cause error, args ...any) Errx {
 // Decorate instantiates an Errx from a Kind pointer. The cause argument must be an Errx.
 // The difference between Make and Decorate is that Make sets a new stack trace at the point
 // of instantiation while Decorate effectively relies on the the stack trace provided by
-// causes or its most recent cause which has a stack trace.
+// its most recent cause which has a stack trace.
 func (s *Kind) Decorate(cause Errx, args ...any) Errx {
 	err := errxImpl{kind: s}
 	err.args = args
