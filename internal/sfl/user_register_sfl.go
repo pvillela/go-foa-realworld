@@ -44,7 +44,12 @@ func UserRegisterSflC(
 			return rpc.UserOut{}, err
 		}
 
+		_, err = ctxDb.Commit(ctx)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
+
 		userOut := rpc.UserOut_FromModel(user, token)
-		return userOut, err
+		return userOut, nil
 	}
 }

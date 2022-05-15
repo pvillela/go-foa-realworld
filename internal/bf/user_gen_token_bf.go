@@ -7,9 +7,9 @@
 package bf
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-
+	"crypto/ecdsa"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"time"
 )
@@ -17,6 +17,7 @@ import (
 type UserGenTokenBfT = func(user model.User) (string, error)
 
 func UserGenTokenBfC(
+	privateKey ecdsa.PrivateKey,
 	tokenTimeToLive time.Duration,
 ) UserGenTokenBfT {
 	return func(user model.User) (string, error) {
@@ -30,11 +31,11 @@ func UserGenTokenBfC(
 			Issuer:    "real-world-demo-backend",
 		}
 
-		sig, err := jwt.NewWithClaims(jwt.SigningMethodHS256, &claims).
-			SignedString("") // TODO: use appropriate parameter
+		jws, err := jwt.NewWithClaims(jwt.SigningMethodES256, &claims).SignedString(privateKey)
 		if err != nil {
 			return "", errx.ErrxOf(err)
 		}
-		return sig, nil
+
+		return jws, nil
 	}
 }
