@@ -34,7 +34,7 @@ func UserRegisterSflC(
 
 		user := in.ToUser()
 
-		_, err = userCreateDaf(ctx, user)
+		_, err = userCreateDaf(ctx, &user)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

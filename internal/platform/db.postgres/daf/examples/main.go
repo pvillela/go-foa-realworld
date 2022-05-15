@@ -38,7 +38,8 @@ func main() {
 
 	tx, err := db.BeginTx(ctx)
 	util.PanicOnError(err)
-	cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites", "article_tags")
+	cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
+		"article_tags", "comments")
 	err = tx.Commit(ctx)
 	util.PanicOnError(err)
 

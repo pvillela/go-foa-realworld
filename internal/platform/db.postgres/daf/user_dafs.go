@@ -55,7 +55,7 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 // UserCreateDafT.
 var UserCreateDaf UserCreateDafT = func(
 	ctx context.Context,
-	user model.User,
+	user *model.User,
 ) (RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
