@@ -16,9 +16,24 @@ import (
 
 type UserGenTokenBfT = func(user model.User) (string, error)
 
-func UserGenTokenBfC(
+func UserGenTokenEcdsaBfC(
 	privateKey ecdsa.PrivateKey,
 	tokenTimeToLive time.Duration,
+) UserGenTokenBfT {
+	return userGenTokenBfC[ecdsa.PrivateKey](privateKey, tokenTimeToLive, jwt.SigningMethodES256)
+}
+
+func UserGenTokenHmacBfC(
+	key []byte,
+	tokenTimeToLive time.Duration,
+) UserGenTokenBfT {
+	return userGenTokenBfC[[]byte](key, tokenTimeToLive, jwt.SigningMethodHS256)
+}
+
+func userGenTokenBfC[K any](
+	key K,
+	tokenTimeToLive time.Duration,
+	signingMethod jwt.SigningMethod,
 ) UserGenTokenBfT {
 	return func(user model.User) (string, error) {
 		if user.Username == "" {
@@ -31,7 +46,7 @@ func UserGenTokenBfC(
 			Issuer:    "real-world-demo-backend",
 		}
 
-		jws, err := jwt.NewWithClaims(jwt.SigningMethodES256, &claims).SignedString(privateKey)
+		jws, err := jwt.NewWithClaims(signingMethod, &claims).SignedString(key)
 		if err != nil {
 			return "", errx.ErrxOf(err)
 		}
