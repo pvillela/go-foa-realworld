@@ -15,7 +15,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
-func FavoriteDafsExample(ctx context.Context, db dbpgx.Db) {
+func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 	fmt.Println("********** FavoriteDafsExample **********\n")
 
 	tx, err := db.BeginTx(ctx)

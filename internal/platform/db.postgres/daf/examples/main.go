@@ -47,7 +47,7 @@ func main() {
 	articleDafsExample(ctx, db)
 	tagDafsExample(ctx, db)
 	followingDafsExample(ctx, db)
-	FavoriteDafsExample(ctx, db)
+	favoriteDafsExample(ctx, db)
 }
 
 func cleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
