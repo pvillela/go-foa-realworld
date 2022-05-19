@@ -37,8 +37,8 @@ func pwCommentFromDb(value interface{}) daf.PwComment {
 }
 
 // CommentGetByIdDafC is the function that constructs a stereotype instance of type
-// bf.CommentGetByIdDafT.
-func CommentGetByIdDafC(commentDb mapdb.MapDb) daf.CommentGetByIdDafT {
+// bf.CommentsGetBySlugDafT.
+func CommentGetByIdDafC(commentDb mapdb.MapDb) daf.CommentsGetBySlugDafT {
 	return func(articleUuid util.Uuid, id int) (model.Comment, daf.RecCtxComment, error) {
 		value, err := commentDb.Read(commentKey0(articleUuid, id))
 		if err != nil {

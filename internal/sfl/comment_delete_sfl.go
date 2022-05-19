@@ -25,7 +25,7 @@ type CommentDeleteSflT = func(ctx context.Context, in rpc.CommentDeleteIn) (arch
 // CommentDeleteSflT.
 func CommentDeleteSflC(
 	beginTxn func(context string) db.Txn,
-	commentGetByIdDaf daf.CommentGetByIdDafT,
+	commentGetByIdDaf daf.CommentsGetBySlugDafT,
 	commentDeleteDaf daf.CommentDeleteDafT,
 	articleGetBySlugdDaf daf.ArticleGetBySlugDafT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
