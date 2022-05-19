@@ -8,7 +8,6 @@ package web
 
 import (
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch"
 )
 
 type ErrorResult struct {
@@ -20,7 +19,7 @@ type ErrorResult struct {
 	ParentSpanId     string
 	SpanId           string
 	Cause            map[string]string
-	Args             []arch.Any
+	Args             []any
 	Details          []ErrorDetail
 }
 

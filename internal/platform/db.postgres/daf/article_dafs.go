@@ -155,6 +155,9 @@ var ArticlesListDaf ArticlesListDafT = func(
 	}
 
 	var whereTuples []util.Tuple2[string, any]
+	if v := criteria.FavoritedBy; v != nil {
+		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa1.username = $%d", *v})
+	}
 	if v := criteria.Tag; v != nil {
 		whereTuples = append(whereTuples, util.Tuple2[string, any]{"t.name = $%d", *v})
 	}

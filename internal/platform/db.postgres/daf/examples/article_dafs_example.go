@@ -17,22 +17,16 @@ import (
 
 var articles = []model.Article{
 	{
-		Title:          "An interesting subject",
-		Slug:           "anintsubj",
-		Description:    "Story about an interesting subject.",
-		Body:           util.PointerFromValue("I met this interesting subject a long time ago."),
-		FavoritesCount: 0,
-		TagList:        nil,
-		Comments:       nil,
+		Title:       "An interesting subject",
+		Slug:        "anintsubj",
+		Description: "Story about an interesting subject.",
+		Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
 	},
 	{
-		Title:          "A dull story",
-		Slug:           "adullsubj",
-		Description:    "Narrative about something dull.",
-		Body:           util.PointerFromValue("This is so dull, bla, bla, bla."),
-		FavoritesCount: 0,
-		TagList:        nil,
-		Comments:       nil,
+		Title:       "A dull story",
+		Slug:        "adullsubj",
+		Description: "Narrative about something dull.",
+		Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
 	},
 }
 

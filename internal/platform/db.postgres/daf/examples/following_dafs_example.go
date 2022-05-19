@@ -26,6 +26,10 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 			FollowerID: users[0].Id,
 			FolloweeID: users[1].Id,
 		},
+		{
+			FollowerID: users[2].Id,
+			FolloweeID: users[1].Id,
+		},
 	}
 
 	for i, _ := range followings {
@@ -33,11 +37,32 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 		util.PanicOnError(err)
 	}
 
-	currUserId := users[0].Id
+	{
+		currUserId := users[0].Id
 
-	articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
-	util.PanicOnError(err)
-	fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
+		articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
+		util.PanicOnError(err)
+		fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
+	}
+
+	{
+		currUserId := users[2].Id
+
+		articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
+		util.PanicOnError(err)
+		fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
+	}
+
+	{
+		err := daf.FollowingDeleteDaf(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
+		util.PanicOnError(err)
+
+		currUserId := users[2].Id
+
+		articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
+		util.PanicOnError(err)
+		fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
+	}
 
 	err = tx.Commit(ctx)
 	util.PanicOnError(err)

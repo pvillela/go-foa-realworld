@@ -7,11 +7,10 @@
 package web
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/sirupsen/logrus"
 )
 
-func DefaultErrorHandler(errorContents arch.Any, ctx RequestContext) ErrorResult {
+func DefaultErrorHandler(errorContents any, ctx RequestContext) ErrorResult {
 	logrus.Info("Error caught in web handler:", errorContents)
 	var errResult ErrorResult
 	errResult.DeveloperMessage = "Dummy error handler implementation."

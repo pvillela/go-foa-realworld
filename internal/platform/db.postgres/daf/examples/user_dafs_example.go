@@ -31,6 +31,13 @@ var users = []model.User{
 		Bio:          util.PointerFromValue("Famous person."),
 		ImageLink:    "https://myimage.com",
 	},
+	{
+		Username:     "johndoe",
+		Email:        "johndoe@foo.com",
+		PasswordHash: "09fs8asfoasi",
+		Bio:          util.PointerFromValue("Average guy."),
+		ImageLink:    "https://johndooeimage.com",
+	},
 }
 
 func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
