@@ -13,14 +13,12 @@ import (
 
 // User represents a user account in the system
 type User struct {
-	Id           uint    `json:"-"`
-	Username     string  `json:"username"`
-	Email        string  `json:"email"`
-	PasswordHash string  `json:"-"`
-	Bio          *string `json:"bio,omitempty"`
-	ImageLink    string  `json:"image,omitempty" db:"image"`
-	//Followees    []*User `json:"-"`
-	//Followers    []*User `json:"-"`
+	Id           uint
+	Username     string
+	Email        string
+	PasswordHash string
+	Bio          *string
+	ImageLink    *string `db:"image"`
 	// Below added to daf.RecCtx
 	//CreatedAt time.Time `json:"-"`
 	//UpdatedAt time.Time `json:"-"`
@@ -30,7 +28,7 @@ type Profile struct {
 	Username  string  `json:"username"`
 	Bio       *string `json:"bio"`
 	Image     *string `json:"image"`
-	Following bool    `json:"following" db:"-"`
+	Following bool    `json:"following"`
 }
 
 type UserPatch struct {
@@ -53,7 +51,7 @@ func User_Create(
 		Email:        strings.ToLower(email),
 		PasswordHash: passwordHash,
 		Bio:          nil,
-		ImageLink:    "",
+		ImageLink:    nil,
 	}
 }
 
@@ -73,27 +71,16 @@ func (s User) Update(v UserPatch) User {
 		s.Bio = v.Bio
 	}
 	if v.ImageLink != nil {
-		s.ImageLink = *v.ImageLink
+		s.ImageLink = v.ImageLink
 	}
-
 	return s
 }
 
 func ProfileFromUser(user *User, follows bool) Profile {
-	s := Profile{}
-	if user.Bio != nil {
-		s.Bio = user.Bio
-	} else {
-		empty := ""
-		s.Bio = &empty
+	return Profile{
+		Username:  user.Username,
+		Bio:       user.Bio,
+		Image:     user.ImageLink,
+		Following: follows,
 	}
-
-	if user.ImageLink != "" {
-		s.Image = &user.ImageLink
-	}
-
-	s.Username = user.Username
-	s.Following = follows
-
-	return s
 }

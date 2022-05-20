@@ -9,27 +9,25 @@ package rpc
 import "github.com/pvillela/go-foa-realworld/internal/model"
 
 type UserOut struct {
-	User userOut0
+	User userOut0 `json:"user"`
 }
 
 type userOut0 = struct {
-	Email    string
-	Token    string
-	Username string
-	Bio      *string
-	Image    *string
+	Email    string  `json:"email"`
+	Token    string  `json:"token"`
+	Username string  `json:"username"`
+	Bio      *string `json:"bio"`
+	Image    *string `json:"image"`
 }
 
 func UserOut_FromModel(user model.User, token string) UserOut {
-	uo := UserOut{}
-	uo.User = userOut0{
-		Email:    user.Email,
-		Token:    token,
-		Username: user.Username,
-		Bio:      user.Bio,
+	return UserOut{
+		User: userOut0{
+			Email:    user.Email,
+			Token:    token,
+			Username: user.Username,
+			Bio:      user.Bio,
+			Image:    user.ImageLink,
+		},
 	}
-	if link := user.ImageLink; link != "" {
-		uo.User.Image = &link
-	}
-	return uo
 }

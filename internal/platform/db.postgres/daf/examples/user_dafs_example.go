@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -22,21 +23,21 @@ var users = []model.User{
 		Email:        "foo@bar.com",
 		PasswordHash: "dakfljads0fj",
 		Bio:          util.PointerFromValue("I am me."),
-		ImageLink:    "",
+		ImageLink:    nil,
 	},
 	{
 		Username:     "joebloe",
 		Email:        "joe@bloe.com",
 		PasswordHash: "9zdakfljads0",
 		Bio:          util.PointerFromValue("Famous person."),
-		ImageLink:    "https://myimage.com",
+		ImageLink:    util.PointerFromValue("https://myimage.com"),
 	},
 	{
 		Username:     "johndoe",
 		Email:        "johndoe@foo.com",
 		PasswordHash: "09fs8asfoasi",
 		Bio:          util.PointerFromValue("Average guy."),
-		ImageLink:    "https://johndooeimage.com",
+		ImageLink:    util.PointerFromValue("https://johndooeimage.com"),
 	},
 }
 
@@ -50,7 +51,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	for i, _ := range users {
 		recCtx, err := daf.UserCreateDaf(ctx, &users[i])
 		util.PanicOnError(err)
-		fmt.Println("user from Create:", users[i])
+		_, _ = spew.Printf("user from Create: %v", users[i])
 		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
 
@@ -91,7 +92,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	util.PanicOnError(err)
 
 	user := users[0]
-	user.ImageLink = "https://xyz.com"
+	user.ImageLink = util.PointerFromValue("https://xyz.com")
 	recCtx, err = daf.UserUpdateDaf(ctx, user, recCtx)
 	util.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)

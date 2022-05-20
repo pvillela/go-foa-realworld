@@ -13,17 +13,17 @@ import (
 )
 
 type Article struct {
-	Id             uint
-	AuthorId       uint
-	Author         *User ` db:"-"`
+	Id       uint
+	AuthorId uint
+	//Author         *User ` db:"-"`
 	Title          string
 	Slug           string
 	Description    string
 	Body           *string
 	FavoritesCount int
 	//FavoritedBy    []*User
-	TagList   []string  ` db:"-"`
-	Comments  []Comment ` db:"-"`
+	TagList []string ` db:"-"`
+	//Comments  []Comment ` db:"-"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -56,9 +56,9 @@ func Article_Create(
 	tagList []string,
 ) Article {
 	article := Article{
-		Slug:        util.Slug(title), // make sure this is unique index in database
-		AuthorId:    author.Id,
-		Author:      author,
+		Slug:     util.Slug(title), // make sure this is unique index in database
+		AuthorId: author.Id,
+		//Author:      author,
 		Title:       title,
 		Description: description,
 		Body:        body,

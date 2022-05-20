@@ -14,7 +14,7 @@ import (
 )
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
-// authenticates a user, with hard-wired BF dependencies.
+// authenticates a user.
 type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
