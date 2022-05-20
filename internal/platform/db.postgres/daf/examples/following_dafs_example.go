@@ -33,7 +33,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	for i, _ := range followings {
-		err := daf.FollowingCreateDaf(ctx, tx, followings[i].FollowerID, followings[i].FolloweeID)
+		err := daf.FollowingCreateDafI(ctx, tx, followings[i].FollowerID, followings[i].FolloweeID)
 		util.PanicOnError(err)
 	}
 
@@ -54,7 +54,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	{
-		err := daf.FollowingDeleteDaf(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
+		err := daf.FollowingDeleteDafI(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
 		util.PanicOnError(err)
 
 		currUserId := users[2].Id

@@ -12,9 +12,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 )
 
-// FollowingCreateDaf is the instance of the DAF stereotype that
+// FollowingCreateDafI is the instance of the DAF stereotype that
 // associates a follower with a followee.
-func FollowingCreateDaf(ctx context.Context, tx pgx.Tx, followerId uint, followeeId uint) error {
+func FollowingCreateDafI(ctx context.Context, tx pgx.Tx, followerId uint, followeeId uint) error {
 	sql := `
 	INSERT INTO followings (follower_id, followee_id)
 	VALUES ($1, $2)
@@ -25,9 +25,9 @@ func FollowingCreateDaf(ctx context.Context, tx pgx.Tx, followerId uint, followe
 	return errx.ErrxOf(err)
 }
 
-// FollowingDeleteDaf is the instance of the DAF stereotype that
+// FollowingDeleteDafI is the instance of the DAF stereotype that
 // disaassociates a follower from a followee.
-func FollowingDeleteDaf(ctx context.Context, tx pgx.Tx, followerId uint, followeeId uint) error {
+func FollowingDeleteDafI(ctx context.Context, tx pgx.Tx, followerId uint, followeeId uint) error {
 	sql := `
 	DELETE FROM followings
 	WHERE follower_id = $1 AND followee_id = $2
