@@ -34,3 +34,42 @@ func DeferredRollback(ctx context.Context, tx pgx.Tx) {
 		log.Error("transaction rollback failed ", err)
 	}
 }
+
+func (s Db) WithTransaction(ctx context.Context, block func(ctx context.Context, tx pgx.Tx) error) error {
+	tx, err := s.BeginTx(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer DeferredRollback(ctx, tx)
+
+	err = block(ctx, tx)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit(ctx)
+	return errx.ErrxOf(err)
+}
+
+func DbWithTransaction[T any](
+	db Db,
+	ctx context.Context,
+	block func(ctx context.Context, tx pgx.Tx) (T, error),
+) (T, error) {
+	var zero T
+	tx, err := db.BeginTx(ctx)
+	if err != nil {
+		return zero, err
+	}
+
+	defer DeferredRollback(ctx, tx)
+
+	t, err := block(ctx, tx)
+	if err != nil {
+		return zero, err
+	}
+
+	err = tx.Commit(ctx)
+	return t, errx.ErrxOf(err)
+}

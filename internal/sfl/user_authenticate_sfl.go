@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -25,11 +26,13 @@ type UserAuthenticateSflT = func(
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT with hard-wired dependencies.
 func UserAuthenticateSflC(
+	ctxDb db.CtxDb,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserAuthenticateSflT {
 	userGetByEmailDaf := daf.UserGetByEmailDafI
 	userAuthenticateBf := bf.UserAuthenticateBfI
 	return UserAuthenticateSflC0(
+		ctxDb,
 		userGetByEmailDaf,
 		userGenTokenBf,
 		userAuthenticateBf,
@@ -39,6 +42,7 @@ func UserAuthenticateSflC(
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT without hard-wired dependencies.
 func UserAuthenticateSflC0(
+	ctxDb db.CtxDb,
 	userGetByEmailDaf daf.UserGetByEmailDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
@@ -48,26 +52,30 @@ func UserAuthenticateSflC0(
 		_ web.RequestContext,
 		in rpc.UserAuthenticateIn,
 	) (rpc.UserOut, error) {
-		var zero rpc.UserOut
-		email := in.User.Email
-		password := in.User.Password
+		block := func(ctx context.Context) (rpc.UserOut, error) {
+			var zero rpc.UserOut
+			email := in.User.Email
+			password := in.User.Password
 
-		user, _, err := userGetByEmailDaf(ctx, email)
-		if err != nil {
-			return zero, err
+			user, _, err := userGetByEmailDaf(ctx, email)
+			if err != nil {
+				return zero, err
+			}
+
+			if !userAuthenticateBf(user, password) {
+				// I know the error info below is not secure but OK for now for debugging
+				return zero, bf.ErrAuthenticationFailed.Make(nil, user.Username, password)
+			}
+
+			token, err := userGenTokenBf(user)
+			if err != nil {
+				return zero, err
+			}
+
+			userOut := rpc.UserOut_FromModel(user, token)
+			return userOut, err
 		}
 
-		if !userAuthenticateBf(user, password) {
-			// I know the error info below is not secure but OK for now for debugging
-			return zero, bf.ErrAuthenticationFailed.Make(nil, user.Username, password)
-		}
-
-		token, err := userGenTokenBf(user)
-		if err != nil {
-			return zero, err
-		}
-
-		userOut := rpc.UserOut_FromModel(user, token)
-		return userOut, err
+		return db.CtxDbWithTransaction(ctxDb, ctx, block)
 	}
 }

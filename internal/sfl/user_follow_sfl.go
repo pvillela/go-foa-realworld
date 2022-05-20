@@ -36,35 +36,34 @@ func UserFollowSflC(
 		followeeUsername string,
 	) (rpc.ProfileOut, error) {
 		username := reqCtx.Username
-		var zero rpc.ProfileOut
 
-		ctx, err := ctxDb.BeginTx(ctx)
-		if err != nil {
-			return zero, err
-		}
-		defer ctxDb.DeferredRollback(ctx)
+		return db.CtxDbWithTransaction(ctxDb, ctx, func(
+			ctx context.Context,
+		) (rpc.ProfileOut, error) {
+			var zero rpc.ProfileOut
 
-		follower, _, err := daf.UserGetByNameDafI(ctx, username)
-		if err != nil {
-			return zero, err
-		}
+			follower, _, err := daf.UserGetByNameDafI(ctx, username)
+			if err != nil {
+				return zero, err
+			}
 
-		followee, _, err := daf.UserGetByNameDafI(ctx, followeeUsername)
-		if err != nil {
-			return zero, err
-		}
+			followee, _, err := daf.UserGetByNameDafI(ctx, followeeUsername)
+			if err != nil {
+				return zero, err
+			}
 
-		tx, err := dbpgx.GetCtxTx(ctx)
-		if err != nil {
-			return zero, err
-		}
+			tx, err := dbpgx.GetCtxTx(ctx)
+			if err != nil {
+				return zero, err
+			}
 
-		err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
-		if err != nil {
-			return zero, err
-		}
+			err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
+			if err != nil {
+				return zero, err
+			}
 
-		profileOut := rpc.ProfileOut_FromModel(&follower, true)
-		return profileOut, nil
+			profileOut := rpc.ProfileOut_FromModel(&follower, true)
+			return profileOut, nil
+		})
 	}
 }

@@ -35,30 +35,23 @@ func UserRegisterSflC(
 		_ web.RequestContext,
 		in rpc.UserRegisterIn,
 	) (rpc.UserOut, error) {
-		ctx, err := ctxDb.BeginTx(ctx)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
-		defer ctxDb.DeferredRollback(ctx)
+		return db.CtxDbWithTransaction(ctxDb, ctx, func(
+			ctx context.Context,
+		) (rpc.UserOut, error) {
+			user := in.ToUser()
 
-		user := in.ToUser()
+			_, err := userCreateDaf(ctx, &user)
+			if err != nil {
+				return rpc.UserOut{}, err
+			}
 
-		_, err = userCreateDaf(ctx, &user)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
+			token, err := userGenTokenBf(user)
+			if err != nil {
+				return rpc.UserOut{}, err
+			}
 
-		token, err := userGenTokenBf(user)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
-
-		_, err = ctxDb.Commit(ctx)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
-
-		userOut := rpc.UserOut_FromModel(user, token)
-		return userOut, nil
+			userOut := rpc.UserOut_FromModel(user, token)
+			return userOut, nil
+		})
 	}
 }
