@@ -16,9 +16,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// ArticleCreateDaf implements a stereotype instance of type
+// ArticleCreateDafI implements a stereotype instance of type
 // ArticleCreateDafT.
-var ArticleCreateDaf ArticleCreateDafT = func(
+var ArticleCreateDafI ArticleCreateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	article *model.Article,
@@ -42,9 +42,9 @@ var ArticleCreateDaf ArticleCreateDafT = func(
 	return errx.ErrxOf(err)
 }
 
-// ArticleGetBySlugDaf implements a stereotype instance of type
+// ArticleGetBySlugDafI implements a stereotype instance of type
 // ArticleGetBySlugDafT.
-var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
+var ArticleGetBySlugDafI ArticleGetBySlugDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,
@@ -72,9 +72,9 @@ var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	return results[0], nil
 }
 
-// ArticleUpdateDaf implements a stereotype instance of type
+// ArticleUpdateDafI implements a stereotype instance of type
 // ArticleUpdateDafT.
-var ArticleUpdateDaf ArticleUpdateDafT = func(
+var ArticleUpdateDafI ArticleUpdateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	article *model.Article,
@@ -97,9 +97,9 @@ var ArticleUpdateDaf ArticleUpdateDafT = func(
 	return errx.ErrxOf(err)
 }
 
-// ArticleDeleteDaf implements a stereotype instance of type
+// ArticleDeleteDafI implements a stereotype instance of type
 // ArticleDeleteDafT.
-var ArticleDeleteDaf ArticleDeleteDafT = func(
+var ArticleDeleteDafI ArticleDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
@@ -112,9 +112,9 @@ var ArticleDeleteDaf ArticleDeleteDafT = func(
 	return errx.ErrxOf(err)
 }
 
-// ArticlesFeedDaf implements a stereotype instance of type
+// ArticlesFeedDafI implements a stereotype instance of type
 // ArticlesFeedDafT.
-var ArticlesFeedDaf ArticlesFeedDafT = func(
+var ArticlesFeedDafI ArticlesFeedDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,
@@ -135,9 +135,9 @@ var ArticlesFeedDaf ArticlesFeedDafT = func(
 	return results, nil
 }
 
-// ArticlesListDafT implements a stereotype instance of type
-// ArticlesListDafTT.
-var ArticlesListDaf ArticlesListDafT = func(
+// ArticlesListDafI implements a stereotype instance of type
+// ArticlesListDafT.
+var ArticlesListDafI ArticlesListDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,

@@ -33,7 +33,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	for i, _ := range Favorites {
-		err := daf.FavoriteCreateDaf(ctx, tx, Favorites[i].ArticleId, Favorites[i].UserId)
+		err := daf.FavoriteCreateDafI(ctx, tx, Favorites[i].ArticleId, Favorites[i].UserId)
 		util.PanicOnError(err)
 	}
 
@@ -47,7 +47,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
+		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
 		util.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 	}
@@ -62,13 +62,13 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
+		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
 		util.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 	}
 
 	{
-		err := daf.FavoriteDeleteDaf(ctx, tx, Favorites[1].ArticleId, Favorites[1].UserId)
+		err := daf.FavoriteDeleteDafI(ctx, tx, Favorites[1].ArticleId, Favorites[1].UserId)
 		util.PanicOnError(err)
 
 		currUserId := users[0].Id
@@ -80,7 +80,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
+		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
 		util.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 	}

@@ -40,7 +40,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 	{
 		currUserId := users[0].Id
 
-		articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
+		articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
 		util.PanicOnError(err)
 		fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
 	}
@@ -48,7 +48,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 	{
 		currUserId := users[2].Id
 
-		articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
+		articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
 		util.PanicOnError(err)
 		fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
 	}
@@ -59,7 +59,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 
 		currUserId := users[2].Id
 
-		articlePluses, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
+		articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
 		util.PanicOnError(err)
 		fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
 	}

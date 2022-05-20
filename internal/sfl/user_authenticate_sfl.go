@@ -15,14 +15,14 @@ import (
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
 // authenticates a user.
-type UserAuthenticateSflT = func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
+type UserAuthenticateSflT = func(ctx context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
-// UserAuthenticateSflT with hard-wired BF dependencies.
+// UserAuthenticateSflT with hard-wired dependencies.
 func UserAuthenticateSflC(
-	userGetByEmailDaf daf.UserGetByEmailDafT,
+	userGenTokenBf bf.UserGenTokenBfT,
 ) UserAuthenticateSflT {
-	userGenTokenBf := bf.UserGenTokenBfI
+	userGetByEmailDaf := daf.UserGetByEmailDafI
 	userAuthenticateBf := bf.UserAuthenticateBfI
 	return UserAuthenticateSflC0(
 		userGetByEmailDaf,
@@ -32,19 +32,18 @@ func UserAuthenticateSflC(
 }
 
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
-// UserAuthenticateSflT without hard-wired BF dependencies.
+// UserAuthenticateSflT without hard-wired dependencies.
 func UserAuthenticateSflC0(
 	userGetByEmailDaf daf.UserGetByEmailDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
-	return func(_ context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
+	return func(ctx context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
 		var zero rpc.UserOut
-
 		email := in.User.Email
 		password := in.User.Password
 
-		user, _, err := userGetByEmailDaf(email)
+		user, _, err := userGetByEmailDaf(ctx, email)
 		if err != nil {
 			return zero, err
 		}

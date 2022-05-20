@@ -49,13 +49,13 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	//fmt.Println("ctx", ctx)
 
 	for i, _ := range users {
-		recCtx, err := daf.UserCreateDaf(ctx, &users[i])
+		recCtx, err := daf.UserCreateDafI(ctx, &users[i])
 		util.PanicOnError(err)
 		_, _ = spew.Printf("user from Create: %v", users[i])
 		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
 
-	userFromDb, recCtx, err := daf.UserGetByNameDaf(ctx, "pvillela")
+	userFromDb, recCtx, err := daf.UserGetByNameDafI(ctx, "pvillela")
 	// Commented-out lines below were used to test forced error due to multiple rows returned
 	//fmt.Println("Error classification:", dbpgx.ClassifyError(err))
 	//uerr := errors.Unwrap(err)
@@ -64,14 +64,14 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	fmt.Println("UserGetByNameDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx, "\n")
 
-	userFromDb, recCtx, err = daf.UserGetByNameDaf(ctx, "xxx")
+	userFromDb, recCtx, err = daf.UserGetByNameDafI(ctx, "xxx")
 	fmt.Println("UserGetByNameDaf with invalid username")
 	fmt.Println("Error:", err)
 	fmt.Println("Error classification:", dbpgx.ClassifyError(err), "\n")
 	uerr := errors.Unwrap(err)
 	fmt.Printf("Unwrapped error: %+v\n\n", uerr)
 
-	userFromDb, recCtx, err = daf.UserGetByEmailDaf(ctx, "foo@bar.com")
+	userFromDb, recCtx, err = daf.UserGetByEmailDafI(ctx, "foo@bar.com")
 	util.PanicOnError(err)
 	fmt.Println("UserGetByEmailDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx, "\n")
@@ -93,7 +93,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 
 	user := users[0]
 	user.ImageLink = util.PointerFromValue("https://xyz.com")
-	recCtx, err = daf.UserUpdateDaf(ctx, user, recCtx)
+	recCtx, err = daf.UserUpdateDafI(ctx, user, recCtx)
 	util.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)
 	fmt.Println("recCtx from Update:", recCtx, "\n")

@@ -15,9 +15,9 @@ import (
 	"strings"
 )
 
-// UserGetByNameDaf implements a stereotype instance of type
+// UserGetByNameDafI implements a stereotype instance of type
 // UserGetByNameDafT.
-var UserGetByNameDaf UserGetByNameDafT = func(
+var UserGetByNameDafI UserGetByNameDafT = func(
 	ctx context.Context,
 	username string,
 ) (model.User, RecCtxUser, error) {
@@ -33,9 +33,9 @@ var UserGetByNameDaf UserGetByNameDafT = func(
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
-// UserGetByEmailDaf implements a stereotype instance of type
+// UserGetByEmailDafI implements a stereotype instance of type
 // UserGetByEmailDafT.
-var UserGetByEmailDaf UserGetByEmailDafT = func(
+var UserGetByEmailDafI UserGetByEmailDafT = func(
 	ctx context.Context,
 	email string,
 ) (model.User, RecCtxUser, error) {
@@ -51,9 +51,9 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
-// UserCreateDaf implements a stereotype instance of type
+// UserCreateDafI implements a stereotype instance of type
 // UserCreateDafT.
-var UserCreateDaf UserCreateDafT = func(
+var UserCreateDafI UserCreateDafT = func(
 	ctx context.Context,
 	user *model.User,
 ) (RecCtxUser, error) {
@@ -74,9 +74,9 @@ var UserCreateDaf UserCreateDafT = func(
 	return recCtx, errx.ErrxOf(err)
 }
 
-// UserUpdateDafC is the function that constructs a stereotype instance of type
+// UserUpdateDafI implements a stereotype instance of type
 // UserUpdateDafT.
-var UserUpdateDaf UserUpdateDafT = func(
+var UserUpdateDafI UserUpdateDafT = func(
 	ctx context.Context,
 	user model.User,
 	recCtx RecCtxUser,
