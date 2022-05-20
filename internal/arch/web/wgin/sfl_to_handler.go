@@ -12,15 +12,13 @@ import (
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch"
-
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
-type SflT[S any, T any] func(ctx context.Context, in S) (T, error)
+type SflT[S any, T any] func(ctx context.Context, reqCtx web.RequestContext, in S) (T, error)
 
 type SflToHandlerT[S any, T any] func(SflT[S, T]) gin.HandlerFunc
 
@@ -42,21 +40,31 @@ func setErrorAndAbort(c *gin.Context, err error, httpStatus int) {
 // a Gin handler function.
 // Contains common logic to bind the HTTP request to service flow input, call service flow, and
 // produce HTTP responses.
+//
 // - jsonBind: determines whether a JSON payload is expected or not. If true, the request payload
 //   will be bound to the service flow input object.
+//
 // - queryBind: determines whether query parameters are expected or not. If true, the query params
 //   will be bound to the service flow input object.
+//
 // - uriBind: determines whether URI parameters are expected or not. If true, the URI params
 //   will be bound to the service flow input object.
-// - authenticator: authenticates the call, typically using JWT.
+//
+// - authenticator: authenticates the call, typically using JWT. Is nil for unauthenticated endpoints.
+//
 // - reqCtxExtractor: extracts information from the HTTP request to form the RequestContext object
-//   used throught the processing flow.
+//   used throught the processing flow. If nil, a zero RequestContext is used.
+//
 // - errorHadler: maps errors before for the HTTP response.
+//
 // Below are parameters of the function returned by this function:
+//
 // - queryMapper: merges a map extracted from query parameters with a service flow input object, to
 //   produce an augmented input object. Usually is nil.
+//
 // - uriMapper: merges a map extracted from uri parameters with a service flow input object, to
 //   produce an augmented input object. Usually is nil.
+//
 // - sfl: the service flow that is transformeed into a Gin HandlerFunc.
 func makeSflHandler[S any, T any](
 	jsonBind bool,
@@ -72,14 +80,15 @@ func makeSflHandler[S any, T any](
 		uriMapper func(map[string]string, *S) error,
 		svc SflT[S, T],
 	) gin.HandlerFunc {
-
 		return func(c *gin.Context) {
-			var err error
 			req := c.Request
 
-			var token *jwt.Token
 			var ok bool
-			ok, token, err = authenticator(req)
+			var token *jwt.Token
+			var err error
+			if authenticator != nil {
+				ok, token, err = authenticator(req)
+			}
 			if err != nil {
 				setErrorAndAbort(c, err, 401)
 				return
@@ -91,8 +100,9 @@ func makeSflHandler[S any, T any](
 			}
 
 			var reqCtx web.RequestContext
-
-			reqCtx, err = reqCtxExtractor(req, token)
+			if reqCtxExtractor != nil {
+				reqCtx, err = reqCtxExtractor(req, token)
+			}
 			if err != nil {
 				setErrorAndAbort(c, err, 403) // not sure this is the right code here
 				return
@@ -173,10 +183,7 @@ func makeSflHandler[S any, T any](
 			}
 
 			ctx := context.Background()
-			ctx = context.WithValue(ctx, arch.Void, reqCtx)
-
-			output, err := svc(ctx, input)
-
+			output, err := svc(ctx, reqCtx, input)
 			if err != nil {
 				setErrorResponseAndAbort(err)
 				return
@@ -191,8 +198,11 @@ func makeSflHandler[S any, T any](
 // a Gin handler function.
 // Contains common logic to bind the HTTP request to service flow input, call service flow, and
 // produce HTTP responses.
+//
 // - errorHadler: maps errors before for the HTTP response.
+//
 // Below are parameters of the function returned by this function:
+//
 // - sfl: the service flow that is transformeed into a Gin HandlerFunc.
 func MakeLoginHandler[S any](
 	errorHandler func(any, web.RequestContext) web.ErrorResult,
@@ -223,9 +233,7 @@ func MakeLoginHandler[S any](
 			}
 
 			ctx := context.Background()
-
-			output, err := svc(ctx, input)
-
+			output, err := svc(ctx, web.RequestContext{}, input)
 			if err != nil {
 				setErrorResponseAndAbort(err)
 				return

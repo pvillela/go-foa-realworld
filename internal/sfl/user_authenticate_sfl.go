@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -15,7 +16,11 @@ import (
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
 // authenticates a user.
-type UserAuthenticateSflT = func(ctx context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error)
+type UserAuthenticateSflT = func(
+	ctx context.Context,
+	_ web.RequestContext,
+	in rpc.UserAuthenticateIn,
+) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT with hard-wired dependencies.
@@ -38,7 +43,11 @@ func UserAuthenticateSflC0(
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
-	return func(ctx context.Context, in rpc.UserAuthenticateIn) (rpc.UserOut, error) {
+	return func(
+		ctx context.Context,
+		_ web.RequestContext,
+		in rpc.UserAuthenticateIn,
+	) (rpc.UserOut, error) {
 		var zero rpc.UserOut
 		email := in.User.Email
 		password := in.User.Password

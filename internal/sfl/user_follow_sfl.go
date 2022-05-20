@@ -8,8 +8,9 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/fl"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -17,26 +18,53 @@ import (
 
 // UserFollowSflT is the type of the stereotype instance for the service flow that
 // causes the current user start following a given other user.
-type UserFollowSflT = func(ctx context.Context, followedUsername string) (rpc.ProfileOut, error)
+type UserFollowSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	followeeUsername string,
+) (rpc.ProfileOut, error)
 
 // UserFollowSflC is the function that constructs a stereotype instance of type
 // UserFollowSflT.
 func UserFollowSflC(
-	beginTxn func(context string) db.Txn,
-	userFollowFl fl.UserStartFollowingFlT,
+	ctxDb db.CtxDb,
 ) UserFollowSflT {
-	return func(ctx context.Context, followedUsername string) (rpc.ProfileOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
-
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
-
+	followingCreateDaf := daf.FollowingCreateDafI
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		followeeUsername string,
+	) (rpc.ProfileOut, error) {
+		username := reqCtx.Username
 		var zero rpc.ProfileOut
-		user, _, err := userFollowFl(username, followedUsername, true, txn)
+
+		ctx, err := ctxDb.BeginTx(ctx)
 		if err != nil {
 			return zero, err
 		}
-		profileOut := rpc.ProfileOut_FromModel(user, true)
-		return profileOut, err
+		defer ctxDb.DeferredRollback(ctx)
+
+		follower, _, err := daf.UserGetByNameDafI(ctx, username)
+		if err != nil {
+			return zero, err
+		}
+
+		followee, _, err := daf.UserGetByNameDafI(ctx, followeeUsername)
+		if err != nil {
+			return zero, err
+		}
+
+		tx, err := dbpgx.GetCtxTx(ctx)
+		if err != nil {
+			return zero, err
+		}
+
+		err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
+		if err != nil {
+			return zero, err
+		}
+
+		profileOut := rpc.ProfileOut_FromModel(&follower, true)
+		return profileOut, nil
 	}
 }
