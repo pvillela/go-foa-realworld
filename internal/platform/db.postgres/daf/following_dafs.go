@@ -14,7 +14,12 @@ import (
 
 // FollowingCreateDafI is the instance of the DAF stereotype that
 // associates a follower with a followee.
-func FollowingCreateDafI(ctx context.Context, tx pgx.Tx, followerId uint, followeeId uint) error {
+var FollowingCreateDafI FollowingCreateDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	followerId uint,
+	followeeId uint,
+) error {
 	sql := `
 	INSERT INTO followings (follower_id, followee_id)
 	VALUES ($1, $2)
@@ -27,7 +32,12 @@ func FollowingCreateDafI(ctx context.Context, tx pgx.Tx, followerId uint, follow
 
 // FollowingDeleteDafI is the instance of the DAF stereotype that
 // disaassociates a follower from a followee.
-func FollowingDeleteDafI(ctx context.Context, tx pgx.Tx, followerId uint, followeeId uint) error {
+var FollowingDeleteDafI FollowingDeleteDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	followerId uint,
+	followeeId uint,
+) error {
 	sql := `
 	DELETE FROM followings
 	WHERE follower_id = $1 AND followee_id = $2

@@ -14,7 +14,12 @@ import (
 
 // FavoriteCreateDafI is the instance of the DAF stereotype that
 // associates an article with a user that favors it.
-func FavoriteCreateDafI(ctx context.Context, tx pgx.Tx, articleId uint, userId uint) error {
+var FavoriteCreateDafI FavoriteCreateDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	articleId uint,
+	userId uint,
+) error {
 	sql := `
 	INSERT INTO favorites (article_id, user_id)
 	VALUES ($1, $2)
@@ -26,7 +31,12 @@ func FavoriteCreateDafI(ctx context.Context, tx pgx.Tx, articleId uint, userId u
 
 // FavoriteDeleteDafI is the instance of the DAF stereotype that
 // disaassociates an article from a user that favors it.
-func FavoriteDeleteDafI(ctx context.Context, tx pgx.Tx, articleId uint, userId uint) error {
+var FavoriteDeleteDafI FavoriteDeleteDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	articleId uint,
+	userId uint,
+) error {
 	sql := `
 	DELETE FROM favorites
 	WHERE article_id = $1 AND user_id = $2
