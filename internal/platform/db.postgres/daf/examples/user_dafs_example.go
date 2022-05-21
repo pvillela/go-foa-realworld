@@ -22,6 +22,7 @@ var users = []model.User{
 		Username:     "pvillela",
 		Email:        "foo@bar.com",
 		PasswordHash: "dakfljads0fj",
+		PasswordSalt: "2af8d0b50a",
 		Bio:          util.PointerFromValue("I am me."),
 		ImageLink:    nil,
 	},
@@ -29,6 +30,7 @@ var users = []model.User{
 		Username:     "joebloe",
 		Email:        "joe@bloe.com",
 		PasswordHash: "9zdakfljads0",
+		PasswordSalt: "3ba9e9c611",
 		Bio:          util.PointerFromValue("Famous person."),
 		ImageLink:    util.PointerFromValue("https://myimage.com"),
 	},
@@ -36,6 +38,7 @@ var users = []model.User{
 		Username:     "johndoe",
 		Email:        "johndoe@foo.com",
 		PasswordHash: "09fs8asfoasi",
+		PasswordSalt: "0000000000",
 		Bio:          util.PointerFromValue("Average guy."),
 		ImageLink:    util.PointerFromValue("https://johndooeimage.com"),
 	},
@@ -51,7 +54,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	for i, _ := range users {
 		recCtx, err := daf.UserCreateDafI(ctx, &users[i])
 		util.PanicOnError(err)
-		_, _ = spew.Printf("user from Create: %v", users[i])
+		_, _ = spew.Printf("user from Create: %v\n", users[i])
 		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
 

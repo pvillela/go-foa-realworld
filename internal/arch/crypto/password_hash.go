@@ -7,6 +7,8 @@
 package crypto
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"github.com/alexedwards/argon2id"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"golang.org/x/crypto/bcrypt"
@@ -40,7 +42,7 @@ var argonParams = &argon2id.Params{
 }
 
 func ArgonPasswordHash(password string) string {
-	hash, err := argon2id.CreateHash("pa$$word", argonParams)
+	hash, err := argon2id.CreateHash(password, argonParams)
 	util.PanicOnError(err)
 	return hash
 }
@@ -49,4 +51,11 @@ func ArgonPasswordCheck(password string, hash string) bool {
 	match, err := argon2id.ComparePasswordAndHash(password, hash)
 	util.PanicOnError(err)
 	return match
+}
+
+// RandomString generates a hex string corresponding to a random byte slice of length n.
+func RandomString(n int) string {
+	buf := make([]byte, n)
+	_, _ = rand.Reader.Read(buf)
+	return hex.EncodeToString(buf)
 }

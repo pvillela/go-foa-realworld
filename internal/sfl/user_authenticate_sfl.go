@@ -62,7 +62,7 @@ func UserAuthenticateSflC0(
 				return zero, err
 			}
 
-			if !userAuthenticateBf(user, password) {
+			if !userAuthenticateBf(user, password, user.PasswordSalt) {
 				// I know the error info below is not secure but OK for now for debugging
 				return zero, bf.ErrAuthenticationFailed.Make(nil, user.Username, password)
 			}

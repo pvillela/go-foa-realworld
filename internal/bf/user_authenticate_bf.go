@@ -11,10 +11,14 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type UserAuthenticateBfT = func(user model.User, password string) bool
+type UserAuthenticateBfT = func(user model.User, password string, passwordSalt string) bool
 
-var UserAuthenticateBfI UserAuthenticateBfT = func(user model.User, password string) bool {
-	if crypto.ArgonPasswordHash(password) != user.PasswordHash {
+var UserAuthenticateBfI UserAuthenticateBfT = func(
+	user model.User,
+	password string,
+	passwordSalt string,
+) bool {
+	if crypto.ArgonPasswordHash(password+user.PasswordSalt) != user.PasswordHash {
 		return false
 	}
 	return true

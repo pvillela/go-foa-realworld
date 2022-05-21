@@ -62,12 +62,19 @@ var UserCreateDafI UserCreateDafT = func(
 		return RecCtxUser{}, errx.ErrxOf(err)
 	}
 	sql := `
-	INSERT INTO users (username, email, password_hash, bio, image)
-	VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO users (username, email, password_hash, password_salt, bio, image)
+	VALUES ($1, $2, $3, $4, $5, $6)
 	RETURNING id, created_at, updated_at
 	`
 	user.Email = strings.ToLower(user.Email)
-	args := []any{user.Username, user.Email, user.PasswordHash, user.Bio, user.ImageLink}
+	args := []any{
+		user.Username,
+		user.Email,
+		user.PasswordHash,
+		user.PasswordSalt,
+		user.Bio,
+		user.ImageLink,
+	}
 	row := tx.QueryRow(ctx, sql, args...)
 	var recCtx RecCtxUser
 	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
@@ -87,8 +94,9 @@ var UserUpdateDafI UserUpdateDafT = func(
 	}
 	sql := `
 	UPDATE users 
-	SET username = $1, email = $2, bio = $3, image = $4, password_hash = $5, updated_at = NOW()
-	WHERE id = $6 AND updated_at = $7
+	SET username = $1, email = $2, bio = $3, image = $4, password_hash = $5, password_salt = $6, 
+		updated_at = NOW()
+	WHERE id = $7 AND updated_at = $8
 	RETURNING updated_at
 	`
 	user.Email = strings.ToLower(user.Email)
@@ -98,6 +106,7 @@ var UserUpdateDafI UserUpdateDafT = func(
 		user.Bio,
 		user.ImageLink,
 		user.PasswordHash,
+		user.PasswordSalt,
 		user.Id,
 		recCtx.UpdatedAt,
 	}
