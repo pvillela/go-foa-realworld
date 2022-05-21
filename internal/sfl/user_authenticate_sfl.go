@@ -24,7 +24,7 @@ type UserAuthenticateSflT = func(
 ) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
-// UserAuthenticateSflT with hard-wired dependencies.
+// UserAuthenticateSflT with hard-wired stereotype dependencies.
 func UserAuthenticateSflC(
 	ctxDb db.CtxDb,
 	userGenTokenBf bf.UserGenTokenBfT,
@@ -40,7 +40,7 @@ func UserAuthenticateSflC(
 }
 
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
-// UserAuthenticateSflT without hard-wired dependencies.
+// UserAuthenticateSflT without hard-wired stereotype dependencies.
 func UserAuthenticateSflC0(
 	ctxDb db.CtxDb,
 	userGetByEmailDaf daf.UserGetByEmailDafT,

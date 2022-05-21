@@ -16,44 +16,60 @@ import (
 
 // UserUpdateSflT is the type of the stereotype instance for the service flow that
 // updates a user.
-type UserUpdateSflT = func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error)
+type UserUpdateSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	in rpc.UserUpdateIn,
+) (rpc.UserOut, error)
 
 // UserUpdateSflC is the function that constructs a stereotype instance of type
-// UserUpdateSflT.
+// UserUpdateSflT with hard-wired stereotype dependencies.
 func UserUpdateSflC(
+	ctxDb db.CtxDb,
+) UserUpdateSflT {
+	userGetByNameDaf := daf.UserGetByNameDafI
+	userUpdateDaf := daf.UserUpdateDafI
+	return UserUpdateSflC0(
+		ctxDb,
+		userGetByNameDaf,
+		userUpdateDaf,
+	)
+}
+
+// UserUpdateSflC0 is the function that constructs a stereotype instance of type
+// UserUpdateSflT without hard-wired stereotype dependencies.
+func UserUpdateSflC0(
 	ctxDb db.CtxDb,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	userUpdateDaf daf.UserUpdateDafT,
 ) UserUpdateSflT {
-	return func(ctx context.Context, in rpc.UserUpdateIn) (rpc.UserOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		in rpc.UserUpdateIn,
+	) (rpc.UserOut, error) {
+		return db.CtxDbWithTransaction(ctxDb, ctx, func(
+			ctx context.Context,
+		) (rpc.UserOut, error) {
+			username := reqCtx.Username
 
-		ctx, err := ctxDb.BeginTx(ctx)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
-		defer ctxDb.DeferredRollback(ctx)
+			user, rc, err := userGetByNameDaf(ctx, username)
+			if err != nil {
+				return rpc.UserOut{}, err
+			}
 
-		user, rc, err := userGetByNameDaf(ctx, username)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
+			user = user.Update(in.User)
 
-		user = user.Update(in.User)
+			_, err = userUpdateDaf(ctx, user, rc)
+			if err != nil {
+				return rpc.UserOut{}, err
+			}
 
-		_, err = userUpdateDaf(ctx, user, rc)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
+			token := reqCtx.Token
 
-		_, err = ctxDb.Commit(ctx)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
-
-		token := web.ContextToRequestContext(ctx).Token
-
-		userOut := rpc.UserOut_FromModel(user, token.Raw)
-		return userOut, nil
+			userOut := rpc.UserOut_FromModel(user, token.Raw)
+			return userOut, nil
+		})
 	}
 }
+	

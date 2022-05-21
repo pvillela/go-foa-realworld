@@ -25,11 +25,26 @@ type UserFollowSflT = func(
 ) (rpc.ProfileOut, error)
 
 // UserFollowSflC is the function that constructs a stereotype instance of type
-// UserFollowSflT.
+// UserFollowSflT with hard-wired stereotype dependencies.
 func UserFollowSflC(
 	ctxDb db.CtxDb,
 ) UserFollowSflT {
+	userGetByNameDaf := daf.UserGetByNameDafI
 	followingCreateDaf := daf.FollowingCreateDafI
+	return UserFollowSflC0(
+		ctxDb,
+		userGetByNameDaf,
+		followingCreateDaf,
+	)
+}
+
+// UserFollowSflC0 is the function that constructs a stereotype instance of type
+// UserFollowSflT without hard-wired stereotype dependencies.
+func UserFollowSflC0(
+	ctxDb db.CtxDb,
+	userGetByNameDaf daf.UserGetByNameDafT,
+	followingCreateDaf daf.FollowingCreateDafT,
+) UserFollowSflT {
 	return func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
@@ -42,12 +57,12 @@ func UserFollowSflC(
 		) (rpc.ProfileOut, error) {
 			var zero rpc.ProfileOut
 
-			follower, _, err := daf.UserGetByNameDafI(ctx, username)
+			follower, _, err := userGetByNameDaf(ctx, username)
 			if err != nil {
 				return zero, err
 			}
 
-			followee, _, err := daf.UserGetByNameDafI(ctx, followeeUsername)
+			followee, _, err := userGetByNameDaf(ctx, followeeUsername)
 			if err != nil {
 				return zero, err
 			}

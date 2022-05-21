@@ -24,8 +24,22 @@ type UserRegisterSflT = func(
 ) (rpc.UserOut, error)
 
 // UserRegisterSflC is the function that constructs a stereotype instance of type
-// UserRegisterSflT.
+// UserRegisterSflT with hard-wired stereotype dependencies.
 func UserRegisterSflC(
+	ctxDb db.CtxDb,
+	userGenTokenBf bf.UserGenTokenBfT,
+) UserRegisterSflT {
+	userCreateDaf := daf.UserCreateDafI
+	return UserRegisterSflC0(
+		ctxDb,
+		userCreateDaf,
+		userGenTokenBf,
+	)
+}
+
+// UserRegisterSflC0 is the function that constructs a stereotype instance of type
+// UserRegisterSflT without hard-wired stereotype dependencies.
+func UserRegisterSflC0(
 	ctxDb db.CtxDb,
 	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf bf.UserGenTokenBfT,

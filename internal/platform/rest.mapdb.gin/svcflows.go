@@ -82,7 +82,7 @@ var tagsGetSfl = sfl.TagsGetSflC(tagGetAllDaf)
 
 var userAuthenticateSfl = sfl.UserAuthenticateSflC(userGetByNameDaf)
 var userFollowSfl = sfl.UserFollowSflC(beginTxn, userFollowFl)
-var userGetCurrentSfl = sfl.UserGetCurrentSflC(userGetByNameDaf)
+var userGetCurrentSfl = sfl.UserGetCurrentSflC0(userGetByNameDaf)
 var userRegisterSfl = sfl.UserRegisterSflC(beginTxn, userCreateDaf)
 var userUnfollowSfl = sfl.UserUnfollowSflC(beginTxn, userFollowFl)
 var userUpdateSfl = sfl.UserUpdateSflC(beginTxn, userGetByNameDaf, userUpdateDaf)
