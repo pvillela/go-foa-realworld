@@ -63,40 +63,65 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 		util.PanicOnError(err)
 	}
 
-	// Add some more tags to database.
-	err = daf.TagsAddNewDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"})
-	util.PanicOnError(err)
-
-	tagsFromDb, err = daf.TagsGetAllDafI(ctx, tx)
-	fmt.Println("Tags from database:", tagsFromDb, "\n")
-
 	currUserId := users[0].Id
 
-	criteria := model.ArticleCriteria{
-		Tag:         nil,
-		Author:      &users[1].Username,
-		FavoritedBy: nil,
-		Limit:       nil,
-		Offset:      nil,
+	{
+		criteria := model.ArticleCriteria{
+			Tag:         nil,
+			Author:      &users[1].Username,
+			FavoritedBy: nil,
+			Limit:       nil,
+			Offset:      nil,
+		}
+		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		util.PanicOnError(err)
+		fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 	}
-	articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-	util.PanicOnError(err)
-	fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 
-	criteria = model.ArticleCriteria{
-		Tag:         util.PointerFromValue("FOOTAG"),
-		Author:      nil,
-		FavoritedBy: nil,
-		Limit:       nil,
-		Offset:      nil,
+	{
+		// Add some more tags to database.
+		err = daf.TagsAddNewDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"})
+		util.PanicOnError(err)
+
+		tagsFromDb, err = daf.TagsGetAllDafI(ctx, tx)
+		fmt.Println("Tags from database:", tagsFromDb, "\n")
+
+		// Add the new tags to an article.
+		err = daf.TagsAddToArticleDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"}, articles[1])
+		util.PanicOnError(err)
 	}
-	articlePluses, err = daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-	util.PanicOnError(err)
-	fmt.Println("\narticlesListDaf - by tag:", articlePluses, "\n")
 
-	articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUserId, articles[1].Slug)
-	util.PanicOnError(err)
-	fmt.Println("\nArticleGetBySlugDaf:", articleFromDb, "\n")
+	{
+		criteria := model.ArticleCriteria{
+			Tag:         nil,
+			Author:      &users[1].Username,
+			FavoritedBy: nil,
+			Limit:       nil,
+			Offset:      nil,
+		}
+		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		util.PanicOnError(err)
+		fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
+	}
+
+	{
+		criteria := model.ArticleCriteria{
+			Tag:         util.PointerFromValue("FOOTAG"),
+			Author:      nil,
+			FavoritedBy: nil,
+			Limit:       nil,
+			Offset:      nil,
+		}
+		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		util.PanicOnError(err)
+		fmt.Println("\narticlesListDaf - by tag:", articlePluses, "\n")
+	}
+
+	{
+		articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUserId, articles[1].Slug)
+		util.PanicOnError(err)
+		fmt.Println("\nArticleGetBySlugDaf:", articleFromDb, "\n")
+	}
 
 	err = tx.Commit(ctx)
 	util.PanicOnError(err)

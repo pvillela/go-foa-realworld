@@ -13,6 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -73,7 +74,7 @@ var TagsAddNewDafI TagsAddNewDafT = func(
 	}
 	valueString := strings.Join(values, ", ")
 	sql := fmt.Sprintf(preSql, valueString)
-	fmt.Println("sql:", sql)
+	log.Debug("sql:", sql)
 	_, err := tx.Exec(ctx, sql)
 	return errx.ErrxOf(err)
 }
@@ -97,17 +98,30 @@ var TagAddToArticleDafI TagAddToArticleDafT = func(
 
 // TagsAddToArticleDafI implements a stereotype instance of type
 // TagsAddToArticleDafT.
-//var TagsAddToArticleDafI TagsAddToArticleDafT = func(
-//	ctx context.Context,
-//	tx pgx.Tx,
-//	names []string,
-//	article model.Article,
-//) error {
-//	sql := `
-//	INSERT INTO article_tags (article_id, tag_id)
-//	VALUES ($1, $2)
-//	`
-//	args := []any{article.Id, names.Id}
-//	_, err := tx.Exec(ctx, sql, args...)
-//	return errx.ErrxOf(err)
-//}
+var TagsAddToArticleDafI TagsAddToArticleDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	names []string,
+	article model.Article,
+) error {
+	preSql := `
+	INSERT INTO article_tags (article_id, tag_id)
+	SELECT $1, t.id
+	FROM tags t
+	WHERE t.name IN (%v)
+	AND NOT EXISTS (
+			SELECT 1
+			FROM article_tags at
+			WHERE at.tag_id = t.id
+	)
+	`
+	var values []string
+	for _, name := range names {
+		values = append(values, fmt.Sprintf("'%v'", name))
+	}
+	valueString := strings.Join(values, ", ")
+	sql := fmt.Sprintf(preSql, valueString)
+	log.Debug("sql:", sql)
+	_, err := tx.Exec(ctx, sql, article.Id)
+	return errx.ErrxOf(err)
+}
