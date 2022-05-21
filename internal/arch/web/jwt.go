@@ -1,7 +1,7 @@
 package web
 
 import (
-	"fmt"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"net/http"
 	"strings"
 	"time"
@@ -93,10 +93,10 @@ func extractToken(r *http.Request) string {
 
 func VerifiedJwtToken(r *http.Request, secretKey []byte) (*jwt.Token, error) {
 	tokenString := extractToken(r)
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		//Make sure that the token method conform to "SigningMethodHMAC"
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+		//Make sure that the token method conforms to "SigningMethodHMAC"
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			return nil, errx.NewErrx(nil, "unexpected signing method: %v", token.Header["alg"])
 		}
 		return secretKey, nil
 	})

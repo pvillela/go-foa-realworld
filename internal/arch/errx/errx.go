@@ -218,8 +218,12 @@ func newErrxInternal(cause error, msg string, stackLinesToSuppress int) Errx {
 }
 
 // NewErrx creates an Errx whose Kind is defined on-the-fly using msg.
-func NewErrx(cause error, msg string) Errx {
-	return newErrxInternal(cause, msg, 4)
+func NewErrx(cause error, msg string, args ...any) Errx {
+	msgWithArgs := msg
+	if len(args) != 0 {
+		msgWithArgs = fmt.Sprintf(msg, args...)
+	}
+	return newErrxInternal(cause, msgWithArgs, 4)
 }
 
 // ErrxOf creates an Errx from r.

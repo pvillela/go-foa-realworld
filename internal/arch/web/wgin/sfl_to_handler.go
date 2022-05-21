@@ -70,7 +70,7 @@ func makeSflHandler[S any, T any](
 	jsonBind bool,
 	queryBind bool,
 	uriBind bool,
-	authenticator func(*http.Request) (bool, *jwt.Token, error),
+	authenticator web.AuthenticatorT,
 	reqCtxExtractor func(*http.Request, *jwt.Token) (web.RequestContext, error),
 	errorHandler func(any, web.RequestContext) web.ErrorResult,
 ) SflToMappedHandlerT[S, T] {
@@ -258,7 +258,7 @@ func MakeStdNoBodySflHandler[S any, T any](
 }
 
 func MakeStdFullBodySflHandler[S any, T any](
-	authenticator func(*http.Request) (bool, *jwt.Token, error),
+	authenticator web.AuthenticatorT,
 	reqCtxExtractor func(*http.Request, *jwt.Token) (web.RequestContext, error),
 	errorHandler func(any, web.RequestContext) web.ErrorResult,
 ) SflToHandlerT[S, T] {

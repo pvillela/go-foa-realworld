@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
@@ -15,26 +16,39 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// ArticleCreateSflT is the type of the stereotype instance for the service flow that
+// UserGetCurrentSflT is the type of the stereotype instance for the service flow that
 // returns the current user.
-type UserGetCurrentSflT = func(ctx context.Context, _ arch.Unit) (rpc.UserOut, error)
+type UserGetCurrentSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	_ arch.Unit,
+) (rpc.UserOut, error)
 
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT.
 func UserGetCurrentSflC(
+	ctxDb db.CtxDb,
 	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {
-	return func(ctx context.Context, _ arch.Unit) (rpc.UserOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		_ arch.Unit,
+	) (rpc.UserOut, error) {
+		return db.CtxDbWithTransaction(ctxDb, ctx, func(
+			ctx context.Context,
+		) (rpc.UserOut, error) {
+			username := reqCtx.Username
 
-		user, _, err := userGetByNameDaf(username)
-		if err != nil {
-			return rpc.UserOut{}, err
-		}
+			user, _, err := userGetByNameDaf(ctx, username)
+			if err != nil {
+				return rpc.UserOut{}, err
+			}
 
-		token := web.ContextToRequestContext(ctx).Token
+			token := reqCtx.Token
 
-		userOut := rpc.UserOut_FromModel(user, token.Raw)
-		return userOut, err
+			userOut := rpc.UserOut_FromModel(user, token.Raw)
+			return userOut, nil
+		})
 	}
 }
