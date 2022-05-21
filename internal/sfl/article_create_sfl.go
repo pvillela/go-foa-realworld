@@ -29,16 +29,18 @@ type ArticleCreateSflT = func(
 // ArticleCreateSflT with hard-wired stereotype dependencies.
 func ArticleCreateSflC(
 	db dbpgx.Db,
-	userGetByNameDaf daf.UserGetByNameDafT,
-	articleCreateDaf daf.ArticleCreateDafT,
-	tagAddDaf daf.TagCreateDafT,
 ) ArticleCreateSflT {
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
+	articleCreateDaf := daf.ArticleCreateDafI
+	tagsAddNewDaf := daf.TagsAddNewDafI
+	tagsAddToArticleDaf := daf.TagsAddToArticleDafI
 	articleValidateBeforeCreateBf := bf.ArticleValidateBeforeCreateBfI
 	return ArticleCreateSflC0(
-		beginTxn,
+		db,
 		userGetByNameDaf,
 		articleCreateDaf,
-		tagAddDaf,
+		tagsAddNewDaf,
+		tagsAddToArticleDaf,
 		articleValidateBeforeCreateBf,
 	)
 }
@@ -49,7 +51,9 @@ func ArticleCreateSflC0(
 	db dbpgx.Db,
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
-	tagAddDaf daf.TagCreateDafT,
+	tagsAddNewDaf daf.TagsAddNewDafT,
+	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
+	articleValidateBeforeCreateBf bf.ArticleValidateBeforeCreateBfT,
 ) ArticleCreateSflT {
 	return func(
 		ctx context.Context,
@@ -60,7 +64,6 @@ func ArticleCreateSflC0(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.ArticleOut, error) {
-			zero := rpc.ArticleOut{}
 			username := reqCtx.Username
 
 			user, _, err := userGetByNameDaf(ctx, tx, username)
@@ -69,42 +72,29 @@ func ArticleCreateSflC0(
 			}
 
 			article := in.ToArticle(&user)
+			err = articleValidateBeforeCreateBf(article) // TODO: check if needed
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
 			err = articleCreateDaf(ctx, tx, &article)
 			if err != nil {
 				return rpc.ArticleOut{}, err
 			}
 
+			names := article.TagList
+
+			err = tagsAddNewDaf(ctx, tx, names)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+
+			err = tagsAddToArticleDaf(ctx, tx, names, article)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+
+			articleOut := rpc.ArticleOut_FromModel(article, &user, false, false)
+			return articleOut, nil
 		})
-	}
-
-	func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
-
-		zero := rpc.ArticleOut{}
-
-		user, _, err := userGetByNameDaf(username)
-		if err != nil {
-			return zero, err
-		}
-
-		article := in.ToArticle(user)
-
-		if err := articleValidateBeforeCreateBf(article); err != nil {
-			return zero, err
-		}
-
-		_, err = articleCreateDaf(article, txn)
-		if err != nil {
-			return zero, err
-		}
-
-		if err := tagAddDaf(article.TagList); err != nil {
-			return zero, err
-		}
-
-		articleOut := rpc.ArticleOut_FromModel(user, article)
-		return articleOut, err
 	}
 }

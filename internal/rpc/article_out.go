@@ -22,15 +22,15 @@ type ArticlesOut struct {
 }
 
 // TODO
-func ArticleOut_FromModel(article model.Article, followsAuthor bool, likesArticle bool) ArticleOut {
+func ArticleOut_FromModel(article model.Article, author *model.User, followsAuthor bool, likesArticle bool) ArticleOut {
 	articlePlus := model.ArticlePlus{
 		Slug:           article.Slug,
 		Title:          article.Title,
 		Description:    article.Description,
 		Body:           article.Body,
-		CreatedAt:      article.CreatedAt.UTC().Format(dateLayout),
-		UpdatedAt:      article.UpdatedAt.UTC().Format(dateLayout),
-		Author:         model.ProfileFromUser(article.Author, followsAuthor),
+		CreatedAt:      article.CreatedAt.UTC(),
+		UpdatedAt:      article.UpdatedAt.UTC(),
+		Author:         model.ProfileFromUser(author, followsAuthor),
 		TagList:        article.TagList,
 		Favorited:      likesArticle,
 		FavoritesCount: article.FavoritesCount,
@@ -39,16 +39,16 @@ func ArticleOut_FromModel(article model.Article, followsAuthor bool, likesArticl
 }
 
 // TODO
-func ArticlesOut_FromModel(
-	articles []model.Article,
-	followsAuthors []bool,
-	likesArticles []bool,
-) ArticlesOut {
-	outs := []ArticleOut{} // return at least an empty array (not nil)
-
-	for i, article := range articles {
-		outs = append(outs, ArticleOut_FromModel(article, followsAuthors[i], likesArticles[i]))
-	}
-
-	return ArticlesOut{outs, len(outs)}
-}
+//func ArticlesOut_FromModel(
+//	articles []model.Article,
+//	followsAuthors []bool,
+//	likesArticles []bool,
+//) ArticlesOut {
+//	outs := []ArticleOut{} // return at least an empty array (not nil)
+//
+//	for i, article := range articles {
+//		outs = append(outs, ArticleOut_FromModel(article, followsAuthors[i], likesArticles[i]))
+//	}
+//
+//	return ArticlesOut{outs, len(outs)}
+//}
