@@ -12,10 +12,10 @@ import (
 )
 
 // TagGetAllDafC is the function that constructs a stereotype instance of type
-// bf.TagGetAllDafT.
+// bf.TagsGetAllDafT.
 func TagGetAllDafC(
 	tagDb mapdb.MapDb,
-) daf.TagGetAllDafT {
+) daf.TagsGetAllDafT {
 	return func() ([]string, error) {
 		var ret []string
 

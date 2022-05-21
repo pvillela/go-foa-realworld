@@ -42,6 +42,9 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 		util.PanicOnError(err)
 	}
 
+	tagsFromDb, err := daf.TagsGetAllDafI(ctx, tx)
+	fmt.Println("Tags from database:", tagsFromDb, "\n")
+
 	// Try to insert same tag again
 	{
 		err = tx.Commit(ctx)
@@ -59,6 +62,13 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 		tx, err = db.BeginTx(ctx)
 		util.PanicOnError(err)
 	}
+
+	// Add some more tags to database.
+	err = daf.TagsAddNewDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"})
+	util.PanicOnError(err)
+
+	tagsFromDb, err = daf.TagsGetAllDafI(ctx, tx)
+	fmt.Println("Tags from database:", tagsFromDb, "\n")
 
 	currUserId := users[0].Id
 

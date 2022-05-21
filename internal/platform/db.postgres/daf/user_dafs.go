@@ -8,6 +8,7 @@ package daf
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -27,6 +28,21 @@ var UserGetByNameDafI UserGetByNameDafT = func(
 	}
 	pwUser := PwUser{}
 	err = dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
+	if err != nil {
+		return model.User{}, RecCtxUser{}, err
+	}
+	return pwUser.Entity, pwUser.RecCtx, nil
+}
+
+// UserGetByNameExplicitTxDafI implements a stereotype instance of type
+// UserGetByNameDafT with explicit passing of a pgx.Tx.
+var UserGetByNameExplicitTxDafI UserGetByNameExplicitTxDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	username string,
+) (model.User, RecCtxUser, error) {
+	pwUser := PwUser{}
+	err := dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
 	if err != nil {
 		return model.User{}, RecCtxUser{}, err
 	}

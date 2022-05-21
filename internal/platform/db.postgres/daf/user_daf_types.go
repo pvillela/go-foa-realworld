@@ -8,6 +8,7 @@ package daf
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -21,16 +22,24 @@ type PwUser = db.Pw[model.User, RecCtxUser]
 
 // UserGetByNameDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by username.
-type UserGetByNameDafT = func(reqCtx context.Context, userName string) (model.User, RecCtxUser, error)
+type UserGetByNameDafT = func(ctx context.Context, userName string) (model.User, RecCtxUser, error)
+
+// UserGetByNameExplicitTxDafT is the type of the stereotype instance for the DAF that
+// retrieves a user by username taking an explicit pgx.Tx.
+type UserGetByNameExplicitTxDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	userName string,
+) (model.User, RecCtxUser, error)
 
 // UserGetByEmailDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by email address.
-type UserGetByEmailDafT = func(reqCtx context.Context, email string) (model.User, RecCtxUser, error)
+type UserGetByEmailDafT = func(ctx context.Context, email string) (model.User, RecCtxUser, error)
 
 // UserCreateDafT is the type of the stereotype instance for the DAF that
 // creates a user.
-type UserCreateDafT = func(reqCtx context.Context, user *model.User) (RecCtxUser, error)
+type UserCreateDafT = func(ctx context.Context, user *model.User) (RecCtxUser, error)
 
 // UserUpdateDafT is the type of the stereotype instance for the DAF that
 // updates a user.
-type UserUpdateDafT = func(reqCtx context.Context, user model.User, recCtx RecCtxUser) (RecCtxUser, error)
+type UserUpdateDafT = func(ctx context.Context, user model.User, recCtx RecCtxUser) (RecCtxUser, error)

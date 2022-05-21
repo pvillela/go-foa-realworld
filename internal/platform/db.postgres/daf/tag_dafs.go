@@ -8,6 +8,7 @@ package daf
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -15,13 +16,13 @@ import (
 	"strings"
 )
 
-// TagGetAllDafI implements a stereotype instance of type
-// TagGetAllDafT.
-var TagGetAllDafI TagGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]string, error) {
+// TagsGetAllDafI implements a stereotype instance of type
+// TagsGetAllDafT.
+var TagsGetAllDafI TagsGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]model.Tag, error) {
 	mainSql := `
 	SELECT * FROM tags
 	`
-	return dbpgx.ReadMany[string](ctx, tx, mainSql, -1, -1)
+	return dbpgx.ReadMany[model.Tag](ctx, tx, mainSql, -1, -1)
 }
 
 // TagCreateDafI implements a stereotype instance of type
@@ -42,6 +43,41 @@ var TagCreateDafI TagCreateDafT = func(
 	return errx.ErrxOf(err)
 }
 
+// TagsAddNewDafI implements a stereotype instance of type
+// TagsAddNewDafT.
+var TagsAddNewDafI TagsAddNewDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	names []string,
+) error {
+	if len(names) == 0 {
+		return nil
+	}
+
+	preSql := `
+	INSERT INTO tags (name)
+	SELECT x.name
+	FROM (
+		VALUES
+			%v
+	) x (name)
+	WHERE NOT EXISTS (
+		SELECT 1
+		FROM tags t
+		WHERE t.name = x.name
+	)
+	`
+	var values []string
+	for _, name := range names {
+		values = append(values, fmt.Sprintf("('%v')", name))
+	}
+	valueString := strings.Join(values, ", ")
+	sql := fmt.Sprintf(preSql, valueString)
+	fmt.Println("sql:", sql)
+	_, err := tx.Exec(ctx, sql)
+	return errx.ErrxOf(err)
+}
+
 // TagAddToArticleDafI implements a stereotype instance of type
 // TagAddToArticleDafT.
 var TagAddToArticleDafI TagAddToArticleDafT = func(
@@ -58,3 +94,20 @@ var TagAddToArticleDafI TagAddToArticleDafT = func(
 	_, err := tx.Exec(ctx, sql, args...)
 	return errx.ErrxOf(err)
 }
+
+// TagsAddToArticleDafI implements a stereotype instance of type
+// TagsAddToArticleDafT.
+//var TagsAddToArticleDafI TagsAddToArticleDafT = func(
+//	ctx context.Context,
+//	tx pgx.Tx,
+//	names []string,
+//	article model.Article,
+//) error {
+//	sql := `
+//	INSERT INTO article_tags (article_id, tag_id)
+//	VALUES ($1, $2)
+//	`
+//	args := []any{article.Id, names.Id}
+//	_, err := tx.Exec(ctx, sql, args...)
+//	return errx.ErrxOf(err)
+//}

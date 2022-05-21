@@ -52,7 +52,7 @@ func UserFollowSflC0(
 	) (rpc.ProfileOut, error) {
 		username := reqCtx.Username
 
-		return db.CtxDbWithTransaction(ctxDb, ctx, func(
+		return db.CtxDb_WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.ProfileOut, error) {
 			var zero rpc.ProfileOut

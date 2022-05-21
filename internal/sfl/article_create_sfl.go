@@ -8,22 +8,27 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleCreateSflT is the type of the stereotype instance for the service flow that
-// creates an article with hard-wired BF dependencies.
-type ArticleCreateSflT = func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error)
+// creates an article.
+type ArticleCreateSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	in rpc.ArticleCreateIn,
+) (rpc.ArticleOut, error)
 
 // ArticleCreateSflC is the function that constructs a stereotype instance of type
-// ArticleCreateSflT with hard-wired BF dependencies.
+// ArticleCreateSflT with hard-wired stereotype dependencies.
 func ArticleCreateSflC(
-	beginTxn func(context string) db.Txn,
+	db dbpgx.Db,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	tagAddDaf daf.TagCreateDafT,
@@ -39,15 +44,40 @@ func ArticleCreateSflC(
 }
 
 // ArticleCreateSflC0 is the function that constructs a stereotype instance of type
-// ArticleCreateSflT without hard-wired BF dependencies..
+// ArticleCreateSflT without hard-wired stereotype dependencies..
 func ArticleCreateSflC0(
-	beginTxn func(context string) db.Txn,
-	userGetByNameDaf daf.UserGetByNameDafT,
+	db dbpgx.Db,
+	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	tagAddDaf daf.TagCreateDafT,
-	articleValidateBeforeCreateBf bf.ArticleValidateBeforeCreateBfT,
 ) ArticleCreateSflT {
-	return func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		in rpc.ArticleCreateIn,
+	) (rpc.ArticleOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.ArticleOut, error) {
+			zero := rpc.ArticleOut{}
+			username := reqCtx.Username
+
+			user, _, err := userGetByNameDaf(ctx, tx, username)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+
+			article := in.ToArticle(&user)
+			err = articleCreateDaf(ctx, tx, &article)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+
+		})
+	}
+
+	func(ctx context.Context, in rpc.ArticleCreateIn) (rpc.ArticleOut, error) {
 		username := web.ContextToRequestContext(ctx).Username
 		txn := beginTxn("ArticleCreateSflS")
 		defer txn.End()

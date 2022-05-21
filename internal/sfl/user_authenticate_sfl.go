@@ -76,6 +76,6 @@ func UserAuthenticateSflC0(
 			return userOut, err
 		}
 
-		return db.CtxDbWithTransaction(ctxDb, ctx, block)
+		return db.CtxDb_WithTransaction(ctxDb, ctx, block)
 	}
 }

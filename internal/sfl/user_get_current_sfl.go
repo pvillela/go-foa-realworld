@@ -47,7 +47,7 @@ func UserGetCurrentSflC0(
 		reqCtx web.RequestContext,
 		_ arch.Unit,
 	) (rpc.UserOut, error) {
-		return db.CtxDbWithTransaction(ctxDb, ctx, func(
+		return db.CtxDb_WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.UserOut, error) {
 			username := reqCtx.Username

@@ -7,6 +7,7 @@ Some of the code was based on https://github.com/err0r500/go-realworld-clean.
 
 ## To-dos:
 
+* Add input validation.
 * Complete implementation of boot logic.
 * Review basic error handling, including fs/errors.go.
 * Create pattern for platform-independent unmarshallers.

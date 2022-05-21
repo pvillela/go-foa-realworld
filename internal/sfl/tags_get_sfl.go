@@ -20,7 +20,7 @@ type TagsGetSflT = func(_ context.Context, _ arch.Unit) (rpc.TagsOut, error)
 // TagsGetSflC is the function that constructs a stereotype instance of type
 // TagsGetSflT.
 func TagsGetSflC(
-	tagGetAllDaf daf.TagGetAllDafT,
+	tagGetAllDaf daf.TagsGetAllDafT,
 ) TagsGetSflT {
 	return func(_ context.Context, _ arch.Unit) (rpc.TagsOut, error) {
 		tags, err := tagGetAllDaf()

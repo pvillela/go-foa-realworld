@@ -19,17 +19,17 @@ type ArticleCreateIn struct {
 	}
 }
 
-func (in ArticleCreateIn) ToArticle(author model.User) model.Article {
+func (in ArticleCreateIn) ToArticle(author *model.User) model.Article {
 	tagList := in.Article.TagList
 	if tagList == nil {
 		tagList = new([]string)
 	}
 
 	return model.Article_Create(
+		author,
 		in.Article.Title,
 		in.Article.Description,
 		in.Article.Body,
 		*tagList,
-		author,
 	)
 }
