@@ -10,11 +10,11 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type ArticleCheckOwnerBfT = func(article model.Article, username string) error
+type ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) error
 
-//var ArticleCheckOwnerBfI ArticleCheckOwnerBfT = func(article model.Article, username string) error {
-//	if article.Author.Username != username {
-//		return errors.New("article not owned by user")
-//	}
-//	return nil
-//}
+var ArticleCheckOwnerBfI ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) error {
+	if article.Author.Username != username {
+		return ErrUnauthorizedUser.Make(nil, username)
+	}
+	return nil
+}

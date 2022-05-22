@@ -8,35 +8,53 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-
-	"github.com/pvillela/go-foa-realworld/internal/arch"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
-	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 )
 
 // ArticleDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes an article.
-type ArticleDeleteSflT = func(ctx context.Context, slug string) (arch.Unit, error)
+type ArticleDeleteSflT = func(ctx context.Context, reqCtx web.RequestContext, slug string) (arch.Unit, error)
 
 // ArticleDeleteSflC is the function that constructs a stereotype instance of type
-// ArticleDeleteSflT.
+// ArticleDeleteSflT with hard-wired stereotype dependencies.
 func ArticleDeleteSflC(
-	beginTxn func(context string) db.Txn,
+	db dbpgx.Db,
+) ArticleDeleteSflT {
+	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFlI
+	articleDeleteDaf := daf.ArticleDeleteDafI
+	return ArticleDeleteSflC0(
+		db,
+		articleGetAndCheckOwnerFl,
+		articleDeleteDaf,
+	)
+}
+
+// ArticleDeleteSflC0 is the function that constructs a stereotype instance of type
+// ArticleDeleteSflT without hard-wired stereotype dependencies.
+func ArticleDeleteSflC0(
+	db dbpgx.Db,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
-	return func(ctx context.Context, slug string) (arch.Unit, error) {
-		username := web.ContextToRequestContext(ctx).Username
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
+	return func(ctx context.Context, reqCtx web.RequestContext, slug string) (arch.Unit, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (arch.Unit, error) {
+			username := reqCtx.Username
 
-		_, _, err := articleGetAndCheckOwnerFl(username, slug)
-		if err != nil {
+			_, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
+			if err != nil {
+				return arch.Void, err
+			}
+
+			err = articleDeleteDaf(ctx, tx, slug)
 			return arch.Void, err
-		}
-
-		return arch.Void, articleDeleteDaf(slug, txn)
+		})
 	}
 }

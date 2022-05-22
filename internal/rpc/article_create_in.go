@@ -7,6 +7,7 @@
 package rpc
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -19,7 +20,11 @@ type ArticleCreateIn struct {
 	}
 }
 
-func (in ArticleCreateIn) ToArticle(author *model.User) model.Article {
+func (in ArticleCreateIn) ToArticle(author *model.User) (model.Article, error) {
+	if in.Article.Title == "" || in.Article.Description == "" || in.Article.Body == nil {
+		return model.Article{}, bf.ErrArticleCreateMissingFields.Make(nil)
+	}
+
 	tagList := in.Article.TagList
 	if tagList == nil {
 		tagList = new([]string)
@@ -31,5 +36,5 @@ func (in ArticleCreateIn) ToArticle(author *model.User) model.Article {
 		in.Article.Description,
 		in.Article.Body,
 		*tagList,
-	)
+	), nil
 }

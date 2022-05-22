@@ -13,7 +13,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -34,26 +33,23 @@ func ArticleCreateSflC(
 	articleCreateDaf := daf.ArticleCreateDafI
 	tagsAddNewDaf := daf.TagsAddNewDafI
 	tagsAddToArticleDaf := daf.TagsAddToArticleDafI
-	articleValidateBeforeCreateBf := bf.ArticleValidateBeforeCreateBfI
 	return ArticleCreateSflC0(
 		db,
 		userGetByNameDaf,
 		articleCreateDaf,
 		tagsAddNewDaf,
 		tagsAddToArticleDaf,
-		articleValidateBeforeCreateBf,
 	)
 }
 
 // ArticleCreateSflC0 is the function that constructs a stereotype instance of type
-// ArticleCreateSflT without hard-wired stereotype dependencies..
+// ArticleCreateSflT without hard-wired stereotype dependencies.
 func ArticleCreateSflC0(
 	db dbpgx.Db,
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	tagsAddNewDaf daf.TagsAddNewDafT,
 	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
-	articleValidateBeforeCreateBf bf.ArticleValidateBeforeCreateBfT,
 ) ArticleCreateSflT {
 	return func(
 		ctx context.Context,
@@ -71,11 +67,12 @@ func ArticleCreateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			article := in.ToArticle(&user)
-			err = articleValidateBeforeCreateBf(article) // TODO: check if needed
+			// Performs input validation.
+			article, err := in.ToArticle(&user)
 			if err != nil {
 				return rpc.ArticleOut{}, err
 			}
+
 			err = articleCreateDaf(ctx, tx, &article)
 			if err != nil {
 				return rpc.ArticleOut{}, err

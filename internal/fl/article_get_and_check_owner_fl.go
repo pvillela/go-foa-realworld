@@ -7,43 +7,67 @@
 package fl
 
 import (
+	"context"
+	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
 // ArticleGetAndCheckOwnerFlT is the type of the stereotype instance for the flow that
-// checks if a given article's author's username matches a given username, with hard-wired BF dependencies.
-type ArticleGetAndCheckOwnerFlT = func(username, slug string) (model.Article, RecCtxArticle, error)
+// checks if a given article's author's username matches a given username.
+type ArticleGetAndCheckOwnerFlT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	slug string,
+	username string,
+) (model.ArticlePlus, error)
 
-// ArticleGetAndCheckOwnerFlC is the function that constructs a stereotype instance of type
-// ArticleGetAndCheckOwnerFlT with hard-wired BF dependencies.
-func ArticleGetAndCheckOwnerFlC(
-	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
-) ArticleGetAndCheckOwnerFlT {
+// ArticleGetAndCheckOwnerFlI implements a stereotype instance of type
+// ArticleGetAndCheckOwnerFlT.
+var ArticleGetAndCheckOwnerFlI ArticleGetAndCheckOwnerFlT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	slug string,
+	username string,
+) (model.ArticlePlus, error) {
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
+	articleGetBySlugDaf := daf.ArticleGetBySlugDafI
 	articleCheckOwnerBf := bf.ArticleCheckOwnerBfI
 	return ArticleGetAndCheckOwnerFlC0(
+		userGetByNameDaf,
 		articleGetBySlugDaf,
 		articleCheckOwnerBf,
-	)
+	)(ctx, tx, slug, username)
 }
 
 // ArticleGetAndCheckOwnerFlC0 is the function that constructs a stereotype instance of type
 // ArticleGetAndCheckOwnerFlT without hard-wired BF dependencies.
 func ArticleGetAndCheckOwnerFlC0(
+	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 	articleCheckOwnerBf bf.ArticleCheckOwnerBfT,
 ) ArticleGetAndCheckOwnerFlT {
-	return func(slug string, username string) (model.Article, RecCtxArticle, error) {
-		article, rc, err := articleGetBySlugDaf(slug)
+	return func(
+		ctx context.Context,
+		tx pgx.Tx,
+		slug string,
+		username string,
+	) (model.ArticlePlus, error) {
+		user, _, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
-			return model.Article{}, RecCtxArticle{}, err
+			return model.ArticlePlus{}, err
+		}
+
+		article, err := articleGetBySlugDaf(ctx, tx, user.Id, slug)
+		if err != nil {
+			return model.ArticlePlus{}, err
 		}
 
 		if err := articleCheckOwnerBf(article, username); err != nil {
-			return model.Article{}, RecCtxArticle{}, err
+			return model.ArticlePlus{}, err
 		}
 
-		return article, rc, err
+		return article, err
 	}
 }

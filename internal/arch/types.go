@@ -6,6 +6,11 @@
 
 package arch
 
+// Unit is the standard functional programming Unit type.
 type Unit = struct{}
 
+// Void is the single instance of Unit.
 var Void Unit
+
+// CheckType fails to compile if the type doesn't check.
+func CheckType[S any](f S) struct{} { return struct{}{} }

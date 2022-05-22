@@ -57,9 +57,13 @@ func ArticleUpdateSflC0(
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
-	articleValidateBeforeUpdateBf bf.ArticleValidateBeforeUpdateBfT,
 ) ArticleUpdateSflT {
 	return func(ctx context.Context, in rpc.ArticleUpdateIn) (rpc.ArticleOut, error) {
+		err := in.Validate()
+		if err != nil {
+			return rpc.ArticleOut{}, err
+		}
+
 		username := web.ContextToRequestContext(ctx).Username
 
 		slug := in.Article.Slug

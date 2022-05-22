@@ -64,7 +64,7 @@ var tagGetAllDaf = daf.TagGetAllDafC(mapDb)
 // SFLs
 
 var articleCreateSfl = sfl.ArticleCreateSflC(beginTxn, userGetByNameDaf, articleCreateDaf, tagAddDaf)
-var articleDeleteSfl = sfl.ArticleDeleteSflC(beginTxn, articleGetAndCheckOwnerFl, articleDeleteDaf)
+var articleDeleteSfl = sfl.ArticleDeleteSflC0(beginTxn, articleGetAndCheckOwnerFl, articleDeleteDaf)
 var articleFavoriteSfl = sfl.ArticleFavoriteSflC(beginTxn, articleFavoriteFl)
 var articleGetSfl = sfl.ArticleGetSflC(beginTxn, userGetByNameDaf, articleGetBySlugDaf)
 var articleUnfavoriteSfl = sfl.ArticleUnfavoriteSflC(beginTxn, articleFavoriteFl)
