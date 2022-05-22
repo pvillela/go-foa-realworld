@@ -108,7 +108,6 @@ func readArticles(
 
 	// Data structures to receive data
 	type recordT struct {
-		Id        uint
 		Article   model.Article `db:""`
 		Profile   model.Profile `db:""`
 		Following *uint
@@ -125,7 +124,7 @@ func readArticles(
 	fresh := true // true when first encountering a new article
 
 	articleChanged := func() bool {
-		return !fresh && currRecord.Id != prevRecord.Id
+		return !fresh && currRecord.Article.Id != prevRecord.Article.Id
 	}
 
 	tagChanged := func() bool {
@@ -155,6 +154,7 @@ func readArticles(
 				Image:     rp.Image,
 				Following: rp.Following,
 			},
+			Id:             ra.Id,
 			Title:          ra.Title,
 			Description:    ra.Description,
 			Body:           ra.Body,

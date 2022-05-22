@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
 // ArticleGetAndCheckOwnerFlT is the type of the stereotype instance for the flow that
@@ -31,12 +30,10 @@ var ArticleGetAndCheckOwnerFlI ArticleGetAndCheckOwnerFlT = func(
 	slug string,
 	username string,
 ) (model.ArticlePlus, error) {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
-	articleGetBySlugDaf := daf.ArticleGetBySlugDafI
+	articleAndUserGetFl := ArticleAndUserGetFlI
 	articleCheckOwnerBf := bf.ArticleCheckOwnerBfI
 	return ArticleGetAndCheckOwnerFlC0(
-		userGetByNameDaf,
-		articleGetBySlugDaf,
+		articleAndUserGetFl,
 		articleCheckOwnerBf,
 	)(ctx, tx, slug, username)
 }
@@ -44,8 +41,7 @@ var ArticleGetAndCheckOwnerFlI ArticleGetAndCheckOwnerFlT = func(
 // ArticleGetAndCheckOwnerFlC0 is the function that constructs a stereotype instance of type
 // ArticleGetAndCheckOwnerFlT without hard-wired BF dependencies.
 func ArticleGetAndCheckOwnerFlC0(
-	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
-	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
+	articleAndUserGetFl ArticleAndUserGetFlT,
 	articleCheckOwnerBf bf.ArticleCheckOwnerBfT,
 ) ArticleGetAndCheckOwnerFlT {
 	return func(
@@ -54,15 +50,7 @@ func ArticleGetAndCheckOwnerFlC0(
 		slug string,
 		username string,
 	) (model.ArticlePlus, error) {
-		user, _, err := userGetByNameDaf(ctx, tx, username)
-		if err != nil {
-			return model.ArticlePlus{}, err
-		}
-
-		article, err := articleGetBySlugDaf(ctx, tx, user.Id, slug)
-		if err != nil {
-			return model.ArticlePlus{}, err
-		}
+		article, _, err := articleAndUserGetFl(ctx, tx, slug, username)
 
 		if err := articleCheckOwnerBf(article, username); err != nil {
 			return model.ArticlePlus{}, err

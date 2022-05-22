@@ -22,19 +22,7 @@ type ArticlesOut struct {
 }
 
 // TODO
-func ArticleOut_FromModel(article model.Article, author *model.User, followsAuthor bool, likesArticle bool) ArticleOut {
-	articlePlus := model.ArticlePlus{
-		Slug:           article.Slug,
-		Title:          article.Title,
-		Description:    article.Description,
-		Body:           article.Body,
-		CreatedAt:      article.CreatedAt.UTC(),
-		UpdatedAt:      article.UpdatedAt.UTC(),
-		Author:         model.ProfileFromUser(author, followsAuthor),
-		TagList:        article.TagList,
-		Favorited:      likesArticle,
-		FavoritesCount: article.FavoritesCount,
-	}
+func ArticleOut_FromModel(articlePlus model.ArticlePlus) ArticleOut {
 	return ArticleOut{articlePlus}
 }
 

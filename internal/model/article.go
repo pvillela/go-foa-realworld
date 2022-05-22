@@ -28,7 +28,8 @@ type Article struct {
 	UpdatedAt time.Time
 }
 
-type ArticlePlus = struct {
+type ArticlePlus struct {
+	Id             uint      `json:"-"`
 	Slug           string    `json:"slug"`
 	Author         Profile   `json:"author"`
 	Title          string    `json:"title"`
@@ -84,4 +85,24 @@ func (s Article) Update(src ArticlePatch) Article {
 	s.Slug = util.Slug(s.Title)
 
 	return s
+}
+
+func (s Article) IncrementFavoriteCount() Article {
+	s.FavoritesCount++
+	return s
+}
+
+func (s ArticlePlus) ToArticle() Article {
+	return Article{
+		Id:             s.Id,
+		AuthorId:       s.Author.UserId,
+		Title:          s.Title,
+		Slug:           s.Slug,
+		Description:    s.Description,
+		Body:           s.Body,
+		FavoritesCount: s.FavoritesCount,
+		TagList:        s.TagList,
+		CreatedAt:      s.CreatedAt,
+		UpdatedAt:      s.UpdatedAt,
+	}
 }

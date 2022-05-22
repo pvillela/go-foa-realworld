@@ -7,6 +7,7 @@
 package bf
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 )
 
@@ -17,6 +18,7 @@ var (
 	ErrArticleNotFound            = errx.NewKind("article not found for Id %v")
 	ErrArticleCreateMissingFields = errx.NewKind("article has missing fields for Create operation")
 	ErrArticleUpdateMissingFields = errx.NewKind("article has missing fields for Update operation")
+	ErrArticleAlreadyFavorited    = errx.NewKind("article with slug \"%v\" has already been favoriated", dbpgx.DbErrConstraintViolation)
 	ErrCommentNotFound            = errx.NewKind("comment not found for articleUuid %v and id %")
 	ErrProfileNotFound            = errx.NewKind("profile not found")
 	ErrUserNameNotFound           = errx.NewKind("user not found for username \"%v\"")

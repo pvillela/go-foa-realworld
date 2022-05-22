@@ -8,35 +8,85 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleFavoriteSflT is the type of the stereotype instance for the service flow that
 // designates an article as a favorite.
-type ArticleFavoriteSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, error)
+type ArticleFavoriteSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	slug string,
+) (rpc.ArticleOut, error)
 
 // ArticleFavoriteSflC is the function that constructs a stereotype instance of type
-// ArticleFavoriteSflT.
+// ArticleFavoriteSflT with hard-wired stereotype dependencies.
 func ArticleFavoriteSflC(
-	beginTxn func(context string) db.Txn,
-	articleFavoriteFl fl.ArticleFavoriteFlT,
+	db dbpgx.Db,
 ) ArticleFavoriteSflT {
-	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
+	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	favoriteCreateDaf := daf.FavoriteCreateDafI
+	articleUpdateDaf := daf.ArticleUpdateDafI
+	return ArticleFavoriteSflC0(
+		db,
+		articleAndUserGetFl,
+		favoriteCreateDaf,
+		articleUpdateDaf,
+	)
+}
 
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
+// ArticleFavoriteSflC0 is the function that constructs a stereotype instance of type
+// ArticleFavoriteSflT without hard-wired stereotype dependencies.
+func ArticleFavoriteSflC0(
+	db dbpgx.Db,
+	articleAndUserGetFl fl.ArticleAndUserGetFlT,
+	favoriteCreateDaf daf.FavoriteCreateDafT,
+	articleUpdateDaf daf.ArticleUpdateDafT,
+) ArticleFavoriteSflT {
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		slug string,
+	) (rpc.ArticleOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.ArticleOut, error) {
+			username := reqCtx.Username
+			var zero rpc.ArticleOut
 
-		var zero rpc.ArticleOut
-		pwUser, pwArticle, err := articleFavoriteFl(username, slug, true, txn)
-		if err != nil {
-			return zero, err
-		}
-		articleOut := rpc.ArticleOut_FromModel(pwUser.Entity, pwArticle.Entity)
-		return articleOut, err
+			articlePlus, user, err := articleAndUserGetFl(ctx, tx, slug, username)
+			if err != nil {
+				return zero, err
+			}
+
+			err = favoriteCreateDaf(ctx, tx, articlePlus.Id, user.Id)
+			if err != nil {
+				if kind := dbpgx.ClassifyError(err); kind == dbpgx.DbErrUniqueViolation {
+					errX := err.(errx.Errx)
+					return zero, bf.ErrArticleAlreadyFavorited.Decorate(errX, slug)
+				}
+				return zero, err
+			}
+
+			article := articlePlus.ToArticle()
+			article.IncrementFavoriteCount()
+
+			err = articleUpdateDaf(ctx, tx, &article)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+
+			articleOut := rpc.ArticleOut_FromModel(articlePlus)
+			return articleOut, err
+		})
 	}
 }
