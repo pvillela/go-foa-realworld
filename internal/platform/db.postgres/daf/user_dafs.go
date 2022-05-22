@@ -8,9 +8,11 @@ package daf
 
 import (
 	"context"
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -26,12 +28,7 @@ var UserGetByNameDafI UserGetByNameDafT = func(
 	if err != nil {
 		return model.User{}, RecCtxUser{}, err
 	}
-	pwUser := PwUser{}
-	err = dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
-	if err != nil {
-		return model.User{}, RecCtxUser{}, err
-	}
-	return pwUser.Entity, pwUser.RecCtx, nil
+	return UserGetByNameExplicitTxDafI(ctx, tx, username)
 }
 
 // UserGetByNameExplicitTxDafI implements a stereotype instance of type
@@ -44,6 +41,9 @@ var UserGetByNameExplicitTxDafI UserGetByNameExplicitTxDafT = func(
 	pwUser := PwUser{}
 	err := dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
 	if err != nil {
+		if pgxscan.NotFound(err) {
+			err = bf.ErrUsernameNotFound.Make(err, username)
+		}
 		return model.User{}, RecCtxUser{}, err
 	}
 	return pwUser.Entity, pwUser.RecCtx, nil
@@ -62,6 +62,9 @@ var UserGetByEmailDafI UserGetByEmailDafT = func(
 	pwUser := PwUser{}
 	err = dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &pwUser)
 	if err != nil {
+		if pgxscan.NotFound(err) {
+			err = bf.ErrUserEmailNotFound.Make(err, email)
+		}
 		return model.User{}, RecCtxUser{}, err
 	}
 	return pwUser.Entity, pwUser.RecCtx, nil
@@ -129,8 +132,13 @@ var UserUpdateDafI UserUpdateDafT = func(
 	log.Debug("UserUpdateDaf sql: ", sql)
 	log.Debug("UserUpdateDaf args: ", args)
 	row := tx.QueryRow(ctx, sql, args...)
-	err = row.Scan(&recCtx.UpdatedAt)
-	return recCtx, errx.ErrxOf(err)
+	if err := row.Scan(&recCtx.UpdatedAt); err != nil {
+		if err == pgx.ErrNoRows {
+			err = bf.ErrUsernameNotFound.Make(err, user.Username)
+		}
+		return RecCtxUser{}, err
+	}
+	return recCtx, nil
 }
 
 func userDeleteByUsernameDaf(

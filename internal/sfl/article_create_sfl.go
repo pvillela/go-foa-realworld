@@ -10,9 +10,9 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -90,7 +90,9 @@ func ArticleCreateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			articleOut := rpc.ArticleOut_FromModel(article, &user, false, false)
+			articlePlus := model.ArticlePlus_FromArticle(article, user)
+			articleOut := rpc.ArticleOut_FromModel(articlePlus)
+
 			return articleOut, nil
 		})
 	}

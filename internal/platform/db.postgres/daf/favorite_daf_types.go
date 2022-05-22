@@ -17,4 +17,5 @@ type FavoriteCreateDafT = func(ctx context.Context, tx pgx.Tx, articleId uint, u
 
 // FavoriteDeleteDafT is the instance of the DAF stereotype that
 // disaassociates an article from a user that favors it.
-type FavoriteDeleteDafT = func(ctx context.Context, tx pgx.Tx, articleId uint, userId uint) error
+// Returns the number of rows affected, which can be 0 or 1.
+type FavoriteDeleteDafT = func(ctx context.Context, tx pgx.Tx, articleId uint, userId uint) (int, error)

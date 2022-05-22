@@ -8,48 +8,58 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleGetSflT is the type of the stereotype instance for the service flow that
 // retrieves an article.
-type ArticleGetSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, error)
+type ArticleGetSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	slug string,
+) (rpc.ArticleOut, error)
 
 // ArticleGetSflC is the function that constructs a stereotype instance of type
-// ArticleGetSflT.
+// ArticleGetSflT with hard-wired stereotype dependencies.
 func ArticleGetSflC(
-	ctxDb db.CtxDb,
-	userGetByNameDaf daf.UserGetByNameDafT,
-	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
+	db dbpgx.Db,
 ) ArticleGetSflT {
-	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
-		ctx, err := ctxDb.BeginTx(ctx)
-		if err != nil {
-			return rpc.ArticleOut{}, err
-		}
-		defer ctxDb.DeferredRollback(ctx)
+	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	return ArticleGetSflC0(
+		db,
+		articleAndUserGetFl,
+	)
+}
 
-		article, _, err := articleGetBySlugDaf(slug)
-		if err != nil {
-			return rpc.ArticleOut{}, err
-		}
+// ArticleGetSflC0 is the function that constructs a stereotype instance of type
+// ArticleGetSflT without hard-wired stereotype dependencies.
+func ArticleGetSflC0(
+	db dbpgx.Db,
+	articleAndUserGetFl fl.ArticleAndUserGetFlT,
+) ArticleGetSflT {
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		slug string,
+	) (rpc.ArticleOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.ArticleOut, error) {
+			username := reqCtx.Username
 
-		username := web.ContextToRequestContext(ctx).Username
-		var user model.User
-		if username != "" {
-			user, _, err = userGetByNameDaf(ctx, username)
+			article, _, err := articleAndUserGetFl(ctx, tx, slug, username)
 			if err != nil {
 				return rpc.ArticleOut{}, err
 			}
-		}
 
-		articleOut := rpc.ArticleOut_FromModel(article, followsAuthor, likesArticle)
+			articleOut := rpc.ArticleOut_FromModel(article)
 
-		return articleOut, err
+			return articleOut, nil
+		})
 	}
 }

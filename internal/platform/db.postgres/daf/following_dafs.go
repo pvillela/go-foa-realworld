@@ -37,12 +37,12 @@ var FollowingDeleteDafI FollowingDeleteDafT = func(
 	tx pgx.Tx,
 	followerId uint,
 	followeeId uint,
-) error {
+) (int, error) {
 	sql := `
 	DELETE FROM followings
 	WHERE follower_id = $1 AND followee_id = $2
 	`
 	args := []any{followerId, followeeId}
-	_, err := tx.Exec(ctx, sql, args...)
-	return errx.ErrxOf(err)
+	c, err := tx.Exec(ctx, sql, args...)
+	return int(c.RowsAffected()), errx.ErrxOf(err)
 }

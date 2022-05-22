@@ -61,11 +61,11 @@ var CommentDeleteDafI CommentDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	id uint,
-) error {
+) (int, error) {
 	sql := `
 	DELETE FROM comments
 	WHERE id = $1
 	`
-	_, err := tx.Exec(ctx, sql, id)
-	return errx.ErrxOf(err)
+	c, err := tx.Exec(ctx, sql, id)
+	return int(c.RowsAffected()), errx.ErrxOf(err)
 }

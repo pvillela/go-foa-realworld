@@ -36,12 +36,12 @@ var FavoriteDeleteDafI FavoriteDeleteDafT = func(
 	tx pgx.Tx,
 	articleId uint,
 	userId uint,
-) error {
+) (int, error) {
 	sql := `
 	DELETE FROM favorites
 	WHERE article_id = $1 AND user_id = $2
 	`
 	args := []any{articleId, userId}
-	_, err := tx.Exec(ctx, sql, args...)
-	return errx.ErrxOf(err)
+	c, err := tx.Exec(ctx, sql, args...)
+	return int(c.RowsAffected()), errx.ErrxOf(err)
 }

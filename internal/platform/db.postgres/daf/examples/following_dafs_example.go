@@ -54,7 +54,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	{
-		err := daf.FollowingDeleteDafI(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
+		_, err := daf.FollowingDeleteDafI(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
 		util.PanicOnError(err)
 
 		currUserId := users[2].Id

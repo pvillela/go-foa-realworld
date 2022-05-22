@@ -85,7 +85,7 @@ var ArticleUpdateDafI ArticleUpdateDafT = func(
 	WHERE id = $4 AND updated_at = $5
 	RETURNING updated_at
 	`
-	args := []interface{}{
+	args := []any{
 		article.Title,
 		article.Description,
 		article.Body,
@@ -93,8 +93,14 @@ var ArticleUpdateDafI ArticleUpdateDafT = func(
 		article.UpdatedAt,
 	}
 	row := tx.QueryRow(ctx, sql, args...)
-	err := row.Scan(&article.UpdatedAt)
-	return errx.ErrxOf(err)
+	if err := row.Scan(&article.UpdatedAt); err != nil {
+		if err == pgx.ErrNoRows {
+			err = bf.ErrArticleSlugNotFound.Make(err, article.Slug)
+		}
+		return err
+	}
+
+	return nil
 }
 
 // ArticleDeleteDafI implements a stereotype instance of type
@@ -103,13 +109,13 @@ var ArticleDeleteDafI ArticleDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
-) error {
+) (int, error) {
 	sql := `
 	DELETE FROM articles
 	WHERE slug = $1
 	`
-	_, err := tx.Exec(ctx, sql, slug)
-	return errx.ErrxOf(err)
+	c, err := tx.Exec(ctx, sql, slug)
+	return int(c.RowsAffected()), errx.ErrxOf(err)
 }
 
 // ArticlesFeedDafI implements a stereotype instance of type

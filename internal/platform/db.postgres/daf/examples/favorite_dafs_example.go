@@ -68,7 +68,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	{
-		err := daf.FavoriteDeleteDafI(ctx, tx, Favorites[1].ArticleId, Favorites[1].UserId)
+		_, err := daf.FavoriteDeleteDafI(ctx, tx, Favorites[1].ArticleId, Favorites[1].UserId)
 		util.PanicOnError(err)
 
 		currUserId := users[0].Id

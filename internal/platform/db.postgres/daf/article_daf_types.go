@@ -32,7 +32,7 @@ type ArticleUpdateDafT = func(ctx context.Context, tx pgx.Tx, article *model.Art
 
 // ArticleDeleteDafT is the type of the stereotype instance for the DAF that
 // deletes an article.
-type ArticleDeleteDafT = func(ctx context.Context, tx pgx.Tx, slug string) error
+type ArticleDeleteDafT = func(ctx context.Context, tx pgx.Tx, slug string) (int, error)
 
 // ArticlesFeedDafT is the type of the stereotype instance for the DAF that
 // queries for all articles authored by other users followed by

@@ -10,6 +10,7 @@ import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
@@ -72,9 +73,12 @@ func UserUnfollowSflC0(
 				return zero, err
 			}
 
-			err = followingDeleteDaf(ctx, tx, follower.Id, followee.Id)
+			rowsAffected, err := followingDeleteDaf(ctx, tx, follower.Id, followee.Id)
 			if err != nil {
 				return zero, err
+			}
+			if rowsAffected == 0 {
+				return zero, bf.ErrUserWasNotFollowed.Make(nil, followee.Username)
 			}
 
 			profileOut := rpc.ProfileOut_FromModel(&follower, true)

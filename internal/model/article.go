@@ -106,3 +106,25 @@ func (s ArticlePlus) ToArticle() Article {
 		UpdatedAt:      s.UpdatedAt,
 	}
 }
+
+func ArticlePlus_FromArticle(article Article, author User) ArticlePlus {
+	return ArticlePlus{
+		Id:   article.Id,
+		Slug: article.Slug,
+		Author: Profile{
+			UserId:    author.Id,
+			Username:  author.Username,
+			Bio:       author.Bio,
+			Image:     author.ImageLink,
+			Following: false,
+		},
+		Title:          article.Title,
+		Description:    article.Description,
+		Body:           article.Body,
+		TagList:        article.TagList,
+		CreatedAt:      article.CreatedAt,
+		UpdatedAt:      article.UpdatedAt,
+		Favorited:      false,
+		FavoritesCount: 0,
+	}
+}

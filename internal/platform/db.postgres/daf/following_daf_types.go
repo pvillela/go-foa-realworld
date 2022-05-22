@@ -27,4 +27,4 @@ type FollowingDeleteDafT = func(
 	tx pgx.Tx,
 	followerId uint,
 	followeeId uint,
-) error
+) (int, error)

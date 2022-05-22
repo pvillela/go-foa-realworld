@@ -8,35 +8,83 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleUnfavoriteSflT is the type of the stereotype instance for the service flow that
-// designates an article as a favorite.
-type ArticleUnfavoriteSflT = func(ctx context.Context, slug string) (rpc.ArticleOut, error)
+// designates an article as no longer a favorite.
+type ArticleUnfavoriteSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	slug string,
+) (rpc.ArticleOut, error)
 
 // ArticleUnfavoriteSflC is the function that constructs a stereotype instance of type
-// ArticleUnfavoriteSflT.
+// ArticleUnfavoriteSflT with hard-wired stereotype dependencies.
 func ArticleUnfavoriteSflC(
-	beginTxn func(context string) db.Txn,
-	articleFavoriteFl fl.ArticleFavoriteFlT,
+	db dbpgx.Db,
 ) ArticleUnfavoriteSflT {
-	return func(ctx context.Context, slug string) (rpc.ArticleOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
+	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	favoriteDeleteDaf := daf.FavoriteDeleteDafI
+	articleUpdateDaf := daf.ArticleUpdateDafI
+	return ArticleUnfavoriteSflC0(
+		db,
+		articleAndUserGetFl,
+		favoriteDeleteDaf,
+		articleUpdateDaf,
+	)
+}
 
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
+// ArticleUnfavoriteSflC0 is the function that constructs a stereotype instance of type
+// ArticleUnfavoriteSflT without hard-wired stereotype dependencies.
+func ArticleUnfavoriteSflC0(
+	db dbpgx.Db,
+	articleAndUserGetFl fl.ArticleAndUserGetFlT,
+	favoriteDeleteDaf daf.FavoriteDeleteDafT,
+	articleUpdateDaf daf.ArticleUpdateDafT,
+) ArticleUnfavoriteSflT {
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		slug string,
+	) (rpc.ArticleOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.ArticleOut, error) {
+			username := reqCtx.Username
+			var zero rpc.ArticleOut
 
-		var zero rpc.ArticleOut
-		pwUser, pwArticle, err := articleFavoriteFl(username, slug, false, txn)
-		if err != nil {
-			return zero, err
-		}
-		articleOut := rpc.ArticleOut_FromModel(pwUser.Entity, pwArticle.Entity)
-		return articleOut, err
+			articlePlus, user, err := articleAndUserGetFl(ctx, tx, slug, username)
+			if err != nil {
+				return zero, err
+			}
+
+			rowsAffected, err := favoriteDeleteDaf(ctx, tx, articlePlus.Id, user.Id)
+			if err != nil {
+				return zero, err
+			}
+			if rowsAffected == 0 {
+				return zero, bf.ErrArticleWasNotFavorited.Make(nil, slug)
+			}
+
+			article := articlePlus.ToArticle()
+			article.IncrementFavoriteCount()
+
+			err = articleUpdateDaf(ctx, tx, &article)
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
+
+			articleOut := rpc.ArticleOut_FromModel(articlePlus)
+			return articleOut, err
+		})
 	}
 }
