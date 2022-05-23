@@ -96,7 +96,7 @@ var (
 	DbErrExternalSystemError       = errx.NewKind("DbErrExternalSystemError", DbErrRuntimeEnvironment)
 	DbErrEngineError               = errx.NewKind("DbErrEngineError", DbErrRuntimeEnvironment)
 	DbErrRecordNotFound            = errx.NewKind("DbErrRecordNotFound")
-	DbErrUnexpectedMultipleRecords = errx.NewKind("DbErrUnexpectedMultipleRecords")
+	DbErrUnexpectedMultipleRecords = errx.NewKind("DbErrUnexpectedMultipleRecords", DbErrInternalAppError)
 )
 
 // ClassifyError returns an database-related *errx.Kind that corresponds to err.

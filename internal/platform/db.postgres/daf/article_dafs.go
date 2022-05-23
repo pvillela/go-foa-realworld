@@ -8,10 +8,8 @@ package daf
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -72,8 +70,9 @@ var ArticleGetBySlugDafI ArticleGetBySlugDafT = func(
 			dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgArticleSlugNotFound, slug)
 	}
 	if len(results) > 1 {
-		errx.PanicOnError(errx.NewErrx(nil,
-			fmt.Sprintf("Found multiple articles with same slug '%v'", slug)))
+		return model.ArticlePlus{},
+			dbpgx.DbErrUnexpectedMultipleRecords.Make(nil,
+				"Found multiple articles with same slug '%v'", slug)
 	}
 
 	return results[0], nil
