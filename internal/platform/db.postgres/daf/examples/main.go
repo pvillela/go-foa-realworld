@@ -12,13 +12,13 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
 func main() {
-	defer util.PanicLog(log.Fatal)
+	defer errx.PanicLog(log.Fatal)
 
 	log.SetLevel(log.DebugLevel)
 	//var arr []any
@@ -28,20 +28,20 @@ func main() {
 
 	connStr := "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
 	pool, err := pgxpool.Connect(ctx, connStr)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	ctxDb := dbpgx.CtxPgx{pool}
 	ctx, err = ctxDb.SetPool(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	db := dbpgx.Db{pool}
 
 	tx, err := db.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
 		"article_tags", "comments")
 	err = tx.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	userDafsExample(ctx, ctxDb)
 	articleDafsExample(ctx, db)
@@ -54,5 +54,5 @@ func cleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
 	tablesStr := strings.Join(tables, ", ")
 	sql := fmt.Sprintf("TRUNCATE %v", tablesStr)
 	_, err := tx.Exec(ctx, sql)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 }

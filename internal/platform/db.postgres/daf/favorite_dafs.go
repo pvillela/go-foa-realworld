@@ -9,7 +9,8 @@ package daf
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 )
 
 // FavoriteCreateDafI is the instance of the DAF stereotype that
@@ -26,7 +27,13 @@ var FavoriteCreateDafI FavoriteCreateDafT = func(
 	`
 	args := []any{articleId, userId}
 	_, err := tx.Exec(ctx, sql, args...)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return kind.Make(err, bf.ErrMsgArticleAlreadyFavorited, articleId)
+		}
+		return kind.Make(err, "")
+	}
+	return nil
 }
 
 // FavoriteDeleteDafI is the instance of the DAF stereotype that
@@ -36,12 +43,19 @@ var FavoriteDeleteDafI FavoriteDeleteDafT = func(
 	tx pgx.Tx,
 	articleId uint,
 	userId uint,
-) (int, error) {
+) error {
 	sql := `
 	DELETE FROM favorites
 	WHERE article_id = $1 AND user_id = $2
 	`
 	args := []any{articleId, userId}
 	c, err := tx.Exec(ctx, sql, args...)
-	return int(c.RowsAffected()), errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+	if c.RowsAffected() == 0 {
+		return dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgArticleWasNotFavorited, articleId)
+	}
+
+	return nil
 }

@@ -9,7 +9,6 @@ package fl
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
@@ -34,11 +33,9 @@ var ArticleAndUserGetFlI ArticleAndUserGetFlT = func(
 ) (model.ArticlePlus, model.User, error) {
 	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
 	articleGetBySlugDaf := daf.ArticleGetBySlugDafI
-	articleCheckOwnerBf := bf.ArticleCheckOwnerBfI
 	return ArticleAndUserGetFlC0(
 		userGetByNameDaf,
 		articleGetBySlugDaf,
-		articleCheckOwnerBf,
 	)(ctx, tx, slug, username)
 }
 
@@ -47,7 +44,6 @@ var ArticleAndUserGetFlI ArticleAndUserGetFlT = func(
 func ArticleAndUserGetFlC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
-	articleCheckOwnerBf bf.ArticleCheckOwnerBfT,
 ) ArticleAndUserGetFlT {
 	return func(
 		ctx context.Context,
@@ -65,10 +61,6 @@ func ArticleAndUserGetFlC0(
 			return model.ArticlePlus{}, model.User{}, err
 		}
 
-		if err := articleCheckOwnerBf(article, username); err != nil {
-			return model.ArticlePlus{}, model.User{}, err
-		}
-
-		return article, user, err
+		return article, user, nil
 	}
 }

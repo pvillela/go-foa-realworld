@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -48,12 +49,12 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	fmt.Println("********** userDafsExample **********\n")
 
 	ctx, err := ctxDb.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
 
 	for i, _ := range users {
 		recCtx, err := daf.UserCreateDafI(ctx, &users[i])
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		_, _ = spew.Printf("user from Create: %v\n", users[i])
 		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
@@ -63,7 +64,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	//fmt.Println("Error classification:", dbpgx.ClassifyError(err))
 	//uerr := errors.Unwrap(err)
 	//fmt.Printf("Unwrapped error: %+v", uerr)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("UserGetByNameDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx, "\n")
 
@@ -75,12 +76,12 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	fmt.Printf("Unwrapped error: %+v\n\n", uerr)
 
 	userFromDb, recCtx, err = daf.UserGetByEmailDafI(ctx, "foo@bar.com")
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("UserGetByEmailDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx, "\n")
 
 	tx, err := dbpgx.GetCtxTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	readManySql := "SELECT * FROM users"
 	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql, -1, -1)
 	fmt.Println("pwUsers:", pwUsers, "\n")
@@ -89,18 +90,18 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0], "\n")
 
 	ctx, err = ctxDb.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	ctx, err = ctxDb.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	user := users[0]
 	user.ImageLink = util.PointerFromValue("https://xyz.com")
 	recCtx, err = daf.UserUpdateDafI(ctx, user, recCtx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)
 	fmt.Println("recCtx from Update:", recCtx, "\n")
 
 	_, err = ctxDb.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 }

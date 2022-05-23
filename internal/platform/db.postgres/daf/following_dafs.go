@@ -9,7 +9,8 @@ package daf
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 )
 
 // FollowingCreateDafI is the instance of the DAF stereotype that
@@ -26,8 +27,16 @@ var FollowingCreateDafI FollowingCreateDafT = func(
 	RETURNING followed_on
 	`
 	args := []any{followerId, followeeId}
+
 	_, err := tx.Exec(ctx, sql, args...)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return kind.Make(err, bf.ErrMsgUserAlreadyFollowed, followeeId)
+		}
+		return kind.Make(err, "")
+	}
+
+	return nil
 }
 
 // FollowingDeleteDafI is the instance of the DAF stereotype that
@@ -37,12 +46,19 @@ var FollowingDeleteDafI FollowingDeleteDafT = func(
 	tx pgx.Tx,
 	followerId uint,
 	followeeId uint,
-) (int, error) {
+) error {
 	sql := `
 	DELETE FROM followings
 	WHERE follower_id = $1 AND followee_id = $2
 	`
 	args := []any{followerId, followeeId}
 	c, err := tx.Exec(ctx, sql, args...)
-	return int(c.RowsAffected()), errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+	if c.RowsAffected() == 0 {
+		return dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgUserWasNotFollowed, followeeId)
+	}
+
+	return nil
 }

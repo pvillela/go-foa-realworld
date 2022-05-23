@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -34,20 +35,20 @@ func articleDafsExample(ctx context.Context, db dbpgx.Db) {
 	fmt.Println("********** articleDafsExample **********\n")
 
 	tx, err := db.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	for i, _ := range articles {
 		articles[i].AuthorId = users[1].Id
 		err := daf.ArticleCreateDafI(ctx, tx, &articles[i])
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("article from Create:", articles[i], "\n")
 	}
 
 	err = tx.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	tx, err = db.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	currUserId := users[0].Id
 
@@ -59,7 +60,7 @@ func articleDafsExample(ctx context.Context, db dbpgx.Db) {
 		Offset:      nil,
 	}
 	articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 
 	criteria = model.ArticleCriteria{
@@ -70,23 +71,23 @@ func articleDafsExample(ctx context.Context, db dbpgx.Db) {
 		Offset:      nil,
 	}
 	articlePluses, err = daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("\narticlesListDaf - by tag:", articlePluses, "\n")
 
 	articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUserId, articles[1].Slug)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("\nArticleGetBySlugDaf:", articleFromDb, "\n")
 
 	pArticle := &articles[0]
 	pArticle.Title = "A very interesting subject"
 	err = daf.ArticleUpdateDafI(ctx, tx, pArticle)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("ArticleUpdateDaf:", pArticle, "\n")
 
 	articlePluses, err = daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
 
 	err = tx.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 }

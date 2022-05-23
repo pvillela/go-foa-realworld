@@ -4,9 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package util
-
-import "github.com/pvillela/go-foa-realworld/internal/arch/errx"
+package errx
 
 // This function is a placeholder for code to be implemented.
 // It panics on execution, with an errx.Errx as the panic argument.
@@ -19,6 +17,6 @@ func TODO[T any](args ...string) T {
 	} else {
 		msg = args[0]
 	}
-	err := errx.NewErrx(nil, msg)
+	err := NewErrx(nil, msg)
 	panic(err)
 }

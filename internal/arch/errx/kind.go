@@ -4,10 +4,10 @@ import (
 	"runtime/debug"
 )
 
-// Kind encapsulates an error message string (possibly with argument placeholders) and a list
+// Kind encapsulates an error messag string (possibly with argument placeholders) and a list
 // of direct super-kinds it is to be considered to be related to.
 type Kind struct {
-	msg              string
+	name             string
 	directSuperKinds []*Kind
 }
 
@@ -25,35 +25,45 @@ func NewKind(msg string, superKinds ...*Kind) *Kind {
 	return &Kind{msg, superKinds}
 }
 
+// DefaultKind is used for on-the-fly construction of Errx instances.
+var DefaultKind = NewKind("Errx")
+
 // Helper function to instantiate Errx instances from Kind pointers.
 func (s *Kind) makeInternal(
 	cause error,
+	rawMsg string,
 	stackLinesToSuppress int,
 	args ...any,
 ) *errxImpl {
-	err := errxImpl{kind: s}
-	err.args = args
-	err.cause = cause
-	err.stack = debug.Stack()
-	err.stackLinesToSuppress = stackLinesToSuppress
+	err := errxImpl{
+		kind:                 s,
+		rawMsg:               rawMsg,
+		args:                 args,
+		cause:                cause,
+		stack:                debug.Stack(),
+		stackLinesToSuppress: stackLinesToSuppress,
+	}
 	return &err
 }
 
 // Make instantiates an Errx from a Kind pointer, creating a stack trace at the point of
 // instantiation.
-func (s *Kind) Make(cause error, args ...any) Errx {
-	err := s.makeInternal(cause, 3, args...)
+func (s *Kind) Make(cause error, rawMsg string, args ...any) Errx {
+	err := s.makeInternal(cause, rawMsg, 3, args...)
 	return err
 }
 
 // Decorate instantiates an Errx from a Kind pointer. The cause argument must be an Errx.
 // The difference between Make and Decorate is that Make sets a new stack trace at the point
 // of instantiation while Decorate effectively relies on the the stack trace provided by
-// its most recent cause which has a stack trace.
-func (s *Kind) Decorate(cause Errx, args ...any) Errx {
-	err := errxImpl{kind: s}
-	err.args = args
-	err.cause = cause
+// causes or its most recent cause which has a stack trace.
+func (s *Kind) Decorate(cause Errx, rawMsg string, args ...any) Errx {
+	err := errxImpl{
+		kind:   s,
+		rawMsg: rawMsg,
+		args:   args,
+		cause:  cause,
+	}
 	return &err
 }
 

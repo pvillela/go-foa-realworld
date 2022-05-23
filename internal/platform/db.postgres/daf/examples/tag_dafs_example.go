@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgconn"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -31,15 +32,15 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 	fmt.Println("********** tagDafsExample **********\n")
 
 	tx, err := db.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	for i, _ := range tags {
 		err := daf.TagCreateDafI(ctx, tx, &tags[i])
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("tag from Create:", tags[i], "\n")
 
 		err = daf.TagAddToArticleDafI(ctx, tx, tags[i], articles[1])
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 	}
 
 	tagsFromDb, err := daf.TagsGetAllDafI(ctx, tx)
@@ -48,9 +49,9 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 	// Try to insert same tag again
 	{
 		err = tx.Commit(ctx)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		tx, err = db.BeginTx(ctx)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 
 		err = daf.TagCreateDafI(ctx, tx, &tags[0])
 		fmt.Println("Duplicate tag insert:", err)
@@ -60,7 +61,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 		err = tx.Commit(ctx)
 		log.Debug(err, "\n\n")
 		tx, err = db.BeginTx(ctx)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 	}
 
 	currUserId := users[0].Id
@@ -74,21 +75,21 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 			Offset:      nil,
 		}
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 	}
 
 	{
 		// Add some more tags to database.
 		err = daf.TagsAddNewDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"})
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 
 		tagsFromDb, err = daf.TagsGetAllDafI(ctx, tx)
 		fmt.Println("Tags from database:", tagsFromDb, "\n")
 
 		// Add the new tags to an article.
 		err = daf.TagsAddToArticleDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"}, articles[1])
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 	}
 
 	{
@@ -100,7 +101,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 			Offset:      nil,
 		}
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 	}
 
@@ -113,16 +114,16 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 			Offset:      nil,
 		}
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - by tag:", articlePluses, "\n")
 	}
 
 	{
 		articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUserId, articles[1].Slug)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\nArticleGetBySlugDaf:", articleFromDb, "\n")
 	}
 
 	err = tx.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 }

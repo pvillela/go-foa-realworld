@@ -6,28 +6,32 @@
 
 package bf
 
-import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+import "github.com/pvillela/go-foa-realworld/internal/arch/errx"
+
+var (
+	ErrMsgDuplicateArticleSlug       = "duplicate article slug \"%v\""
+	ErrMsgDuplicateArticleUuid       = "duplicate article uuid %v"
+	ErrMsgArticleSlugNotFound        = "article slug \"%v\" not found"
+	ErrMsgArticleNotFound            = "article not found for Id %v"
+	ErrMsgArticleCreateMissingFields = "article has missing fields for Create operation"
+	ErrMsgArticleUpdateMissingFields = "article has missing fields for Update operation"
+	ErrMsgArticleAlreadyFavorited    = "article with ID \"%v\" has already been favoriated"
+	ErrMsgArticleWasNotFavorited     = "article with ID \"%v\" was not favorited"
+	ErrMsgCommentNotFound            = "comment not found for comment ID v%"
+	ErrMsgProfileNotFound            = "profile not found"
+	ErrMsgTagNameAlreadyExists       = "tag name %v already exists"
+	ErrMsgTagOnArticleAlreadyExists  = "tag with name %v already exists on article with slug %v"
+	ErrMsgUserEmailNotFound          = "user not found for email %v"
+	ErrMsgUsernameDuplicate          = "user with name \"%v\" already exists"
+	ErrMsgUsernameNotFound           = "user not found for username \"%v\""
+	ErrMsgUserAlreadyFollowed        = "user with username \"%v\" was already followed"
+	ErrMsgUserWasNotFollowed         = "user with username \"%v\" was not followed"
+	ErrMsgUnauthorizedUser           = "user \"%v\" not authorized to take this action"
+	ErrMsgAuthenticationFailed       = "user authentication failed with name \"%v\" and password \"%v\""
+	ErrMsgNotAuthenticated           = "user not authenticated"
+	ErrMsgDuplicateUserEmail         = "user with email %v already exists"
 )
 
 var (
-	ErrDuplicateArticleSlug       = errx.NewKind("duplicate article slug \"%v\"")
-	ErrDuplicateArticleUuid       = errx.NewKind("duplicate article uuid %v")
-	ErrArticleSlugNotFound        = errx.NewKind("article slug \"%v\" not found")
-	ErrArticleNotFound            = errx.NewKind("article not found for Id %v")
-	ErrArticleCreateMissingFields = errx.NewKind("article has missing fields for Create operation")
-	ErrArticleUpdateMissingFields = errx.NewKind("article has missing fields for Update operation")
-	ErrArticleAlreadyFavorited    = errx.NewKind("article with slug \"%v\" has already been favoriated", dbpgx.DbErrConstraintViolation)
-	ErrArticleWasNotFavorited     = errx.NewKind("article with slug \"%v\" was not favorited", dbpgx.DbErrRecordNotFound)
-	ErrCommentNotFound            = errx.NewKind("comment not found for articleUuid %v and id %")
-	ErrProfileNotFound            = errx.NewKind("profile not found")
-	ErrUserEmailNotFound          = errx.NewKind("user not found for email %v")
-	ErrUsernameNotFound           = errx.NewKind("user not found for username \"%v\"")
-	ErrUserWasNotFollowed         = errx.NewKind("user with username \"%v\" was not followed")
-	ErrUnauthorizedUser           = errx.NewKind("user \"%v\" not authorized to take this action")
-	ErrAuthenticationFailed       = errx.NewKind("user authentication failed with name \"%v\" and password \"%v\"")
-	ErrNotAuthenticated           = errx.NewKind("user not authenticated")
-	ErrDuplicateUserName          = errx.NewKind("user with name \"%v\" already exists")
-	ErrDuplicateUserEmail         = errx.NewKind("user with email %v already exists")
+	ErrUnauthorizedUser = errx.NewKind("ErrUnauthorizedUser")
 )

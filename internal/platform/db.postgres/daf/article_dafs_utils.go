@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -78,7 +79,7 @@ func readArticles(
 	optLimit *int,
 	optOffset *int,
 	additionalArgs ...any,
-) ([]model.ArticlePlus, error) {
+) ([]model.ArticlePlus, errx.Errx) {
 	// Construct SQL
 	orderBy := `
 	ORDER BY a.created_at DESC, t.name
@@ -101,8 +102,8 @@ func readArticles(
 	args := append([]any{currUserId}, additionalArgs...)
 	log.Debug("args: ", args)
 	rows, err := tx.Query(ctx, sql, args...)
-	if err != nil {
-		return nil, errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return nil, kind.Make(err, "")
 	}
 	defer rows.Close()
 
@@ -171,8 +172,8 @@ func readArticles(
 	// Main processing loop
 	for rows.Next() {
 		err = pgxscan.ScanRow(&currRecord, rows)
-		if err != nil {
-			return nil, errx.ErrxOf(err)
+		if kind := dbpgx.ClassifyError(err); kind != nil {
+			return nil, kind.Make(err, "")
 		}
 
 		if articleChanged() {

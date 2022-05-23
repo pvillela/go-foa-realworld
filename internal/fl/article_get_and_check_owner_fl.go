@@ -51,6 +51,9 @@ func ArticleGetAndCheckOwnerFlC0(
 		username string,
 	) (model.ArticlePlus, error) {
 		article, _, err := articleAndUserGetFl(ctx, tx, slug, username)
+		if err != nil {
+			return model.ArticlePlus{}, err
+		}
 
 		if err := articleCheckOwnerBf(article, username); err != nil {
 			return model.ArticlePlus{}, err

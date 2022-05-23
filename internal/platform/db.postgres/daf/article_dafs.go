@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
@@ -39,7 +40,13 @@ var ArticleCreateDafI ArticleCreateDafT = func(
 
 	row := tx.QueryRow(ctx, sql, args...)
 	err := row.Scan(&article.Id, &article.CreatedAt, &article.UpdatedAt)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return kind.Make(err, bf.ErrMsgDuplicateArticleSlug, article.Slug)
+		}
+		return kind.Make(err, "")
+	}
+	return nil
 }
 
 // ArticleGetBySlugDafI implements a stereotype instance of type
@@ -60,12 +67,12 @@ var ArticleGetBySlugDafI ArticleGetBySlugDafT = func(
 	if err != nil {
 		return model.ArticlePlus{}, err
 	}
-
 	if len(results) == 0 {
-		return model.ArticlePlus{}, bf.ErrArticleSlugNotFound.Make(nil, slug)
+		return model.ArticlePlus{},
+			dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgArticleSlugNotFound, slug)
 	}
 	if len(results) > 1 {
-		util.PanicOnError(errx.NewErrx(nil,
+		errx.PanicOnError(errx.NewErrx(nil,
 			fmt.Sprintf("Found multiple articles with same slug '%v'", slug)))
 	}
 
@@ -82,22 +89,22 @@ var ArticleUpdateDafI ArticleUpdateDafT = func(
 	sql := `
 	UPDATE articles 
 	SET title = $1, description = $2, body = $3, updated_at = NOW() 
-	WHERE id = $4 AND updated_at = $5
+	WHERE slug = $4 AND updated_at = $5
 	RETURNING updated_at
 	`
 	args := []any{
 		article.Title,
 		article.Description,
 		article.Body,
-		article.Id,
+		article.Slug,
 		article.UpdatedAt,
 	}
 	row := tx.QueryRow(ctx, sql, args...)
 	if err := row.Scan(&article.UpdatedAt); err != nil {
 		if err == pgx.ErrNoRows {
-			err = bf.ErrArticleSlugNotFound.Make(err, article.Slug)
+			err = dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgArticleSlugNotFound, article.Slug)
 		}
-		return err
+		return dbpgx.ClassifyError(err).Make(err, "")
 	}
 
 	return nil
@@ -109,13 +116,20 @@ var ArticleDeleteDafI ArticleDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
-) (int, error) {
+) error {
 	sql := `
 	DELETE FROM articles
 	WHERE slug = $1
 	`
 	c, err := tx.Exec(ctx, sql, slug)
-	return int(c.RowsAffected()), errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+	if c.RowsAffected() == 0 {
+		return dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgArticleSlugNotFound, slug)
+	}
+
+	return nil
 }
 
 // ArticlesFeedDafI implements a stereotype instance of type

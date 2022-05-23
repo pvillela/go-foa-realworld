@@ -14,7 +14,7 @@ type ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) err
 
 var ArticleCheckOwnerBfI ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) error {
 	if article.Author.Username != username {
-		return ErrUnauthorizedUser.Make(nil, username)
+		return ErrUnauthorizedUser.Make(nil, ErrMsgUnauthorizedUser, username)
 	}
 	return nil
 }

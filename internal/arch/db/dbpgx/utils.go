@@ -28,13 +28,17 @@ func ReadSingle[R any, F any](
 ) error {
 	sql := fmt.Sprintf("SELECT * FROM %v WHERE %v = $1", tableName, fieldName)
 	rows, err := tx.Query(ctx, sql, fieldValue)
-	if err != nil {
-		return errx.ErrxOf(err)
+	if kind := ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
 	}
 	defer rows.Close()
 
 	err = pgxscan.ScanOne(record, rows)
-	return errx.ErrxOf(err)
+	if kind := ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+
+	return nil
 }
 
 // ReadMany reads an array of records from the database. `mainSql` is the main query string,
@@ -55,15 +59,20 @@ func ReadMany[R any](
 	if offset >= 0 {
 		sql += fmt.Sprintf(" OFFSET %d", offset)
 	}
+
 	rows, err := tx.Query(ctx, sql, args...)
-	if err != nil {
-		return nil, errx.ErrxOf(err)
+	if kind := ClassifyError(err); kind != nil {
+		return nil, kind.Make(err, "")
 	}
 	defer rows.Close()
 
 	var dest []R
 	err = pgxscan.ScanAll(&dest, rows)
-	return dest, errx.ErrxOf(err)
+	if kind := ClassifyError(err); kind != nil {
+		return nil, kind.Make(err, "")
+	}
+
+	return dest, nil
 }
 
 // SqlState returns the the pgx SQLState() of err if err is wraps a *pgconn.PgError,
@@ -77,22 +86,26 @@ func SqlState(err error) string {
 }
 
 var (
-	DbErrRuntimeEnvironment        = errx.NewKind("database error runtime environment")
-	DbErrInternalAppError          = errx.NewKind("database internal application error")
-	DbErrConnectionException       = errx.NewKind("database connection exception")
-	DbErrConstraintViolation       = errx.NewKind("database error constraint violation")
-	DbErrUniqueViolation           = errx.NewKind("database error unique violation", DbErrConstraintViolation)
-	DbErrInsufficientResources     = errx.NewKind("database error insufficient resources", DbErrRuntimeEnvironment)
-	DbErrOperatorIntervention      = errx.NewKind("database error operator intervention", DbErrRuntimeEnvironment)
-	DbErrExternalSystemError       = errx.NewKind("database external system error", DbErrRuntimeEnvironment)
-	DbErrEngineError               = errx.NewKind("database engine error", DbErrRuntimeEnvironment)
-	DbErrRecordNotFound            = errx.NewKind("database error record not found")
-	DbErrUnexpectedMultipleRecords = errx.NewKind("database error unexpected multiple records")
+	DbErrRuntimeEnvironment        = errx.NewKind("DbErrRuntimeEnvironment")
+	DbErrInternalAppError          = errx.NewKind("DbErrInternalAppError")
+	DbErrConnectionException       = errx.NewKind("DbErrConnectionException")
+	DbErrConstraintViolation       = errx.NewKind("DbErrConstraintViolation")
+	DbErrUniqueViolation           = errx.NewKind("DbErrUniqueViolation", DbErrConstraintViolation)
+	DbErrInsufficientResources     = errx.NewKind("DbErrInsufficientResources", DbErrRuntimeEnvironment)
+	DbErrOperatorIntervention      = errx.NewKind("DbErrOperatorIntervention", DbErrRuntimeEnvironment)
+	DbErrExternalSystemError       = errx.NewKind("DbErrExternalSystemError", DbErrRuntimeEnvironment)
+	DbErrEngineError               = errx.NewKind("DbErrEngineError", DbErrRuntimeEnvironment)
+	DbErrRecordNotFound            = errx.NewKind("DbErrRecordNotFound")
+	DbErrUnexpectedMultipleRecords = errx.NewKind("DbErrUnexpectedMultipleRecords")
 )
 
 // ClassifyError returns an database-related *errx.Kind that corresponds to err.
 func ClassifyError(err error) *errx.Kind {
-	if ok := errors.As(err, &pgx.ErrNoRows); ok {
+	if err == nil {
+		return nil
+	}
+
+	if ok := errors.As(err, &pgx.ErrNoRows); ok || pgxscan.NotFound(err) {
 		return DbErrRecordNotFound
 	}
 

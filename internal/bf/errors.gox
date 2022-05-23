@@ -1,0 +1,77 @@
+/*
+ * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Use of this source code is governed by the Apache 2.0 license
+ * that can be found in the LICENSE file.
+ */
+
+package bf
+
+import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+)
+
+var ErrMsgArticleSlugNotFound = "article slug \"%v\" not found"
+
+func ErrDuplicateArticleSlug(err errx.Errx, slug string) errx.Errx {
+	return err.Customize("duplicate article slug \"%v\"", slug)
+}
+
+func ErrArticleSlugNotFound(err errx.Errx, slug string) errx.Errx {
+	return err.Customize("article slug \"%v\" not found", slug)
+}
+
+func ErrArticleNotFound(err errx.Errx, id uint) errx.Errx {
+	return err.Customize("article not found for Id %v", id)
+}
+
+func ErrArticleCreateMissingFields(err errx.Errx) errx.Errx {
+	return err.Customize("article has missing fields for Create operation")
+}
+
+func ErrArticleUpdateMissingFields(err errx.Errx) errx.Errx {
+	return err.Customize("article has missing fields for Update operation")
+}
+
+func ErrArticleAlreadyFavorited(err errx.Errx, slug string) errx.Errx {
+	return err.Customize("article with slug \"%v\" has already been favorited", slug)
+}
+
+func ErrArticleWasNotFavorited(err errx.Errx, slug string) errx.Errx {
+	return err.Customize("article with slug \"%v\" was not favorited", slug)
+}
+
+func ErrCommentNotFound(err errx.Errx, articleId uint) errx.Errx {
+	return err.Customize("comment not found for article ID %v", articleId)
+}
+
+func ErrProfileNotFound(err errx.Errx, username string) errx.Errx {
+	return err.Customize("profile not found for username \"%v\"", username)
+}
+
+func ErrUserEmailNotFound(err errx.Errx, email string) errx.Errx {
+	return err.Customize("user not found for email %v", email)
+}
+
+func ErrUsernameNotFound(err errx.Errx, username string) errx.Errx {
+	return err.Customize("user not found for username \"%v\"", username)
+}
+
+func ErrUserWasNotFollowed(err errx.Errx, followeeUsername string) errx.Errx {
+	return err.Customize("user with username \"%v\" was not followed", followeeUsername)
+}
+
+func ErrUnauthorizedUser(err errx.Errx, username string) errx.Errx {
+	return err.Customize("user \"%v\" not authorized to take this action", username)
+}
+
+func ErrAuthenticationFailed(err errx.Errx, username string, password string) errx.Errx {
+	return err.Customize("user authentication failed with name \"%v\" and password \"%v\"", username, password)
+}
+
+func ErrDuplicateUsername(err errx.Errx, username string) errx.Errx {
+	return err.Customize("user with name \"%v\" already exists", username)
+}
+
+func ErrDuplicateUserEmail(err errx.Errx, email string) errx.Errx {
+	return err.Customize("user with email %v already exists", email)
+}

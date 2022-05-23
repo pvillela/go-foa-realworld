@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -41,7 +41,13 @@ var TagCreateDafI TagCreateDafT = func(
 	args := []any{strings.ToUpper(tag.Name)}
 	row := tx.QueryRow(ctx, sql, args...)
 	err := row.Scan(&tag.Id)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return kind.Make(err, bf.ErrMsgTagNameAlreadyExists, tag.Name)
+		}
+		return kind.Make(err, "")
+	}
+	return nil
 }
 
 // TagsAddNewDafI implements a stereotype instance of type
@@ -75,8 +81,13 @@ var TagsAddNewDafI TagsAddNewDafT = func(
 	valueString := strings.Join(values, ", ")
 	sql := fmt.Sprintf(preSql, valueString)
 	log.Debug("sql:", sql)
+
 	_, err := tx.Exec(ctx, sql)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+
+	return nil
 }
 
 // TagAddToArticleDafI implements a stereotype instance of type
@@ -93,7 +104,13 @@ var TagAddToArticleDafI TagAddToArticleDafT = func(
 	`
 	args := []any{article.Id, tag.Id}
 	_, err := tx.Exec(ctx, sql, args...)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return kind.Make(err, bf.ErrMsgTagOnArticleAlreadyExists, tag.Name, article.Slug)
+		}
+		return kind.Make(err, "")
+	}
+	return nil
 }
 
 // TagsAddToArticleDafI implements a stereotype instance of type
@@ -122,6 +139,11 @@ var TagsAddToArticleDafI TagsAddToArticleDafT = func(
 	valueString := strings.Join(values, ", ")
 	sql := fmt.Sprintf(preSql, valueString)
 	log.Debug("sql:", sql)
+
 	_, err := tx.Exec(ctx, sql, article.Id)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+
+	return nil
 }

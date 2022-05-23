@@ -10,7 +10,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"github.com/alexedwards/argon2id"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,7 +21,7 @@ var bcryptCost = 13
 
 func BcryptPasswordHash(password string) string {
 	hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	return string(hashBytes)
 }
 
@@ -43,13 +43,13 @@ var argonParams = &argon2id.Params{
 
 func ArgonPasswordHash(password string) string {
 	hash, err := argon2id.CreateHash(password, argonParams)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	return hash
 }
 
 func ArgonPasswordCheck(password string, hash string) bool {
 	match, err := argon2id.ComparePasswordAndHash(password, hash)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 	return match
 }
 

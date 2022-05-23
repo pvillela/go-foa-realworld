@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -19,7 +20,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 	fmt.Println("********** FavoriteDafsExample **********\n")
 
 	tx, err := db.BeginTx(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 
 	Favorites := []model.Favorite{
 		{
@@ -34,7 +35,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 
 	for i, _ := range Favorites {
 		err := daf.FavoriteCreateDafI(ctx, tx, Favorites[i].ArticleId, Favorites[i].UserId)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 	}
 
 	{
@@ -48,7 +49,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 			Offset:      nil,
 		}
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 	}
 
@@ -63,13 +64,13 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 			Offset:      nil,
 		}
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 	}
 
 	{
-		_, err := daf.FavoriteDeleteDafI(ctx, tx, Favorites[1].ArticleId, Favorites[1].UserId)
-		util.PanicOnError(err)
+		err := daf.FavoriteDeleteDafI(ctx, tx, Favorites[1].ArticleId, Favorites[1].UserId)
+		errx.PanicOnError(err)
 
 		currUserId := users[0].Id
 
@@ -81,10 +82,10 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 			Offset:      nil,
 		}
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		util.PanicOnError(err)
+		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 	}
 
 	err = tx.Commit(ctx)
-	util.PanicOnError(err)
+	errx.PanicOnError(err)
 }

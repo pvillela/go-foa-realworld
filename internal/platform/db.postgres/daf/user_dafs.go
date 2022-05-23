@@ -8,10 +8,10 @@ package daf
 
 import (
 	"context"
-	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	log "github.com/sirupsen/logrus"
@@ -40,9 +40,10 @@ var UserGetByNameExplicitTxDafI UserGetByNameExplicitTxDafT = func(
 ) (model.User, RecCtxUser, error) {
 	pwUser := PwUser{}
 	err := dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
-	if err != nil {
-		if pgxscan.NotFound(err) {
-			err = bf.ErrUsernameNotFound.Make(err, username)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrRecordNotFound {
+			errX := util.SafeCast[errx.Errx](err)
+			return model.User{}, RecCtxUser{}, errX.Customize(bf.ErrMsgUsernameNotFound, username)
 		}
 		return model.User{}, RecCtxUser{}, err
 	}
@@ -61,9 +62,10 @@ var UserGetByEmailDafI UserGetByEmailDafT = func(
 	}
 	pwUser := PwUser{}
 	err = dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &pwUser)
-	if err != nil {
-		if pgxscan.NotFound(err) {
-			err = bf.ErrUserEmailNotFound.Make(err, email)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrRecordNotFound {
+			return model.User{}, RecCtxUser{},
+				kind.Decorate(util.SafeCast[errx.Errx](err), bf.ErrMsgUserEmailNotFound, email)
 		}
 		return model.User{}, RecCtxUser{}, err
 	}
@@ -97,7 +99,14 @@ var UserCreateDafI UserCreateDafT = func(
 	row := tx.QueryRow(ctx, sql, args...)
 	var recCtx RecCtxUser
 	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
-	return recCtx, errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameDuplicate, user.Username)
+		}
+		return RecCtxUser{}, kind.Make(err, "")
+	}
+
+	return recCtx, nil
 }
 
 // UserUpdateDafI implements a stereotype instance of type
@@ -131,13 +140,19 @@ var UserUpdateDafI UserUpdateDafT = func(
 	}
 	log.Debug("UserUpdateDaf sql: ", sql)
 	log.Debug("UserUpdateDaf args: ", args)
+
 	row := tx.QueryRow(ctx, sql, args...)
-	if err := row.Scan(&recCtx.UpdatedAt); err != nil {
-		if err == pgx.ErrNoRows {
-			err = bf.ErrUsernameNotFound.Make(err, user.Username)
+	err = row.Scan(&recCtx.UpdatedAt)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrUniqueViolation {
+			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameDuplicate, user.Username)
 		}
-		return RecCtxUser{}, err
+		if kind == dbpgx.DbErrRecordNotFound {
+			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameNotFound, user.Username)
+		}
+		return RecCtxUser{}, kind.Make(err, "")
 	}
+
 	return recCtx, nil
 }
 
@@ -154,5 +169,12 @@ func userDeleteByUsernameDaf(
 	WHERE username = $1
 	`
 	_, err = tx.Exec(ctx, sql, username)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind == dbpgx.DbErrRecordNotFound {
+			return kind.Make(err, bf.ErrMsgUsernameNotFound, username)
+		}
+		return kind.Make(err, "")
+	}
+
+	return nil
 }

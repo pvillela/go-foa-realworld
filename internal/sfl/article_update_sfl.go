@@ -64,6 +64,8 @@ func ArticleUpdateSflC0(
 			return rpc.ArticleOut{}, err
 		}
 
+		//TODO: Review instances of row.Scan to make sure error handling is done properly
+
 		username := web.ContextToRequestContext(ctx).Username
 
 		slug := in.Article.Slug

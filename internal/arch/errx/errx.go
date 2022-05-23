@@ -2,6 +2,7 @@ package errx
 
 import (
 	"fmt"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 )
 
 /////////////////////
@@ -22,8 +23,8 @@ type Errx interface {
 	// Args returns the arguments that are substituted into KindMsg().
 	Args() []any
 
-	// KindMsg returns the raw message for the error's kind, i.e., Kind().msg.
-	KindMsg() string
+	// RawMsg returns the raw message for the error, i.e., without args substitution.
+	RawMsg() string
 
 	// Msg returns the error's message with arguments substituted.
 	Msg() string
@@ -46,6 +47,10 @@ type Errx interface {
 
 	// StackTrace returns a stack trace from the point where the error was created.
 	StackTrace() string
+
+	// Customize changes the raw error message and arguments of the receiver.
+	// Returns the modified receiver.
+	Customize(rawMsg string, args ...any) Errx
 }
 
 // Interface verification
@@ -58,6 +63,7 @@ func _() {
 
 type errxImpl struct {
 	kind                 *Kind
+	rawMsg               string
 	args                 []any
 	cause                error
 	stack                []byte
@@ -67,29 +73,21 @@ type errxImpl struct {
 /////////////////////
 // Helper functions
 
-func castToErrx(err error) *errxImpl {
-	errx, ok := err.(*errxImpl)
-	if ok {
-		return errx
-	}
-	return nil
-}
-
 func (e *errxImpl) msgWithArgs() string {
-	return fmt.Sprintf(e.kind.msg, e.args...)
+	return fmt.Sprintf(e.kind.name+"["+e.rawMsg+"]", e.args...)
 }
 
 func (e *errxImpl) traverseErrxChain(includeSelf bool, f func(*errxImpl) bool) {
 	err := e
 	if !includeSelf {
-		err = castToErrx(err.cause)
+		err = util.SafeCast[*errxImpl](err.cause)
 	}
 	for err != nil {
 		cont := f(err)
 		if !cont {
 			return
 		}
-		err = castToErrx(err.cause)
+		err = util.SafeCast[*errxImpl](err.cause)
 	}
 	return
 }
@@ -113,8 +111,8 @@ func (e *errxImpl) Args() []any {
 	return e.args
 }
 
-func (e *errxImpl) KindMsg() string {
-	return e.kind.msg
+func (e *errxImpl) RawMsg() string {
+	return e.rawMsg
 }
 
 func (e *errxImpl) Msg() string {
@@ -207,23 +205,24 @@ func (e *errxImpl) StackTrace() string {
 	return "errx.Errx: " + e.Error() + "\n" + string(trimmedStack)
 }
 
+func (e *errxImpl) Customize(rawMsg string, args ...any) Errx {
+	e.rawMsg = rawMsg
+	e.args = args
+	return e
+}
+
 /////////////////////
 // Factory functions. See also kind.go for additional factory functions.
 
 // Helper method to create an Errx whose Kind is defined on-the-fly using msg.
-func newErrxInternal(cause error, msg string, stackLinesToSuppress int) Errx {
-	kind := NewKind(msg)
-	err := kind.makeInternal(cause, stackLinesToSuppress)
+func newErrxInternal(cause error, rawMsg string, stackLinesToSuppress int, args []any) Errx {
+	err := DefaultKind.makeInternal(cause, rawMsg, stackLinesToSuppress, args...)
 	return err
 }
 
 // NewErrx creates an Errx whose Kind is defined on-the-fly using msg.
-func NewErrx(cause error, msg string, args ...any) Errx {
-	msgWithArgs := msg
-	if len(args) != 0 {
-		msgWithArgs = fmt.Sprintf(msg, args...)
-	}
-	return newErrxInternal(cause, msgWithArgs, 4)
+func NewErrx(cause error, rawMsg string, args ...any) Errx {
+	return newErrxInternal(cause, rawMsg, 4, args)
 }
 
 // ErrxOf creates an Errx from r.
@@ -246,9 +245,9 @@ func ErrxOf(r any) Errx {
 	errX, ok := err.(Errx)
 	if !ok {
 		if err != nil {
-			errX = newErrxInternal(err, ".", 4)
+			errX = newErrxInternal(err, ".", 4, nil)
 		} else {
-			errX = newErrxInternal(nil, fmt.Sprintf("%v", r), 4)
+			errX = newErrxInternal(nil, fmt.Sprintf("%v", r), 4, nil)
 		}
 	}
 	return errX

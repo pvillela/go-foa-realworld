@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -34,7 +34,10 @@ var CommentCreateDafI CommentCreateDafT = func(
 
 	row := tx.QueryRow(ctx, sql, args...)
 	err := row.Scan(&comment.Id, &comment.CreatedAt)
-	return errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+	return nil
 }
 
 // CommentsGetBySlugDafI implements a stereotype instance of type
@@ -61,11 +64,19 @@ var CommentDeleteDafI CommentDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	id uint,
-) (int, error) {
+) error {
 	sql := `
 	DELETE FROM comments
 	WHERE id = $1
 	`
 	c, err := tx.Exec(ctx, sql, id)
-	return int(c.RowsAffected()), errx.ErrxOf(err)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return kind.Make(err, "")
+	}
+	if c.RowsAffected() == 0 {
+		return dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgCommentNotFound, id)
+	}
+
+	return nil
+
 }
