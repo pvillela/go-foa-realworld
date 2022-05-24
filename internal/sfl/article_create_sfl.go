@@ -60,6 +60,10 @@ func ArticleCreateSflC0(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.ArticleOut, error) {
+			err := in.Validate()
+			if err != nil {
+				return rpc.ArticleOut{}, err
+			}
 			username := reqCtx.Username
 
 			user, _, err := userGetByNameDaf(ctx, tx, username)
@@ -67,7 +71,6 @@ func ArticleCreateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			// Performs input validation.
 			article, err := in.ToArticle(&user)
 			if err != nil {
 				return rpc.ArticleOut{}, err
@@ -90,7 +93,7 @@ func ArticleCreateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			articlePlus := model.ArticlePlus_FromArticle(article, user)
+			articlePlus := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(&user, false))
 			articleOut := rpc.ArticleOut_FromModel(articlePlus)
 
 			return articleOut, nil

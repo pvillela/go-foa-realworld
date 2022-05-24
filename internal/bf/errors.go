@@ -14,7 +14,6 @@ var (
 	ErrMsgArticleSlugNotFound        = "article slug \"%v\" not found"
 	ErrMsgArticleNotFound            = "article not found for Id %v"
 	ErrMsgArticleCreateMissingFields = "article has missing fields for Create operation"
-	ErrMsgArticleUpdateMissingFields = "article has missing fields for Update operation"
 	ErrMsgArticleAlreadyFavorited    = "article with ID \"%v\" has already been favoriated"
 	ErrMsgArticleWasNotFavorited     = "article with ID \"%v\" was not favorited"
 	ErrMsgCommentNotFound            = "comment not found for comment ID v%"
@@ -33,5 +32,7 @@ var (
 )
 
 var (
-	ErrUnauthorizedUser = errx.NewKind("ErrUnauthorizedUser")
+	ErrUnauthorizedUser           = errx.NewKind("ErrUnauthorizedUser")
+	ErrArticleCreateMissingFields = errx.NewKind("ErrArticleCreateMissingFields")
+	ErrArticleUpdateMissingFields = errx.NewKind("ErrArticleUpdateMissingFields")
 )

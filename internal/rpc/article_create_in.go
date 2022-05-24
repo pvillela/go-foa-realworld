@@ -20,11 +20,15 @@ type ArticleCreateIn struct {
 	}
 }
 
-func (in ArticleCreateIn) ToArticle(author *model.User) (model.Article, error) {
+func (in ArticleCreateIn) Validate() error {
 	if in.Article.Title == "" || in.Article.Description == "" || in.Article.Body == nil {
-		return model.Article{}, bf.ErrArticleCreateMissingFields.Make(nil)
+		return bf.ErrArticleCreateMissingFields.Make(nil,
+			"article has missing fields for Create operation")
 	}
+	return nil
+}
 
+func (in ArticleCreateIn) ToArticle(author *model.User) (model.Article, error) {
 	tagList := in.Article.TagList
 	if tagList == nil {
 		tagList = new([]string)

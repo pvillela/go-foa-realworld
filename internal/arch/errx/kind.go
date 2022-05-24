@@ -21,8 +21,8 @@ func KindOf(err error) *Kind {
 }
 
 // NewKind instantiates a Kind.
-func NewKind(msg string, superKinds ...*Kind) *Kind {
-	return &Kind{msg, superKinds}
+func NewKind(name string, superKinds ...*Kind) *Kind {
+	return &Kind{name, superKinds}
 }
 
 // DefaultKind is used for on-the-fly construction of Errx instances.

@@ -10,9 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
@@ -70,10 +68,6 @@ func ArticleFavoriteSflC0(
 
 			err = favoriteCreateDaf(ctx, tx, articlePlus.Id, user.Id)
 			if err != nil {
-				if kind := dbpgx.ClassifyError(err); kind == dbpgx.DbErrUniqueViolation {
-					errX := err.(errx.Errx)
-					return zero, bf.ErrArticleAlreadyFavorited.Decorate(errX, slug)
-				}
 				return zero, err
 			}
 

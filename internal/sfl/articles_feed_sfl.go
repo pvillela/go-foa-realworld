@@ -8,47 +8,58 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/bf"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticlesFeedSflT is the type of the stereotype instance for the service flow that
 // queries for all articles authored by other users followed by
 // the current user, with optional limit and offset pagination parameters.
-type ArticlesFeedSflT = func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error)
+type ArticlesFeedSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	in rpc.ArticlesFeedIn,
+) (rpc.ArticlesOut, error)
 
 // ArticlesFeedSflC is the function that constructs a stereotype instance of type
-// ArticlesFeedSflT.
-func ArticlesFeedSflC(
-	userGetByNameDaf daf.UserGetByNameDafT,
-	articleGetRecentForAuthorsDaf bf.ArticleGetRecentForAuthorsDafT,
+// ArticlesFeedSflT with hard-wired stereotype dependencies.
+
+// ArticlesFeedSflC0 is the function that constructs a stereotype instance of type
+// ArticlesFeedSflT without hard-wired stereotype dependencies.
+func ArticlesFeedSflC0(
+	db dbpgx.Db,
+	UserGetByNameDaf daf.UserGetByNameExplicitTxDafT,
+	articlesFeedDaf daf.ArticlesFeedDafT,
 ) ArticlesFeedSflT {
-	return func(ctx context.Context, in rpc.ArticlesFeedIn) (rpc.ArticlesOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		in rpc.ArticlesFeedIn,
+	) (rpc.ArticlesOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.ArticlesOut, error) {
+			username := reqCtx.Username
+			zero := rpc.ArticlesOut{}
 
-		var zero rpc.ArticlesOut
-		var user model.User
-		var err error
+			user, _, err := UserGetByNameDaf(ctx, tx, username)
+			if err != nil {
+				return zero, err
+			}
 
-		if username == "" {
-			return zero, bf.ErrNotAuthenticated.Make(nil)
-		}
+			articlesPlus, err := articlesFeedDaf(ctx, tx, user.Id, in.Limit, in.Offset)
+			if err != nil {
+				return zero, err
+			}
 
-		user, _, err = userGetByNameDaf(username)
-		if err != nil {
-			return zero, err
-		}
-
-		articles, err := articleGetRecentForAuthorsDaf(user.Followees, in.Limit, in.Offset)
-		if err != nil {
-			return zero, err
-		}
-
-		articlesOut := rpc.ArticlesOut_FromModel(user, articles)
-		return articlesOut, err
+			articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
+			
+			return articlesOut, err
+		})
 	}
 }

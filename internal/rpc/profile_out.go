@@ -14,6 +14,6 @@ type ProfileOut struct {
 
 func ProfileOut_FromModel(user *model.User, follows bool) ProfileOut {
 	s := ProfileOut{}
-	s.Profile = model.ProfileFromUser(user, follows)
+	s.Profile = model.Profile_FromUser(user, follows)
 	return s
 }

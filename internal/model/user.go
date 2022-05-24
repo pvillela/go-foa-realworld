@@ -82,7 +82,7 @@ func (s User) Update(v UserPatch) User {
 	return s
 }
 
-func ProfileFromUser(user *User, follows bool) Profile {
+func Profile_FromUser(user *User, follows bool) Profile {
 	return Profile{
 		Username:  user.Username,
 		Bio:       user.Bio,

@@ -68,6 +68,8 @@ func Article_Create(
 	return article
 }
 
+// Update returns an updated copy of the receiver.
+// It does not change the slug when the title changes.
 func (s Article) Update(src ArticlePatch) Article {
 	if src.Title != nil {
 		s.Title = *src.Title
@@ -81,8 +83,6 @@ func (s Article) Update(src ArticlePatch) Article {
 	if src.TagList != nil {
 		s.TagList = *src.TagList
 	}
-
-	s.Slug = util.Slug(s.Title)
 
 	return s
 }
@@ -107,15 +107,15 @@ func (s ArticlePlus) ToArticle() Article {
 	}
 }
 
-func ArticlePlus_FromArticle(article Article, author User) ArticlePlus {
+func ArticlePlus_FromArticle(article Article, author Profile) ArticlePlus {
 	return ArticlePlus{
 		Id:   article.Id,
 		Slug: article.Slug,
 		Author: Profile{
-			UserId:    author.Id,
+			UserId:    author.UserId,
 			Username:  author.Username,
 			Bio:       author.Bio,
-			Image:     author.ImageLink,
+			Image:     author.Image,
 			Following: false,
 		},
 		Title:          article.Title,

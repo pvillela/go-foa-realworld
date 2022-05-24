@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
@@ -67,12 +66,9 @@ func ArticleUnfavoriteSflC0(
 				return zero, err
 			}
 
-			rowsAffected, err := favoriteDeleteDaf(ctx, tx, articlePlus.Id, user.Id)
+			err = favoriteDeleteDaf(ctx, tx, articlePlus.Id, user.Id)
 			if err != nil {
 				return zero, err
-			}
-			if rowsAffected == 0 {
-				return zero, bf.ErrArticleWasNotFavorited.Make(nil, slug)
 			}
 
 			article := articlePlus.ToArticle()

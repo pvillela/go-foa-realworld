@@ -54,7 +54,7 @@ func ArticleDeleteSflC0(
 			}
 
 			// Record existence is guaranteed by above code.
-			_, err = articleDeleteDaf(ctx, tx, slug)
+			err = articleDeleteDaf(ctx, tx, slug)
 			return arch.Void, err
 		})
 	}

@@ -21,22 +21,18 @@ type ArticlesOut struct {
 	ArticlesCount int
 }
 
-// TODO
 func ArticleOut_FromModel(articlePlus model.ArticlePlus) ArticleOut {
 	return ArticleOut{articlePlus}
 }
 
-// TODO
-//func ArticlesOut_FromModel(
-//	articles []model.Article,
-//	followsAuthors []bool,
-//	likesArticles []bool,
-//) ArticlesOut {
-//	outs := []ArticleOut{} // return at least an empty array (not nil)
-//
-//	for i, article := range articles {
-//		outs = append(outs, ArticleOut_FromModel(article, followsAuthors[i], likesArticles[i]))
-//	}
-//
-//	return ArticlesOut{outs, len(outs)}
-//}
+func ArticlesOut_FromModel(
+	articlesPlus []model.ArticlePlus,
+) ArticlesOut {
+	outs := make([]ArticleOut, len(articlesPlus))
+
+	for i := range articlesPlus {
+		outs[i] = ArticleOut_FromModel(articlesPlus[i])
+	}
+
+	return ArticlesOut{outs, len(outs)}
+}
