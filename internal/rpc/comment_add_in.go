@@ -7,7 +7,7 @@
 package rpc
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
@@ -20,9 +20,17 @@ type commentAddIn0 struct {
 	Body *string // mandatory
 }
 
-// ToComment
-// TODO: move this directly to the SFL because we have to read the article based on the slug
-//   to get the uuid.
-func (in CommentAddIn) ToComment(articleUuid util.Uuid, commentAuthor model.User) model.Comment {
-	return model.Comment_Create(articleUuid, in.Comment.Body, commentAuthor)
+func (in CommentAddIn) ToComment(articleId uint, commentAuthorId uint) model.Comment {
+	return model.Comment{
+		ArticleId: articleId,
+		AuthorId:  commentAuthorId,
+		Body:      in.Comment.Body,
+	}
+}
+
+func (in CommentAddIn) Validate() error {
+	if in.Slug == "" || in.Comment.Body == nil {
+		return bf.ErrValidationFailed.Make(nil, "slug or body is missing")
+	}
+	return nil
 }

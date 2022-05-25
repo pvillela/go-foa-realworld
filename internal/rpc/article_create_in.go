@@ -22,7 +22,7 @@ type ArticleCreateIn struct {
 
 func (in ArticleCreateIn) Validate() error {
 	if in.Article.Title == "" || in.Article.Description == "" || in.Article.Body == nil {
-		return bf.ErrArticleCreateMissingFields.Make(nil,
+		return bf.ErrValidationFailed.Make(nil,
 			"article has missing fields for Create operation")
 	}
 	return nil

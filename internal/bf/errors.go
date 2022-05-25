@@ -32,7 +32,6 @@ var (
 )
 
 var (
-	ErrUnauthorizedUser           = errx.NewKind("ErrUnauthorizedUser")
-	ErrArticleCreateMissingFields = errx.NewKind("ErrArticleCreateMissingFields")
-	ErrArticleUpdateMissingFields = errx.NewKind("ErrArticleUpdateMissingFields")
+	ErrUnauthorizedUser = errx.NewKind("ErrUnauthorizedUser")
+	ErrValidationFailed = errx.NewKind("ErrValidationFailed")
 )

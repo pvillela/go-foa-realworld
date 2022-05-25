@@ -9,10 +9,9 @@ package model
 import "time"
 
 type Comment struct {
-	ArticleId uint
 	Id        uint
+	ArticleId uint
 	AuthorId  uint
-	Author    *User
 	Body      *string
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -20,17 +19,15 @@ type Comment struct {
 
 func Comment_Create(
 	articleId uint,
+	authorId uint,
 	body *string,
-	author *User,
 ) Comment {
-	now := time.Now()
-	comment := Comment{
-		ArticleId: articleId,
+	return Comment{
 		Id:        0,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ArticleId: articleId,
+		AuthorId:  authorId,
 		Body:      body,
-		Author:    author,
+		//CreatedAt: now,
+		//UpdatedAt: now,
 	}
-	return comment
 }

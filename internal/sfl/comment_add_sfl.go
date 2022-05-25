@@ -8,59 +8,74 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // CommentAddSflT is the type of the stereotype instance for the service flow that
 // adds a comment to an article.
-type CommentAddSflT = func(ctx context.Context, in rpc.CommentAddIn) (rpc.CommentOut, error)
+type CommentAddSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	in rpc.CommentAddIn,
+) (rpc.CommentOut, error)
 
 // CommentAddSflC is the function that constructs a stereotype instance of type
-// CommentAddSflT.
+// CommentAddSflT with hard-wired stereotype dependencies.
 func CommentAddSflC(
-	beginTxn func(context string) db.Txn,
-	userGetByNameDaf daf.UserGetByNameDafT,
-	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
-	commentCreateDaf daf.CommentCreateDafT,
-	articleUpdateDaf daf.ArticleUpdateDafT,
+	db dbpgx.Db,
 ) CommentAddSflT {
-	return func(ctx context.Context, in rpc.CommentAddIn) (rpc.CommentOut, error) {
-		username := web.ContextToRequestContext(ctx).Username
+	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	commentCreateDaf := daf.CommentCreateDafI
+	return CommentAddSflC0(
+		db,
+		articleAndUserGetFl,
+		commentCreateDaf,
+	)
+}
 
-		txn := beginTxn("ArticleCreateSflS")
-		defer txn.End()
+// CommentAddSflC0 is the function that constructs a stereotype instance of type
+// CommentAddSflT without hard-wired stereotype dependencies.
+func CommentAddSflC0(
+	db dbpgx.Db,
+	articleAndUserGetFl fl.ArticleAndUserGetFlT,
+	commentCreateDaf daf.CommentCreateDafT,
+) CommentAddSflT {
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		in rpc.CommentAddIn,
+	) (rpc.CommentOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.CommentOut, error) {
+			err := in.Validate()
+			if err != nil {
+				return rpc.CommentOut{}, err
+			}
 
-		var zero rpc.CommentOut
-		var err error
+			username := reqCtx.Username
 
-		commentAuthor, _, err := userGetByNameDaf(username)
-		if err != nil {
-			return zero, err
-		}
+			articlePlus, user, err := articleAndUserGetFl(ctx, tx, in.Slug, username)
+			if err != nil {
+				return rpc.CommentOut{}, err
+			}
 
-		article, rc, err := articleGetBySlugDaf(in.Slug)
-		if err != nil {
-			return zero, err
-		}
+			comment := in.ToComment(articlePlus.Id, user.Id)
 
-		rawComment := in.ToComment(article.Id, commentAuthor)
+			err = commentCreateDaf(ctx, tx, &comment)
+			if err != nil {
+				return rpc.CommentOut{}, err
+			}
 
-		insertedComment, _, err := commentCreateDaf(rawComment, txn)
-		if err != nil {
-			return zero, err
-		}
-
-		article.Comments = append(article.Comments, insertedComment)
-
-		if _, err := articleUpdateDaf(article, rc, txn); err != nil {
-			return zero, err
-		}
-
-		commentOut := rpc.CommentOut_FromModel(insertedComment)
-		return commentOut, err
+			commentOut := rpc.CommentOut_FromModel(comment)
+			return commentOut, nil
+		})
 	}
 }

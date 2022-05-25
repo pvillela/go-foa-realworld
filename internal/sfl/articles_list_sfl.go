@@ -8,7 +8,9 @@ package sfl
 
 import (
 	"context"
+	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -17,26 +19,47 @@ import (
 
 // ArticlesListSflT is the type of the stereotype instance for the service flow that
 // retrieve recent articles based on a set of query parameters.
-type ArticlesListSflT = func(ctx context.Context, in model.ArticleCriteria) (rpc.ArticlesOut, error)
+type ArticlesListSflT = func(
+	ctx context.Context,
+	reqCtx web.RequestContext,
+	in model.ArticleCriteria,
+) (rpc.ArticlesOut, error)
 
 // ArticlesListSflC is the function that constructs a stereotype instance of type
-// ArticlesListSflT.
-func ArticlesListSflC(
+// ArticlesListSflT without hard-wired stereotype dependencies.
+
+// ArticlesListSflC0 is the function that constructs a stereotype instance of type
+// ArticlesListSflT without hard-wired stereotype dependencies.
+func ArticlesListSflC0(
 	db dbpgx.Db,
+	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesListDaf daf.ArticlesListDafT,
 ) ArticlesListSflT {
-	return func(ctx context.Context, in model.ArticleCriteria) (rpc.ArticlesOut, error) {
-		tx, err := db.BeginTx(ctx)
-		if err != nil {
-			return rpc.ArticlesOut{}, err
-		}
+	return func(
+		ctx context.Context,
+		reqCtx web.RequestContext,
+		in model.ArticleCriteria,
+	) (rpc.ArticlesOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.ArticlesOut, error) {
+			username := reqCtx.Username
+			zero := rpc.ArticlesOut{}
 
-		articles, err := articlesListDaf(ctx, tx, in)
-		if err != nil {
-			return rpc.ArticlesOut{}, err
-		}
+			user, _, err := userGetByNameDaf(ctx, tx, username)
+			if err != nil {
+				return zero, err
+			}
 
-		articlesOut := rpc.ArticlesOut_FromModel(user, articles)
-		return articlesOut, err
+			articlesPlus, err := articlesListDaf(ctx, tx, user.Id, in)
+			if err != nil {
+				return zero, err
+			}
+
+			articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
+
+			return articlesOut, err
+		})
 	}
 }

@@ -27,12 +27,23 @@ type ArticlesFeedSflT = func(
 
 // ArticlesFeedSflC is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT with hard-wired stereotype dependencies.
+func ArticlesFeedSflC(
+	db dbpgx.Db,
+) ArticlesFeedSflT {
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
+	articlesFeedDaf := daf.ArticlesFeedDafI
+	return ArticlesFeedSflC0(
+		db,
+		userGetByNameDaf,
+		articlesFeedDaf,
+	)
+}
 
 // ArticlesFeedSflC0 is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT without hard-wired stereotype dependencies.
 func ArticlesFeedSflC0(
 	db dbpgx.Db,
-	UserGetByNameDaf daf.UserGetByNameExplicitTxDafT,
+	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesFeedDaf daf.ArticlesFeedDafT,
 ) ArticlesFeedSflT {
 	return func(
@@ -47,7 +58,7 @@ func ArticlesFeedSflC0(
 			username := reqCtx.Username
 			zero := rpc.ArticlesOut{}
 
-			user, _, err := UserGetByNameDaf(ctx, tx, username)
+			user, _, err := userGetByNameDaf(ctx, tx, username)
 			if err != nil {
 				return zero, err
 			}
@@ -58,7 +69,7 @@ func ArticlesFeedSflC0(
 			}
 
 			articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
-			
+
 			return articlesOut, err
 		})
 	}

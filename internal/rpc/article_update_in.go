@@ -19,7 +19,7 @@ type ArticleUpdateIn struct {
 
 func (in ArticleUpdateIn) Validate() error {
 	if in.Article.Slug == "" {
-		return bf.ErrArticleUpdateMissingFields.Make(nil,
+		return bf.ErrValidationFailed.Make(nil,
 			"article slug missing for Update operation")
 	}
 	return nil

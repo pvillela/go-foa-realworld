@@ -70,9 +70,9 @@ var articleGetSfl = sfl.ArticleGetSflC(beginTxn, userGetByNameDaf, articleGetByS
 var articleUnfavoriteSfl = sfl.ArticleUnfavoriteSflC(beginTxn, articleFavoriteFl)
 var articleUpdateSfl = sfl.ArticleUpdateSflC(beginTxn, articleGetAndCheckOwnerFl, userGetByNameDaf, articleUpdateDaf, articleGetBySlugDaf, articleCreateDaf, articleDeleteDaf)
 var articlesFeedSfl = sfl.ArticlesFeedSflC(userGetByNameDaf, articleGetRecentForAuthorsDaf)
-var articlesListSfl = sfl.ArticlesListSflC(userGetByNameDaf, articleGetRecentFilteredDaf)
+var articlesListSfl = sfl.ArticlesListSflC0(userGetByNameDaf, articleGetRecentFilteredDaf)
 
-var commentAddSfl = sfl.CommentAddSflC(beginTxn, userGetByNameDaf, articleGetBySlugDaf, commentCreateDaf, articleUpdateDaf)
+var commentAddSfl = sfl.CommentAddSflC0(beginTxn, userGetByNameDaf, articleGetBySlugDaf, commentCreateDaf, articleUpdateDaf)
 var commentDeleteSfl = sfl.CommentDeleteSflC(beginTxn, commentGetByIdDaf, commentDeleteDaf, articleGetBySlugDaf, articleUpdateDaf)
 var commentsGetSfl = sfl.CommentsGetSflC(articleGetBySlugDaf)
 
