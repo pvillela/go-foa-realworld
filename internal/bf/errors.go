@@ -32,6 +32,7 @@ var (
 )
 
 var (
-	ErrUnauthorizedUser = errx.NewKind("ErrUnauthorizedUser")
-	ErrValidationFailed = errx.NewKind("ErrValidationFailed")
+	ErrAuthenticationFailed = errx.NewKind("ErrAuthenticationFailed")
+	ErrUnauthorizedUser     = errx.NewKind("ErrUnauthorizedUser")
+	ErrValidationFailed     = errx.NewKind("ErrValidationFailed")
 )

@@ -8,9 +8,11 @@ package daf
 
 import (
 	"context"
+	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // FollowingCreateDafI is the instance of the DAF stereotype that
@@ -37,6 +39,44 @@ var FollowingCreateDafI FollowingCreateDafT = func(
 	}
 
 	return nil
+}
+
+// FollowingGetDafI implements a stereotype instance of type
+// FollowingGetDafT.
+// Returns the association record if found or a zero model.Following otherwise.
+var FollowingGetDafI FollowingGetDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	followerId uint,
+	followeeId uint,
+) (model.Following, error) {
+	var zero model.Following
+
+	sql := `
+	SELECT * FROM followings 
+	WHERE follower_id = $1 AND followee_id = $2
+	`
+	args := []any{
+		followerId,
+		followeeId,
+	}
+
+	rows, err := tx.Query(ctx, sql, args...)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		return zero, kind.Make(err, "")
+	}
+	defer rows.Close()
+
+	var following model.Following
+	err = pgxscan.ScanOne(&following, rows)
+	if kind := dbpgx.ClassifyError(err); kind != nil {
+		if kind != dbpgx.DbErrRecordNotFound {
+			return zero, kind.Make(err, "")
+		}
+		// Otherwise, the association was not found and the zero value will be returned.
+	}
+
+	return following, nil
 }
 
 // FollowingDeleteDafI is the instance of the DAF stereotype that

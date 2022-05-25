@@ -6,10 +6,16 @@
 
 package rpc
 
+import "github.com/pvillela/go-foa-realworld/internal/model"
+
 type TagsOut struct {
 	Tags []string
 }
 
-func TagsOut_FromModel(tags []string) TagsOut {
-	return TagsOut{tags}
+func TagsOut_FromModel(tags []model.Tag) TagsOut {
+	names := make([]string, len(tags))
+	for i := range tags {
+		names[i] = tags[i].Name
+	}
+	return TagsOut{names}
 }

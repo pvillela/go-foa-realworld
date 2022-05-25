@@ -49,7 +49,7 @@ var CommentsGetBySlugDafI CommentsGetBySlugDafT = func(
 ) ([]model.Comment, error) {
 	sql := `
 	SELECT c.* FROM comments c
-	LEFT JOIN articles a ON c.author_id = a.id
+	LEFT JOIN articles a ON c.article_id = a.id
 	WHERE a.slug = $1
 	`
 	args := []any{slug}

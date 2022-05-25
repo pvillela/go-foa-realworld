@@ -76,9 +76,9 @@ var commentAddSfl = sfl.CommentAddSflC0(beginTxn, userGetByNameDaf, articleGetBy
 var commentDeleteSfl = sfl.CommentDeleteSflC0(beginTxn, commentGetByIdDaf, commentDeleteDaf, articleGetBySlugDaf, articleUpdateDaf)
 var commentsGetSfl = sfl.CommentsGetSflC0(articleGetBySlugDaf)
 
-var profileGetSfl = sfl.ProfileGetSflC(userGetByNameDaf)
+var profileGetSfl = sfl.ProfileGetSflC0(userGetByNameDaf)
 
-var tagsGetSfl = sfl.TagsGetSflC(tagGetAllDaf)
+var tagsGetSfl = sfl.TagsGetSflC0(tagGetAllDaf)
 
 var userAuthenticateSfl = sfl.UserAuthenticateSflC(userGetByNameDaf)
 var userFollowSfl = sfl.UserFollowSflC(beginTxn, userFollowFl)
