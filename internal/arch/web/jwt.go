@@ -81,7 +81,7 @@ func CreateToken(
 	return td, nil
 }
 
-func extractToken(r *http.Request) string {
+func ExtractToken(r *http.Request) string {
 	// Typical header structure -- Authorization: Bearer <token>
 	bearerToken := r.Header.Get("Authorization")
 	strArr := strings.Split(bearerToken, " ")
@@ -92,7 +92,7 @@ func extractToken(r *http.Request) string {
 }
 
 func VerifiedJwtToken(r *http.Request, secretKey []byte) (*jwt.Token, error) {
-	tokenString := extractToken(r)
+	tokenString := ExtractToken(r)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 		//Make sure that the token method conforms to "SigningMethodHMAC"
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {

@@ -16,7 +16,7 @@ var (
 	ErrMsgArticleCreateMissingFields = "article has missing fields for Create operation"
 	ErrMsgArticleAlreadyFavorited    = "article with ID \"%v\" has already been favoriated"
 	ErrMsgArticleWasNotFavorited     = "article with ID \"%v\" was not favorited"
-	ErrMsgCommentNotFound            = "comment not found for comment ID v%"
+	ErrMsgCommentNotFound            = "comment not found because comment ID not valid or user did not author the article"
 	ErrMsgProfileNotFound            = "profile not found"
 	ErrMsgTagNameAlreadyExists       = "tag name %v already exists"
 	ErrMsgTagOnArticleAlreadyExists  = "tag with name %v already exists on article with slug %v"

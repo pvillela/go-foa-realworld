@@ -6,7 +6,16 @@
 
 package rpc
 
+import "github.com/pvillela/go-foa-realworld/internal/bf"
+
 type CommentDeleteIn struct {
 	Slug string
 	Id   int
+}
+
+func (in CommentDeleteIn) Validate() error {
+	if in.Slug == "" || in.Id == 0 {
+		return bf.ErrValidationFailed.Make(nil, "article slug or comment id is missing")
+	}
+	return nil
 }

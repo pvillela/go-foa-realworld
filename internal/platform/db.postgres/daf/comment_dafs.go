@@ -63,18 +63,26 @@ var CommentsGetBySlugDafI CommentsGetBySlugDafT = func(
 var CommentDeleteDafI CommentDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
-	id uint,
+	commentId uint,
+	articleId uint,
+	authorId uint,
 ) error {
 	sql := `
 	DELETE FROM comments
-	WHERE id = $1
+	WHERE id = $1 AND article_id = $2 AND author_id = $3
 	`
-	c, err := tx.Exec(ctx, sql, id)
+	args := []any{
+		commentId,
+		articleId,
+		authorId,
+	}
+
+	c, err := tx.Exec(ctx, sql, args...)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		return kind.Make(err, "")
 	}
 	if c.RowsAffected() == 0 {
-		return dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgCommentNotFound, id)
+		return dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgCommentNotFound)
 	}
 
 	return nil

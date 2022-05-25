@@ -73,8 +73,8 @@ var articlesFeedSfl = sfl.ArticlesFeedSflC(userGetByNameDaf, articleGetRecentFor
 var articlesListSfl = sfl.ArticlesListSflC0(userGetByNameDaf, articleGetRecentFilteredDaf)
 
 var commentAddSfl = sfl.CommentAddSflC0(beginTxn, userGetByNameDaf, articleGetBySlugDaf, commentCreateDaf, articleUpdateDaf)
-var commentDeleteSfl = sfl.CommentDeleteSflC(beginTxn, commentGetByIdDaf, commentDeleteDaf, articleGetBySlugDaf, articleUpdateDaf)
-var commentsGetSfl = sfl.CommentsGetSflC(articleGetBySlugDaf)
+var commentDeleteSfl = sfl.CommentDeleteSflC0(beginTxn, commentGetByIdDaf, commentDeleteDaf, articleGetBySlugDaf, articleUpdateDaf)
+var commentsGetSfl = sfl.CommentsGetSflC0(articleGetBySlugDaf)
 
 var profileGetSfl = sfl.ProfileGetSflC(userGetByNameDaf)
 

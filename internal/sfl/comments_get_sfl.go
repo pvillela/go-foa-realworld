@@ -8,34 +8,50 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
+	"net/http"
 )
 
-// CommentsGetSflC is the type of the stereotype instance for the service flow that
+// CommentsGetSflC0 is the type of the stereotype instance for the service flow that
 // retrieves the comments of an article.
-type CommentsGetSflT = func(ctx context.Context, slug string) (rpc.CommentsOut, error)
+type CommentsGetSflT = func(ctx context.Context, reqCtx http.Request, slug string) (rpc.CommentsOut, error)
 
 // CommentsGetSflC is the function that constructs a stereotype instance of type
-// CommentsGetSflT.
+// CommentsGetSflT with hard-wired stereotype dependencies.
 func CommentsGetSflC(
-	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
+	db dbpgx.Db,
 ) CommentsGetSflT {
-	return func(_ context.Context, slug string) (rpc.CommentsOut, error) {
-		var zero rpc.CommentsOut
+	commentsGetBySlugDaf := daf.CommentsGetBySlugDafI
+	return CommentsGetSflC0(
+		db,
+		commentsGetBySlugDaf,
+	)
+}
 
-		article, _, err := articleGetBySlugDaf(slug)
-		if err != nil {
-			return zero, err
-		}
+// CommentsGetSflC0 is the function that constructs a stereotype instance of type
+// CommentsGetSflT without hard-wired stereotype dependencies.
+func CommentsGetSflC0(
+	db dbpgx.Db,
+	commentsGetBySlugDaf daf.CommentsGetBySlugDafT,
+) CommentsGetSflT {
+	return func(ctx context.Context, reqCtx http.Request, slug string) (rpc.CommentsOut, error) {
+		return dbpgx.Db_WithTransaction(db, ctx, func(
+			ctx context.Context,
+			tx pgx.Tx,
+		) (rpc.CommentsOut, error) {
+			var zero rpc.CommentsOut
 
-		if article.Comments == nil {
-			article.Comments = []model.Comment{}
-		}
+			comments, err := commentsGetBySlugDaf(ctx, tx, slug)
+			if err != nil {
+				return zero, err
+			}
 
-		commentsOut := rpc.CommentsOut_FromModel(article.Comments)
+			commentsOut := rpc.CommentsOut_FromModel(comments)
 
-		return commentsOut, nil
+			return commentsOut, nil
+		})
 	}
 }

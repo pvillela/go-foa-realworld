@@ -22,4 +22,10 @@ type CommentCreateDafT = func(ctx context.Context, tx pgx.Tx, comment *model.Com
 
 // CommentDeleteDafT is the type of the stereotype instance for the DAF that
 // deletes a comment.
-type CommentDeleteDafT = func(ctx context.Context, tx pgx.Tx, id uint) error
+type CommentDeleteDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	commentId uint,
+	articleId uint,
+	authorId uint,
+) error
