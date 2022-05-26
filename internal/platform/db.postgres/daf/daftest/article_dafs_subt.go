@@ -45,19 +45,17 @@ func articleToCore(authors []model.User, follows bool) func(i int, a model.Artic
 
 type DafSubt = func(t *testing.T, db dbpgx.Db, ctx context.Context)
 
-func dbTestWithTransaction(t *testing.T, db dbpgx.Db, ctx context.Context) func(block func(tx pgx.Tx)) {
-	return func(block func(tx pgx.Tx)) {
-		block1 := func(ctx context.Context, tx pgx.Tx) (arch.Unit, error) {
-			block(tx)
-			return arch.Void, nil
-		}
-		_, err := dbpgx.Db_WithTransaction(db, ctx, block1)
-		errx.PanicOnError(err)
+func dbTestWithTransaction(db dbpgx.Db, ctx context.Context, block func(tx pgx.Tx)) {
+	block1 := func(ctx context.Context, tx pgx.Tx) (arch.Unit, error) {
+		block(tx)
+		return arch.Void, nil
 	}
+	_, err := dbpgx.Db_WithTransaction(db, ctx, block1)
+	errx.PanicOnError(err)
 }
 
 func articleDafsSubt(t *testing.T, db dbpgx.Db, ctx context.Context) {
-	dbTestWithTransaction(t, db, ctx)(func(tx pgx.Tx) {
+	dbTestWithTransaction(db, ctx, func(tx pgx.Tx) {
 		currUser := users[0]
 		authors := []model.User{users[1], users[1]}
 		author := authors[0]
