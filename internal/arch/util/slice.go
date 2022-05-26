@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/pvillela/go-foa-realworld/internal/arch"
 )
 
 func SliceWindow(slice []any, limit, offset int) []any {
@@ -33,4 +34,27 @@ func SliceContains(slice []any, value any) bool {
 		}
 	}
 	return false
+}
+
+// SliceToSet returns a set containing the values in the receiver.
+func SliceToSet[T comparable](s []T) map[T]arch.Unit {
+	if s == nil {
+		return nil
+	}
+	set := make(map[T]arch.Unit, len(s)) // optimize for speed vs space
+	for _, x := range s {
+		set[x] = arch.Void
+	}
+	return set
+}
+
+func SliceMap[S, T any](xs []S, f func(int, S) T) []T {
+	if xs == nil {
+		return nil
+	}
+	ts := make([]T, len(xs))
+	for i := range xs {
+		ts[i] = f(i, xs[i])
+	}
+	return ts
 }

@@ -40,6 +40,10 @@ type UserGetByEmailDafT = func(ctx context.Context, email string) (model.User, R
 // creates a user.
 type UserCreateDafT = func(ctx context.Context, user *model.User) (RecCtxUser, error)
 
+// UserCreateExplicitTxDafT is the type of the stereotype instance for the DAF that
+// creates a user taking an explicit pgx.Tx.
+type UserCreateExplicitTxDafT = func(ctx context.Context, tx pgx.Tx, user *model.User) (RecCtxUser, error)
+
 // UserUpdateDafT is the type of the stereotype instance for the DAF that
 // updates a user.
 type UserUpdateDafT = func(ctx context.Context, user model.User, recCtx RecCtxUser) (RecCtxUser, error)

@@ -166,7 +166,7 @@ func readArticles(
 			FavoritesCount: ra.FavoritesCount,
 		}
 		results = append(results, result)
-		tags = []string{}
+		tags = nil
 	}
 
 	// Main processing loop

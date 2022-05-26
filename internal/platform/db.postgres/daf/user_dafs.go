@@ -80,8 +80,18 @@ var UserCreateDafI UserCreateDafT = func(
 ) (RecCtxUser, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return RecCtxUser{}, errx.ErrxOf(err)
+		return RecCtxUser{}, err
 	}
+	return UserCreateExplicitTxDafI(ctx, tx, user)
+}
+
+// UserCreateExplicitTxDafI implements a stereotype instance of type
+// UserCreateDafT.
+var UserCreateExplicitTxDafI UserCreateExplicitTxDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	user *model.User,
+) (RecCtxUser, error) {
 	sql := `
 	INSERT INTO users (username, email, password_hash, password_salt, bio, image)
 	VALUES ($1, $2, $3, $4, $5, $6)
@@ -98,7 +108,7 @@ var UserCreateDafI UserCreateDafT = func(
 	}
 	row := tx.QueryRow(ctx, sql, args...)
 	var recCtx RecCtxUser
-	err = row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
+	err := row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrUniqueViolation {
 			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameDuplicate, user.Username)
