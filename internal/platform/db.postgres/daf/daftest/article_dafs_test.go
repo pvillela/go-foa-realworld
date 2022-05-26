@@ -8,7 +8,6 @@ package daftest
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
@@ -18,21 +17,37 @@ import (
 	"testing"
 )
 
-//import (
-//	"errors"
-//	"fmt"
-//	"testing"
-//
-//	"github.com/stretchr/testify/assert"
-//)
+func articlePlusToCore(_ int, ap model.ArticlePlus) model.ArticlePlus {
+	return model.ArticlePlus{
+		Slug:        ap.Slug,
+		Author:      ap.Author,
+		Title:       ap.Title,
+		Description: ap.Description,
+		Body:        ap.Body,
+		TagList:     ap.TagList,
+	}
+}
+
+func articleToCore(authors []model.User, follows bool) func(i int, a model.Article) model.ArticlePlus {
+	return func(i int, a model.Article) model.ArticlePlus {
+		return model.ArticlePlus{
+			Slug:        a.Slug,
+			Author:      model.Profile_FromUser(&authors[i], follows),
+			Title:       a.Title,
+			Description: a.Description,
+			Body:        a.Body,
+			TagList:     a.TagList,
+		}
+	}
+}
 
 func TestArticleCreateDafI(t *testing.T) {
 	dafTester(func(t *testing.T, ctx context.Context, tx pgx.Tx) {
-		currUserId := users[0].Id
+		currUser := users[0]
+		authors := []model.User{users[1], users[1]}
+		author := authors[0]
 
 		{
-			author := users[1]
-
 			criteria := model.ArticleCriteria{
 				Tag:         nil,
 				Author:      &author.Username,
@@ -40,35 +55,16 @@ func TestArticleCreateDafI(t *testing.T) {
 				Limit:       nil,
 				Offset:      nil,
 			}
-			articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+			articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 			errx.PanicOnError(err)
 
-			coreInfoReturned := util.SliceMap(articlePluses, func(_ int, ap model.ArticlePlus) model.ArticlePlus {
-				return model.ArticlePlus{
-					Slug:        ap.Slug,
-					Author:      ap.Author,
-					Title:       ap.Title,
-					Description: ap.Description,
-					Body:        ap.Body,
-					TagList:     ap.TagList,
-				}
-			})
-
-			coreInfoExpected := util.SliceMap(articles, func(_ int, a model.Article) model.ArticlePlus {
-				return model.ArticlePlus{
-					Slug:        a.Slug,
-					Author:      model.Profile_FromUser(&author, false),
-					Title:       a.Title,
-					Description: a.Description,
-					Body:        a.Body,
-					TagList:     a.TagList,
-				}
-			})
+			returned := util.SliceMap(articlePluses, articlePlusToCore)
+			expected := util.SliceMap(articles, articleToCore(authors, false))
 
 			//fmt.Println("\ncoreInfoReturned:", coreInfoReturned)
 			//fmt.Println("\ncoreInfoExpected:", coreInfoExpected)
 
-			assert.ElementsMatch(t, coreInfoExpected, coreInfoReturned)
+			assert.ElementsMatch(t, expected, returned)
 		}
 
 		{
@@ -79,31 +75,28 @@ func TestArticleCreateDafI(t *testing.T) {
 				Limit:       nil,
 				Offset:      nil,
 			}
-			articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+			articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 			errx.PanicOnError(err)
 
-			coreInfoReturned := util.SliceMap(articlePluses, func(_ int, ap model.ArticlePlus) model.ArticlePlus {
-				return model.ArticlePlus{
-					Slug:        ap.Slug,
-					Author:      ap.Author,
-					Title:       ap.Title,
-					Description: ap.Description,
-					Body:        ap.Body,
-					TagList:     ap.TagList,
-				}
-			})
+			returned := util.SliceMap(articlePluses, articlePlusToCore)
+			var expected []model.ArticlePlus
 
-			var coreInfoExpected []model.ArticlePlus
+			//fmt.Println("\ncore info returned:", returned)
+			//fmt.Println("\ncore info expected:", expected)
 
-			//fmt.Println("\narticlesListDaf - by tag:", articlePluses)
-
-			assert.ElementsMatch(t, coreInfoExpected, coreInfoReturned)
+			assert.ElementsMatch(t, expected, returned)
 		}
 
 		{
-			articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUserId, articles[1].Slug)
+			articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, articles[1].Slug)
 			errx.PanicOnError(err)
-			fmt.Println("\nArticleGetBySlugDaf:", articleFromDb)
+
+			returned := articlePlusToCore(-1, articleFromDb)
+			expected := articleToCore(authors, false)(0, articles[1])
+
+			//_, _ = spew.Println("\nArticleGetBySlugDaf:", articleFromDb)
+
+			assert.Equal(t, expected, returned)
 		}
 
 		{
@@ -111,13 +104,29 @@ func TestArticleCreateDafI(t *testing.T) {
 			pArticle.Title = "A very interesting subject"
 			err := daf.ArticleUpdateDafI(ctx, tx, pArticle)
 			errx.PanicOnError(err)
-			fmt.Println("ArticleUpdateDaf:", pArticle)
+
+			articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, pArticle.Slug)
+			errx.PanicOnError(err)
+
+			returned := articlePlusToCore(-1, articleFromDb)
+			expected := articleToCore(authors, false)(0, *pArticle)
+
+			//_, _ = spew.Println("\nAfter update:", articleFromDb)
+
+			assert.Equal(t, expected, returned)
 		}
 
 		{
-			articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
+			articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
 			errx.PanicOnError(err)
-			fmt.Println("\nArticlesFeedDaf:", articlePluses)
+
+			returned := util.SliceMap(articlePluses, articlePlusToCore)
+			var expected []model.ArticlePlus
+
+			//_, _ = spew.Println("\nArticlesFeedDaf returned:", returned)
+			//_, _ = spew.Println("\nArticlesFeedDaf expected:", expected)
+
+			assert.ElementsMatch(t, expected, returned)
 		}
 	})(t)
 }
