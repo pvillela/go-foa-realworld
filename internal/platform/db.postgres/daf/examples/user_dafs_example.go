@@ -60,7 +60,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	}
 
 	userFromDb, recCtx, err := daf.UserGetByNameDafI(ctx, "pvillela")
-	// Commented-out lines below were used to test forced error due to multiple rows returned
+	// Commented-out lines below were used to daftest forced error due to multiple rows returned
 	//fmt.Println("Error classification:", dbpgx.ClassifyError(err))
 	//uerr := errors.Unwrap(err)
 	//fmt.Printf("Unwrapped error: %+v", uerr)
@@ -68,7 +68,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	fmt.Println("UserGetByNameDaf:", userFromDb)
 	fmt.Println("recCtx from Read:", recCtx, "\n")
 
-	userFromDb, recCtx, err = daf.UserGetByNameDafI(ctx, "xxx")
+	userFromDb, recCtx, err = daf.UserGetByNameDafI(ctx, "daftest")
 	fmt.Println("UserGetByNameDaf with invalid username")
 	fmt.Println("Error:", err)
 	fmt.Println("Error classification:", dbpgx.ClassifyError(err), "\n")

@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,4 +56,16 @@ func Db_WithTransaction[T any](
 
 	err = tx.Commit(ctx)
 	return t, errx.ErrxOf(err)
+}
+
+func SflWithTransaction[S, T any](
+	db Db,
+	block func(ctx context.Context, tx pgx.Tx, reqCtx web.RequestContext, in S) (T, error),
+) func(ctx context.Context, reqCtx web.RequestContext, in S) (T, error) {
+	return func(ctx context.Context, reqCtx web.RequestContext, in S) (T, error) {
+		block1 := func(ctx context.Context, tx pgx.Tx) (T, error) {
+			return block(ctx, tx, reqCtx, in)
+		}
+		return Db_WithTransaction(db, ctx, block1)
+	}
 }

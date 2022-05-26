@@ -9,6 +9,8 @@ package daftest
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -41,8 +43,21 @@ func articleToCore(authors []model.User, follows bool) func(i int, a model.Artic
 	}
 }
 
-func TestArticleCreateDafI(t *testing.T) {
-	dafTester(func(t *testing.T, ctx context.Context, tx pgx.Tx) {
+type DafSubt = func(t *testing.T, db dbpgx.Db, ctx context.Context)
+
+func dbTestWithTransaction(t *testing.T, db dbpgx.Db, ctx context.Context) func(block func(tx pgx.Tx)) {
+	return func(block func(tx pgx.Tx)) {
+		block1 := func(ctx context.Context, tx pgx.Tx) (arch.Unit, error) {
+			block(tx)
+			return arch.Void, nil
+		}
+		_, err := dbpgx.Db_WithTransaction(db, ctx, block1)
+		errx.PanicOnError(err)
+	}
+}
+
+func articleDafsSubt(t *testing.T, db dbpgx.Db, ctx context.Context) {
+	dbTestWithTransaction(t, db, ctx)(func(tx pgx.Tx) {
 		currUser := users[0]
 		authors := []model.User{users[1], users[1]}
 		author := authors[0]
@@ -128,5 +143,5 @@ func TestArticleCreateDafI(t *testing.T) {
 
 			assert.ElementsMatch(t, expected, returned)
 		}
-	})(t)
+	})
 }
