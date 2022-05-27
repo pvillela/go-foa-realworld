@@ -4,10 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package util
-
-// Unit is a type alias representing the standard functional programming Unit type
-type Unit = struct{}
+package types
 
 // Tuple2 is tuple with 2 elements
 type Tuple2[T1, T2 any] struct {

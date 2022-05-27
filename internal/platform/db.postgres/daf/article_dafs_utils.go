@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -34,7 +34,7 @@ const (
 // The placeholders in the WHERE clause are numbered starting with initialIndex.
 func whereClauseFromTuples(
 	initialIndex int,
-	whereTuples []util.Tuple2[string, any],
+	whereTuples []types.Tuple2[string, any],
 ) (where string, whereArgs []any) {
 	wheres := make([]string, len(whereTuples))
 	nullableWhereArgs := make([]any, len(whereTuples))

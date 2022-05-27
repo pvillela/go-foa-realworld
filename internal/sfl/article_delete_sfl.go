@@ -9,8 +9,8 @@ package sfl
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -18,7 +18,7 @@ import (
 
 // ArticleDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes an article.
-type ArticleDeleteSflT = func(ctx context.Context, reqCtx web.RequestContext, slug string) (arch.Unit, error)
+type ArticleDeleteSflT = func(ctx context.Context, reqCtx web.RequestContext, slug string) (types.Unit, error)
 
 // ArticleDeleteSflC is the function that constructs a stereotype instance of type
 // ArticleDeleteSflT with hard-wired stereotype dependencies.
@@ -41,21 +41,21 @@ func ArticleDeleteSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
-	return func(ctx context.Context, reqCtx web.RequestContext, slug string) (arch.Unit, error) {
+	return func(ctx context.Context, reqCtx web.RequestContext, slug string) (types.Unit, error) {
 		return dbpgx.Db_WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
-		) (arch.Unit, error) {
+		) (types.Unit, error) {
 			username := reqCtx.Username
 
 			_, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
 			if err != nil {
-				return arch.Void, err
+				return types.UnitV, err
 			}
 
 			// Record existence is guaranteed by above code.
 			err = articleDeleteDaf(ctx, tx, slug)
-			return arch.Void, err
+			return types.UnitV, err
 		})
 	}
 }

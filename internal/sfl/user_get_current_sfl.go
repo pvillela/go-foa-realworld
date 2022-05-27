@@ -9,10 +9,10 @@ package sfl
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -21,7 +21,7 @@ import (
 type UserGetCurrentSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	_ arch.Unit,
+	_ types.Unit,
 ) (rpc.UserOut, error)
 
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
@@ -45,7 +45,7 @@ func UserGetCurrentSflC0(
 	return func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
-		_ arch.Unit,
+		_ types.Unit,
 	) (rpc.UserOut, error) {
 		return db.CtxDb_WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,

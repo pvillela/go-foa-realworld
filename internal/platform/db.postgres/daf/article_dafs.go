@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
@@ -56,7 +56,7 @@ var ArticleGetBySlugDafI ArticleGetBySlugDafT = func(
 	slug string,
 ) (model.ArticlePlus, error) {
 	// See mainArticlePlusQuery
-	whereTuples := []util.Tuple2[string, any]{
+	whereTuples := []types.Tuple2[string, any]{
 		{"a.slug = $%d", slug},
 	}
 	where, whereArgs := whereClauseFromTuples(2, whereTuples)
@@ -141,7 +141,7 @@ var ArticlesFeedDafI ArticlesFeedDafT = func(
 	optOffset *int,
 ) ([]model.ArticlePlus, error) {
 	// See mainArticlePlusQuery
-	whereTuples := []util.Tuple2[string, any]{
+	whereTuples := []types.Tuple2[string, any]{
 		{"fo.follower_id = $%d", currUserId},
 	}
 	where, whereArgs := whereClauseFromTuples(2, whereTuples)
@@ -173,15 +173,15 @@ var ArticlesListDafI ArticlesListDafT = func(
 		joinArgs = []any{*v}
 	}
 
-	var whereTuples []util.Tuple2[string, any]
+	var whereTuples []types.Tuple2[string, any]
 	if v := criteria.FavoritedBy; v != nil {
-		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ufa1.username = $%d", *v})
+		whereTuples = append(whereTuples, types.Tuple2[string, any]{"ufa1.username = $%d", *v})
 	}
 	if v := criteria.Tag; v != nil {
-		whereTuples = append(whereTuples, util.Tuple2[string, any]{"t.name = $%d", *v})
+		whereTuples = append(whereTuples, types.Tuple2[string, any]{"t.name = $%d", *v})
 	}
 	if v := criteria.Author; v != nil {
-		whereTuples = append(whereTuples, util.Tuple2[string, any]{"ua.username = $%d", *v})
+		whereTuples = append(whereTuples, types.Tuple2[string, any]{"ua.username = $%d", *v})
 	}
 	var initialIndex int
 	if len(join) == 0 {

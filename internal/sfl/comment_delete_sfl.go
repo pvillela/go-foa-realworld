@@ -10,11 +10,11 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -24,7 +24,7 @@ type CommentDeleteSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
 	in rpc.CommentDeleteIn,
-) (arch.Unit, error)
+) (types.Unit, error)
 
 // CommentDeleteSflC is the function that constructs a stereotype instance of type
 // CommentDeleteSflT with hard-wired stereotype dependencies.
@@ -51,29 +51,29 @@ func CommentDeleteSflC0(
 		ctx context.Context,
 		reqCtx web.RequestContext,
 		in rpc.CommentDeleteIn,
-	) (arch.Unit, error) {
+	) (types.Unit, error) {
 		return dbpgx.Db_WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
-		) (arch.Unit, error) {
+		) (types.Unit, error) {
 			err := in.Validate()
 			if err != nil {
-				return arch.Void, err
+				return types.UnitV, err
 			}
 
 			username := reqCtx.Username
 
 			articlePlus, user, err := articleAndUserGetFl(ctx, tx, in.Slug, username)
 			if err != nil {
-				return arch.Void, err
+				return types.UnitV, err
 			}
 
 			err = commentDeleteDaf(ctx, tx, uint(in.Id), articlePlus.Id, user.Id)
 			if err != nil {
-				return arch.Void, err
+				return types.UnitV, err
 			}
 
-			return arch.Void, nil
+			return types.UnitV, nil
 		})
 	}
 }
