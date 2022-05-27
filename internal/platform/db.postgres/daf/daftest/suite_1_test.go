@@ -11,7 +11,11 @@ import (
 )
 
 func TestSuite1(t *testing.T) {
-	dafTester(t, []TestPair{
-		{Name: "ArticleDafsSubt", Func: articleDafsSubt},
+	dafTester0(t, []TestPair0{
+		{Name: "ArticleDafsSubt", Func: articleDafsSubt0},
+	})
+
+	dafTester1(t, []TestPair1{
+		{Name: "ArticleDafsSubt", Func: articleDafsSubt1},
 	})
 }

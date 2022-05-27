@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -58,11 +58,19 @@ func Db_WithTransaction[T any](
 	return t, errx.ErrxOf(err)
 }
 
-func SflWithTransaction[S, T any](
+func SflWithTransaction[R, S, T any](
 	db Db,
-	block func(ctx context.Context, tx pgx.Tx, reqCtx web.RequestContext, in S) (T, error),
-) func(ctx context.Context, reqCtx web.RequestContext, in S) (T, error) {
-	return func(ctx context.Context, reqCtx web.RequestContext, in S) (T, error) {
+	block func(ctx context.Context, tx pgx.Tx, reqCtx R, in S) (T, error),
+) func(ctx context.Context, reqCtx R, in S) (T, error) {
+	return util.LiftContextualizer2(Db_WithTransaction[T], db, block)
+}
+
+// Implementation from scratch of above, without use of util.LiftContextualizer2
+func sflWithTransaction0[R, S, T any](
+	db Db,
+	block func(ctx context.Context, tx pgx.Tx, reqCtx R, in S) (T, error),
+) func(ctx context.Context, reqCtx R, in S) (T, error) {
+	return func(ctx context.Context, reqCtx R, in S) (T, error) {
 		block1 := func(ctx context.Context, tx pgx.Tx) (T, error) {
 			return block(ctx, tx, reqCtx, in)
 		}
