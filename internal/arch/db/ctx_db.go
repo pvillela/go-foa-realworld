@@ -12,9 +12,6 @@ import (
 )
 
 type CtxDb interface {
-	SetConn(ctx context.Context) (context.Context, error)
-	ReleaseConn(ctx context.Context) (context.Context, error)
-	DeferredReleaseConn(ctx context.Context)
 	BeginTx(ctx context.Context) (context.Context, error)
 	Commit(ctx context.Context) (context.Context, error)
 	Rollback(ctx context.Context) (context.Context, error)

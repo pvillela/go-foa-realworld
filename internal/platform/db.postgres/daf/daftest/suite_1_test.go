@@ -13,6 +13,7 @@ import (
 
 func TestSuite1(t *testing.T) {
 	dafTester(t, []dbpgx.TestPair{
-		{Name: "ArticleDafsSubt", Func: articleDafsSubt},
+		{Name: "userDafsSubt", Func: UserDafsSubt},
+		{Name: "articleDafsSubt", Func: articleDafsSubt},
 	})
 }
