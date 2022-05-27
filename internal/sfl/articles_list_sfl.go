@@ -40,7 +40,7 @@ func ArticlesListSflC0(
 		reqCtx web.RequestContext,
 		in model.ArticleCriteria,
 	) (rpc.ArticlesOut, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.ArticlesOut, error) {

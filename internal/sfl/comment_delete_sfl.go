@@ -52,7 +52,7 @@ func CommentDeleteSflC0(
 		reqCtx web.RequestContext,
 		in rpc.CommentDeleteIn,
 	) (types.Unit, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (types.Unit, error) {

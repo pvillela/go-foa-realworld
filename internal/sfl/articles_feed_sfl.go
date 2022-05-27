@@ -51,7 +51,7 @@ func ArticlesFeedSflC0(
 		reqCtx web.RequestContext,
 		in rpc.ArticlesFeedIn,
 	) (rpc.ArticlesOut, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.ArticlesOut, error) {

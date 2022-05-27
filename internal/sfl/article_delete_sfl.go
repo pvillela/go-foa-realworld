@@ -42,7 +42,7 @@ func ArticleDeleteSflC0(
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
 	return func(ctx context.Context, reqCtx web.RequestContext, slug string) (types.Unit, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (types.Unit, error) {

@@ -15,7 +15,7 @@ func TestSuite1(t *testing.T) {
 		{Name: "ArticleDafsSubt", Func: articleDafsSubt0},
 	})
 
-	dafTester1(t, []TestPair1{
+	dafTester1(t, []TestPair0{
 		{Name: "ArticleDafsSubt", Func: articleDafsSubt1},
 	})
 }

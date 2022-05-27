@@ -54,7 +54,7 @@ func ArticleUnfavoriteSflC0(
 		reqCtx web.RequestContext,
 		slug string,
 	) (rpc.ArticleOut, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.ArticleOut, error) {

@@ -30,7 +30,7 @@ func TagsGetSflC0(
 	tagsGetAllDaf daf.TagsGetAllDafT,
 ) TagsGetSflT {
 	return func(ctx context.Context, reqCtx web.RequestContext, _ types.Unit) (rpc.TagsOut, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.TagsOut, error) {

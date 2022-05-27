@@ -51,7 +51,7 @@ func ProfileGetSflC0(
 		reqCtx web.RequestContext,
 		profileName string,
 	) (rpc.ProfileOut, error) {
-		return dbpgx.Db_WithTransaction(db, ctx, func(
+		return dbpgx.WithTransaction(db, ctx, func(
 			ctx context.Context,
 			tx pgx.Tx,
 		) (rpc.ProfileOut, error) {

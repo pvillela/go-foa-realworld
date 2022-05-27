@@ -48,7 +48,7 @@ func UserUpdateSflC0(
 		reqCtx web.RequestContext,
 		in rpc.UserUpdateIn,
 	) (rpc.UserOut, error) {
-		return db.CtxDb_WithTransaction(ctxDb, ctx, func(
+		return db.WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.UserOut, error) {
 			username := reqCtx.Username

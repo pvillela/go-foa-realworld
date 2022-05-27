@@ -21,7 +21,7 @@ type CtxDb interface {
 	DeferredRollback(ctx context.Context)
 }
 
-func CtxDb_WithTransaction[T any](
+func WithTransaction[T any](
 	ctxDb CtxDb,
 	ctx context.Context,
 	block func(ctx context.Context) (T, error),

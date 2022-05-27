@@ -36,7 +36,7 @@ func DeferredRollback(ctx context.Context, tx pgx.Tx) {
 	}
 }
 
-func Db_WithTransaction[T any](
+func WithTransaction[T any](
 	db Db,
 	ctx context.Context,
 	block func(ctx context.Context, tx pgx.Tx) (T, error),
@@ -62,7 +62,7 @@ func SflWithTransaction[R, S, T any](
 	db Db,
 	block func(ctx context.Context, tx pgx.Tx, reqCtx R, in S) (T, error),
 ) func(ctx context.Context, reqCtx R, in S) (T, error) {
-	return util.LiftContextualizer2(Db_WithTransaction[T], db, block)
+	return util.LiftContextualizer2(WithTransaction[T], db, block)
 }
 
 // Implementation from scratch of above, without use of util.LiftContextualizer2
@@ -74,6 +74,6 @@ func sflWithTransaction0[R, S, T any](
 		block1 := func(ctx context.Context, tx pgx.Tx) (T, error) {
 			return block(ctx, tx, reqCtx, in)
 		}
-		return Db_WithTransaction(db, ctx, block1)
+		return WithTransaction(db, ctx, block1)
 	}
 }

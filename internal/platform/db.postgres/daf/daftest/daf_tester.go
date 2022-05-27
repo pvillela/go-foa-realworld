@@ -65,7 +65,7 @@ func dafTester0(t *testing.T, testPairs []TestPair0) {
 	}
 }
 
-func dafTester1(t *testing.T, testPairs []TestPair1) {
+func dafTester1(t *testing.T, testPairs []TestPair0) {
 	defer errx.PanicLog(log.Fatal)
 
 	log.SetLevel(log.DebugLevel)
@@ -92,8 +92,7 @@ func dafTester1(t *testing.T, testPairs []TestPair1) {
 
 	for _, p := range testPairs {
 		testFunc := func(t *testing.T) {
-			f := dbTestWithTransactionL(db, p.Func)
-			f(ctx, t)
+			p.Func(db, ctx, t)
 		}
 		t.Run(p.Name, testFunc)
 	}

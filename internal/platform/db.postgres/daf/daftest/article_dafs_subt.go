@@ -43,12 +43,12 @@ func articleToCore(authors []model.User, follows bool) func(i int, a model.Artic
 	}
 }
 
-func dbTestWithTransaction(db dbpgx.Db, ctx context.Context, block func(tx pgx.Tx)) {
+func testWithTransaction(db dbpgx.Db, ctx context.Context, block func(tx pgx.Tx)) {
 	block1 := func(ctx context.Context, tx pgx.Tx) (types.Unit, error) {
 		block(tx)
 		return types.UnitV, nil
 	}
-	_, err := dbpgx.Db_WithTransaction(db, ctx, block1)
+	_, err := dbpgx.WithTransaction(db, ctx, block1)
 	errx.PanicOnError(err)
 }
 
@@ -58,15 +58,17 @@ type DafSubt func(
 	t *testing.T,
 )
 
-func dbTestWithTransactionL(
-	db dbpgx.Db,
+func testWithTransactionL(
 	f DafSubt,
-) func(ctx context.Context, t *testing.T) {
-	return util.LiftContextualizer1V(dbpgx.Db_WithTransaction[types.Unit], db, f)
+) func(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	return func(db dbpgx.Db, ctx context.Context, t *testing.T) {
+		fL := util.LiftContextualizer1V(dbpgx.WithTransaction[types.Unit], db, f)
+		fL(ctx, t)
+	}
 }
 
 func articleDafsSubt0(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	dbTestWithTransaction(db, ctx, func(tx pgx.Tx) {
+	testWithTransaction(db, ctx, func(tx pgx.Tx) {
 		currUser := users[0]
 		authors := []model.User{users[1], users[1]}
 		author := authors[0]
@@ -155,7 +157,7 @@ func articleDafsSubt0(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	})
 }
 
-func articleDafsSubt1(ctx context.Context, tx pgx.Tx, t *testing.T) {
+var articleDafsSubt1 = testWithTransactionL(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
 	currUser := users[0]
 	authors := []model.User{users[1], users[1]}
 	author := authors[0]
@@ -241,4 +243,4 @@ func articleDafsSubt1(ctx context.Context, tx pgx.Tx, t *testing.T) {
 
 		assert.ElementsMatch(t, expected, returned)
 	}
-}
+})
