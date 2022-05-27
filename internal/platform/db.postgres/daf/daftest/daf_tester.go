@@ -22,17 +22,7 @@ import (
 
 var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
 
-type TestPair0 struct {
-	Name string
-	Func func(db dbpgx.Db, ctx context.Context, t *testing.T)
-}
-
-type TestPair1 struct {
-	Name string
-	Func func(ctx context.Context, tx pgx.Tx, t *testing.T)
-}
-
-func dafTester0(t *testing.T, testPairs []TestPair0) {
+func dafTester(t *testing.T, testPairs []dbpgx.TestPair) {
 	defer errx.PanicLog(log.Fatal)
 
 	log.SetLevel(log.DebugLevel)
@@ -57,45 +47,7 @@ func dafTester0(t *testing.T, testPairs []TestPair0) {
 	err = tx.Commit(ctx)
 	errx.PanicOnError(err)
 
-	for _, p := range testPairs {
-		testFunc := func(t *testing.T) {
-			p.Func(db, ctx, t)
-		}
-		t.Run(p.Name, testFunc)
-	}
-}
-
-func dafTester1(t *testing.T, testPairs []TestPair0) {
-	defer errx.PanicLog(log.Fatal)
-
-	log.SetLevel(log.DebugLevel)
-
-	ctx := context.Background()
-
-	pool, err := pgxpool.Connect(ctx, connStr)
-	errx.PanicOnError(err)
-
-	ctxDb := dbpgx.CtxPgx{pool}
-	ctx, err = ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
-
-	db := dbpgx.Db{pool}
-	defer pool.Close()
-
-	tx, err := db.BeginTx(ctx)
-	errx.PanicOnError(err)
-	cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
-		"article_tags", "comments")
-	setupData(ctx, tx)
-	err = tx.Commit(ctx)
-	errx.PanicOnError(err)
-
-	for _, p := range testPairs {
-		testFunc := func(t *testing.T) {
-			p.Func(db, ctx, t)
-		}
-		t.Run(p.Name, testFunc)
-	}
+	dbpgx.RunTestPairs(db, ctx, t, testPairs)
 }
 
 func cleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {

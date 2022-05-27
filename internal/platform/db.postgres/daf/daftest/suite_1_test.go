@@ -7,15 +7,12 @@
 package daftest
 
 import (
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"testing"
 )
 
 func TestSuite1(t *testing.T) {
-	dafTester0(t, []TestPair0{
-		{Name: "ArticleDafsSubt", Func: articleDafsSubt0},
-	})
-
-	dafTester1(t, []TestPair0{
-		{Name: "ArticleDafsSubt", Func: articleDafsSubt1},
+	dafTester(t, []dbpgx.TestPair{
+		{Name: "ArticleDafsSubt", Func: articleDafsSubt},
 	})
 }
