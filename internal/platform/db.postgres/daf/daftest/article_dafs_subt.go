@@ -18,34 +18,9 @@ import (
 	"testing"
 )
 
-func articlePlusToCore(_ int, ap model.ArticlePlus) model.ArticlePlus {
-	return model.ArticlePlus{
-		Slug:        ap.Slug,
-		Author:      ap.Author,
-		Title:       ap.Title,
-		Description: ap.Description,
-		Body:        ap.Body,
-		TagList:     ap.TagList,
-	}
-}
-
-func articleToCore(authors []model.User, follows bool) func(i int, a model.Article) model.ArticlePlus {
-	return func(i int, a model.Article) model.ArticlePlus {
-		return model.ArticlePlus{
-			Slug:        a.Slug,
-			Author:      model.Profile_FromUser(&authors[i], follows),
-			Title:       a.Title,
-			Description: a.Description,
-			Body:        a.Body,
-			TagList:     a.TagList,
-		}
-	}
-}
-
 var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
 	currUser := users[0]
-	authors := []model.User{users[1], users[1]}
-	author := authors[0]
+	author := users[1]
 
 	{
 		criteria := model.ArticleCriteria{
@@ -55,14 +30,12 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		returned := util.SliceMapWithIndex(articlePluses, articlePlusToCore)
-		expected := util.SliceMapWithIndex(articles, articleToCore(authors, false))
-
-		//fmt.Println("\ncoreInfoReturned:", coreInfoReturned)
-		//fmt.Println("\ncoreInfoExpected:", coreInfoExpected)
+		expected := util.SliceMap(articles, func(a model.Article) model.ArticlePlus {
+			return model.ArticlePlus_FromArticle(a, model.Profile_FromUser(&author, false))
+		})
 
 		assert.ElementsMatch(t, expected, returned)
 	}
@@ -75,10 +48,9 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		returned := util.SliceMapWithIndex(articlePluses, articlePlusToCore)
 		var expected []model.ArticlePlus
 
 		//fmt.Println("\ncore info returned:", returned)
@@ -88,13 +60,12 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 	}
 
 	{
-		articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, articles[1].Slug)
+		article := articles[1]
+
+		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, article.Slug)
 		errx.PanicOnError(err)
 
-		returned := articlePlusToCore(-1, articleFromDb)
-		expected := articleToCore(authors, false)(0, articles[1])
-
-		//_, _ = spew.Println("\nArticleGetBySlugDaf:", articleFromDb)
+		expected := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(&author, false))
 
 		assert.Equal(t, expected, returned)
 	}
@@ -105,26 +76,19 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		err := daf.ArticleUpdateDafI(ctx, tx, pArticle)
 		errx.PanicOnError(err)
 
-		articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, pArticle.Slug)
+		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, pArticle.Slug)
 		errx.PanicOnError(err)
 
-		returned := articlePlusToCore(-1, articleFromDb)
-		expected := articleToCore(authors, false)(0, *pArticle)
-
-		//_, _ = spew.Println("\nAfter update:", articleFromDb)
+		expected := model.ArticlePlus_FromArticle(*pArticle, model.Profile_FromUser(&author, false))
 
 		assert.Equal(t, expected, returned)
 	}
 
 	{
-		articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
+		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
 		errx.PanicOnError(err)
 
-		returned := util.SliceMapWithIndex(articlePluses, articlePlusToCore)
 		var expected []model.ArticlePlus
-
-		//_, _ = spew.Println("\nArticlesFeedDaf returned:", returned)
-		//_, _ = spew.Println("\nArticlesFeedDaf expected:", expected)
 
 		assert.ElementsMatch(t, expected, returned)
 	}

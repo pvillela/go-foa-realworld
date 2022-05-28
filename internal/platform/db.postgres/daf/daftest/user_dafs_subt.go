@@ -17,17 +17,6 @@ import (
 	"testing"
 )
 
-func userToCore(u model.User) model.User {
-	return model.User{
-		Username:     u.Username,
-		Email:        u.Email,
-		PasswordHash: u.PasswordHash,
-		PasswordSalt: u.PasswordSalt,
-		Bio:          u.Bio,
-		ImageLink:    u.ImageLink,
-	}
-}
-
 func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
@@ -39,14 +28,13 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 	{
 		user := users[0]
-		userFromDb, recCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
+		returned, recCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
 		errx.PanicOnError(err)
 		util.Ignore(recCtx)
 		//fmt.Println("UserGetByNameDaf:", userFromDb)
 		//fmt.Println("recCtx from Read:", recCtx)
 
-		returned := userToCore(userFromDb)
-		expected := userToCore(user)
+		expected := user
 		assert.Equal(t, expected, returned)
 	}
 
@@ -63,14 +51,13 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 	{
 		user := users[1]
-		userFromDb, recCtx, err := daf.UserGetByEmailDafI(ctx, user.Email)
+		returned, recCtx, err := daf.UserGetByEmailDafI(ctx, user.Email)
 		errx.PanicOnError(err)
 		util.Ignore(recCtx)
 		//fmt.Println("UserGetByEmailDaf:", userFromDb)
 		//fmt.Println("recCtx from Read:", recCtx)
 
-		returned := userToCore(userFromDb)
-		expected := userToCore(user)
+		expected := user
 		assert.Equal(t, expected, returned)
 	}
 
@@ -83,10 +70,10 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		//fmt.Println("pwUsers:", pwUsers)
 
 		returned := util.SliceMap(pwUsers, func(pw daf.PwUser) model.User {
-			return userToCore(pw.Entity)
+			return pw.Entity
 		})
 
-		expected := util.SliceMap(users, userToCore)
+		expected := users
 
 		assert.ElementsMatch(t, expected, returned)
 	}
@@ -94,23 +81,21 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	{
 		userIdx := 0
 		user := users[userIdx]
-		recCtx := recCtxUsers[userIdx]
+		recCtx := &recCtxUsers[userIdx]
 		user.ImageLink = util.PointerFromValue("https://xyz.com")
-		recCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
-		recCtxUsers[userIdx] = recCtx
+		*recCtx, err = daf.UserUpdateDafI(ctx, user, *recCtx)
 		errx.PanicOnError(err)
 		//fmt.Println("\nUserUpdateDaf:", user)
 		//fmt.Println("recCtx from Update:", recCtx)
 
 		{
-			userFromDb, recCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
+			var returned model.User
+			returned, *recCtx, err = daf.UserGetByNameDafI(ctx, user.Username)
 			errx.PanicOnError(err)
-			util.Ignore(recCtx)
 			//fmt.Println("UserGetByNameDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
 
-			returned := userToCore(userFromDb)
-			expected := userToCore(user)
+			expected := user
 			assert.Equal(t, expected, returned)
 		}
 	}
