@@ -10,12 +10,29 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 )
 
+// Contextualizer represents a higher-order function that executes another function within
+// a context.
+// An example is a function that executes a target function while delimiting the target function
+// within a transaction.
+//
+// - configCtx represents configuration data that is passed to the higher-orfer function.
+// For example, a database object.
+//
+// - externalRuntimeCtx represents a runtime context input for use by both the Contextualizer
+// and the target function.
+// For example, context.Context.
+//
+// - internalRuntimeCtx is a runtime argument produced by the Contextualizer and passed to
+// the target function.
+// For example, a transaction object.
 type Contextualizer[CC, ERC, IRC, T any] func(
 	configCtx CC,
 	externalRuntimeCtx ERC,
 	block func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error),
 ) (T, error)
 
+// LiftContextualizer returns a function that is the partial application of f
+// within the execution context provided by contextualizer.
 func LiftContextualizer[CC, ERC, IRC, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
@@ -29,6 +46,8 @@ func LiftContextualizer[CC, ERC, IRC, T any](
 	}
 }
 
+// LiftContextualizer1 returns a function that is the partial application of f
+// within the execution context provided by contextualizer.
 func LiftContextualizer1[CC, ERC, IRC, S1, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
@@ -42,6 +61,8 @@ func LiftContextualizer1[CC, ERC, IRC, S1, T any](
 	}
 }
 
+// LiftContextualizer2 returns a function that is the partial application of f
+// within the execution context provided by contextualizer.
 func LiftContextualizer2[CC, ERC, IRC, S1, S2, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
@@ -55,6 +76,8 @@ func LiftContextualizer2[CC, ERC, IRC, S1, S2, T any](
 	}
 }
 
+// LiftContextualizer1V returns a function that is the partial application of f
+// within the execution context provided by contextualizer.
 func LiftContextualizer1V[CC, ERC, IRC, S1 any](
 	contextualizer Contextualizer[CC, ERC, IRC, types.Unit],
 	configCtx CC,

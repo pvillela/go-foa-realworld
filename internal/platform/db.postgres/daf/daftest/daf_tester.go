@@ -37,26 +37,27 @@ func dafTester(t *testing.T, testPairs []dbpgx.TestPair) {
 
 	tx, err := db.BeginTx(ctx)
 	errx.PanicOnError(err)
-	CleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
+	cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
 		"article_tags", "comments")
-	SetupData(ctx, tx)
+	setupData(ctx, tx)
 	err = tx.Commit(ctx)
 	errx.PanicOnError(err)
 
 	dbpgx.RunTestPairs(db, ctx, t, testPairs)
 }
 
-func CleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
+func cleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
 	tablesStr := strings.Join(tables, ", ")
 	sql := fmt.Sprintf("TRUNCATE %v", tablesStr)
 	_, err := tx.Exec(ctx, sql)
 	errx.PanicOnError(err)
 }
 
-func SetupData(ctx context.Context, tx pgx.Tx) {
+func setupData(ctx context.Context, tx pgx.Tx) {
 	for i, _ := range users {
 		recCtx, err := daf.UserCreateExplicitTxDafI(ctx, tx, &users[i])
 		errx.PanicOnError(err)
+		recCtxUsers[i] = recCtx
 		_, _ = spew.Printf("user from Create: %v\n", users[i])
 		fmt.Println("recCtx from Create:", recCtx)
 	}

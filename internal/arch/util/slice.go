@@ -48,13 +48,24 @@ func SliceToSet[T comparable](s []T) map[T]types.Unit {
 	return set
 }
 
-func SliceMap[S, T any](xs []S, f func(int, S) T) []T {
+func SliceMapWithIndex[S, T any](xs []S, f func(int, S) T) []T {
 	if xs == nil {
 		return nil
 	}
 	ts := make([]T, len(xs))
 	for i := range xs {
 		ts[i] = f(i, xs[i])
+	}
+	return ts
+}
+
+func SliceMap[S, T any](xs []S, f func(S) T) []T {
+	if xs == nil {
+		return nil
+	}
+	ts := make([]T, len(xs))
+	for i := range xs {
+		ts[i] = f(xs[i])
 	}
 	return ts
 }

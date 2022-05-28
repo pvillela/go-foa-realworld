@@ -58,8 +58,8 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		returned := util.SliceMap(articlePluses, articlePlusToCore)
-		expected := util.SliceMap(articles, articleToCore(authors, false))
+		returned := util.SliceMapWithIndex(articlePluses, articlePlusToCore)
+		expected := util.SliceMapWithIndex(articles, articleToCore(authors, false))
 
 		//fmt.Println("\ncoreInfoReturned:", coreInfoReturned)
 		//fmt.Println("\ncoreInfoExpected:", coreInfoExpected)
@@ -78,7 +78,7 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		returned := util.SliceMap(articlePluses, articlePlusToCore)
+		returned := util.SliceMapWithIndex(articlePluses, articlePlusToCore)
 		var expected []model.ArticlePlus
 
 		//fmt.Println("\ncore info returned:", returned)
@@ -120,7 +120,7 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
 		errx.PanicOnError(err)
 
-		returned := util.SliceMap(articlePluses, articlePlusToCore)
+		returned := util.SliceMapWithIndex(articlePluses, articlePlusToCore)
 		var expected []model.ArticlePlus
 
 		//_, _ = spew.Println("\nArticlesFeedDaf returned:", returned)

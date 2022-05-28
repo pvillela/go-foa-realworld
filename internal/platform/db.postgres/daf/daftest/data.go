@@ -9,6 +9,7 @@ package daftest
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
 var users = []model.User{
@@ -37,6 +38,8 @@ var users = []model.User{
 		ImageLink:    util.PointerFromValue("https://johndooeimage.com"),
 	},
 }
+
+var recCtxUsers = make([]daf.RecCtxUser, len(users))
 
 var articles = []model.Article{
 	{
