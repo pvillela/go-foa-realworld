@@ -44,7 +44,7 @@ func CommentDeleteSflC(
 // CommentDeleteSflT without hard-wired stereotype dependencies.
 func CommentDeleteSflC0(
 	db dbpgx.Db,
-	articleAndUserGetFl fl.ArticleAndUserGetFlT,
+	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	commentDeleteDaf daf.CommentDeleteDafT,
 ) CommentDeleteSflT {
 	return func(
@@ -63,7 +63,7 @@ func CommentDeleteSflC0(
 
 			username := reqCtx.Username
 
-			articlePlus, user, err := articleAndUserGetFl(ctx, tx, in.Slug, username)
+			articlePlus, user, err := articleGetAndCheckOwnerFl(ctx, tx, in.Slug, username)
 			if err != nil {
 				return types.UnitV, err
 			}

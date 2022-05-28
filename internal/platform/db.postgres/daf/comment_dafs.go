@@ -86,5 +86,4 @@ var CommentDeleteDafI CommentDeleteDafT = func(
 	}
 
 	return nil
-
 }

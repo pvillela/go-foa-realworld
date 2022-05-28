@@ -1,28 +1,26 @@
 /*
- * Copyright © 2021 Paulo Villela. All rights reserved.
+ * Copyright © 2022 Paulo Villela. All rights reserved.
  * Use of this source code is governed by the Apache 2.0 license
  * that can be found in the LICENSE file.
  */
 
-package main
+package daftest
 
 import (
 	"context"
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-func commentDafsExample(ctx context.Context, db dbpgx.Db) {
-	fmt.Println("********** CommentDafsExample **********")
+var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
 
-	tx, err := db.BeginTx(ctx)
-	errx.PanicOnError(err)
+	// Create comments.
 
 	comments := []model.Comment{
 		{
@@ -42,22 +40,33 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 		errx.PanicOnError(err)
 	}
 
+	// Tests
+
 	{
-		commentsFromDb, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
+		msg := "Get comments for article with comments."
+
+		returned, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
 		errx.PanicOnError(err)
-		_, _ = spew.Printf("\nCommentsGetBySlugDafI: %v\n", commentsFromDb)
+
+		assert.Equal(t, comments, returned, msg)
 	}
 
 	{
-		// Deletion of article by author.
+		msg := "Get comments for article without comments."
+
+		returned, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[1].Slug)
+		errx.PanicOnError(err)
+
+		var expected []model.Comment
+
+		assert.Equal(t, expected, returned, msg)
+	}
+
+	{
+		msg := "Deletion of article by author."
 		currUser := users[0]
 		comment := comments[0]
 
-		fmt.Printf(
-			"\narticle deletion - currUser ID: %v, comment author ID: %v:\n",
-			currUser.Id,
-			comment.AuthorId,
-		)
 		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
 		errx.PanicOnError(err)
 
@@ -66,41 +75,30 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 		comments = comments[1:]
 
 		{
-			commentsFromDb, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
-			errx.PanicOnError(err)
-			_, _ = spew.Printf("\nCommentsGetBySlugDafI: %v\n", commentsFromDb)
+			returned := commentsGetAll(ctx, tx)
 
-			commentsFromDb = commentsGetAll(ctx, tx)
-			_, _ = spew.Printf("\ncommentsGetAll: %v\n", commentsFromDb)
+			assert.ElementsMatch(t, comments, returned, msg)
 		}
 	}
 
 	{
-		// Deletion of article by non-author. This does not invalidate the transaction.
+		msg := "Deletion of article by non-author. This does not invalidate the transaction."
 		currUser := users[0]
 		comment := comments[0] // is the old comments[1] due to previous delete operation
 
-		fmt.Printf(
-			"\narticle deletion - currUser ID: %v, comment author ID: %v:\n",
-			currUser.Id,
-			comment.AuthorId,
-		)
 		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
-		fmt.Println("err:", err)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg)
 
 		{
-			commentsFromDb, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
-			errx.PanicOnError(err)
-			_, _ = spew.Printf("\nCommentsGetBySlugDafI: %v\n", commentsFromDb)
+			returned := commentsGetAll(ctx, tx)
 
-			commentsFromDb = commentsGetAll(ctx, tx)
-			_, _ = spew.Printf("\ncommentsGetAll: %v\n", commentsFromDb)
+			assert.ElementsMatch(t, comments, returned, msg)
 		}
 	}
-
-	err = tx.Commit(ctx)
-	errx.PanicOnError(err)
-}
+})
 
 func commentsGetAll(ctx context.Context, tx pgx.Tx) []model.Comment {
 	sql := `

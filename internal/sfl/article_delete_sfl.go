@@ -48,7 +48,7 @@ func ArticleDeleteSflC0(
 		) (types.Unit, error) {
 			username := reqCtx.Username
 
-			_, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
+			_, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
 			if err != nil {
 				return types.UnitV, err
 			}

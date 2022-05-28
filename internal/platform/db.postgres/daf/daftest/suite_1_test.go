@@ -15,5 +15,6 @@ func TestSuite1(t *testing.T) {
 	dafTester(t, []dbpgx.TestPair{
 		{Name: "userDafsSubt", Func: UserDafsSubt},
 		{Name: "articleDafsSubt", Func: articleDafsSubt},
+		{Name: "commentDafsSubt", Func: commentDafsSubt},
 	})
 }

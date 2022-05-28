@@ -34,8 +34,7 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		//fmt.Println("UserGetByNameDaf:", userFromDb)
 		//fmt.Println("recCtx from Read:", recCtx)
 
-		expected := user
-		assert.Equal(t, expected, returned)
+		assert.Equal(t, user, returned)
 	}
 
 	{
@@ -57,8 +56,7 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		//fmt.Println("UserGetByEmailDaf:", userFromDb)
 		//fmt.Println("recCtx from Read:", recCtx)
 
-		expected := user
-		assert.Equal(t, expected, returned)
+		assert.Equal(t, user, returned)
 	}
 
 	{
@@ -73,9 +71,7 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			return pw.Entity
 		})
 
-		expected := users
-
-		assert.ElementsMatch(t, expected, returned)
+		assert.ElementsMatch(t, users, returned)
 	}
 
 	{
@@ -95,8 +91,7 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			//fmt.Println("UserGetByNameDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
 
-			expected := user
-			assert.Equal(t, expected, returned)
+			assert.Equal(t, user, returned)
 		}
 	}
 

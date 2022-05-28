@@ -66,7 +66,7 @@ func ArticleUpdateSflC0(
 			slug := in.Article.Slug
 			var zero rpc.ArticleOut
 
-			articlePlus, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
+			articlePlus, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
 			if err != nil {
 				return zero, err
 			}

@@ -20,7 +20,7 @@ type ArticleGetAndCheckOwnerFlT = func(
 	tx pgx.Tx,
 	slug string,
 	username string,
-) (model.ArticlePlus, error)
+) (model.ArticlePlus, model.User, error)
 
 // ArticleGetAndCheckOwnerFlI implements a stereotype instance of type
 // ArticleGetAndCheckOwnerFlT.
@@ -29,7 +29,7 @@ var ArticleGetAndCheckOwnerFlI ArticleGetAndCheckOwnerFlT = func(
 	tx pgx.Tx,
 	slug string,
 	username string,
-) (model.ArticlePlus, error) {
+) (model.ArticlePlus, model.User, error) {
 	articleAndUserGetFl := ArticleAndUserGetFlI
 	articleCheckOwnerBf := bf.ArticleCheckOwnerBfI
 	return ArticleGetAndCheckOwnerFlC0(
@@ -49,16 +49,16 @@ func ArticleGetAndCheckOwnerFlC0(
 		tx pgx.Tx,
 		slug string,
 		username string,
-	) (model.ArticlePlus, error) {
-		article, _, err := articleAndUserGetFl(ctx, tx, slug, username)
+	) (model.ArticlePlus, model.User, error) {
+		article, user, err := articleAndUserGetFl(ctx, tx, slug, username)
 		if err != nil {
-			return model.ArticlePlus{}, err
+			return model.ArticlePlus{}, model.User{}, err
 		}
 
 		if err := articleCheckOwnerBf(article, username); err != nil {
-			return model.ArticlePlus{}, err
+			return model.ArticlePlus{}, model.User{}, err
 		}
 
-		return article, err
+		return article, user, err
 	}
 }
