@@ -16,6 +16,19 @@ type Contextualizer[CC, ERC, IRC, T any] func(
 	block func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error),
 ) (T, error)
 
+func LiftContextualizer[CC, ERC, IRC, T any](
+	contextualizer Contextualizer[CC, ERC, IRC, T],
+	configCtx CC,
+	f func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error),
+) func(externalRuntimeCtx ERC) (T, error) {
+	return func(externalRuntimeCtx ERC) (T, error) {
+		block := func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error) {
+			return f(externalRuntimeCtx, internalRuntimeCtx)
+		}
+		return contextualizer(configCtx, externalRuntimeCtx, block)
+	}
+}
+
 func LiftContextualizer1[CC, ERC, IRC, S1, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
