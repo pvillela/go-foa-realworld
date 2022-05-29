@@ -93,6 +93,6 @@ func (p CtxPgx) Rollback(ctx context.Context) (context.Context, error) {
 func (p CtxPgx) DeferredRollback(ctx context.Context) {
 	_, err := p.Rollback(ctx)
 	if err != nil {
-		log.Error("rollback failed", err)
+		log.Debug("rollback failed", err)
 	}
 }

@@ -32,7 +32,7 @@ func (s Db) BeginTx(ctx context.Context) (pgx.Tx, error) {
 func DeferredRollback(ctx context.Context, tx pgx.Tx) {
 	err := tx.Rollback(ctx)
 	if err != nil {
-		log.Error("transaction rollback failed ", err)
+		log.Debug("transaction rollback failed ", err)
 	}
 }
 

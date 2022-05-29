@@ -22,6 +22,8 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 
 	// Create comments.
 
+	commentsDeleteAll(ctx, tx) // cleanup to make test idempotent because comments are cumulative
+
 	comments := []model.Comment{
 		{
 			ArticleId: articles[0].Id,
@@ -108,4 +110,12 @@ func commentsGetAll(ctx context.Context, tx pgx.Tx) []model.Comment {
 	errx.PanicOnError(err)
 
 	return comments
+}
+
+func commentsDeleteAll(ctx context.Context, tx pgx.Tx) {
+	sql := `
+	DELETE FROM comments
+	`
+	_, err := tx.Exec(ctx, sql)
+	errx.PanicOnError(err)
 }

@@ -15,7 +15,7 @@ import (
 )
 
 // DafSubtest is the type of a function that implements a DAF subtest
-// that is to be selimited by a transaction.
+// that is to be delimited by a transaction.
 type DafSubtest func(
 	ctx context.Context,
 	tx pgx.Tx,
@@ -23,7 +23,7 @@ type DafSubtest func(
 )
 
 // TransactionalSubtest is the tyype of a function that implements a DAF subtest
-// that is already delimited by a transaction.
+// that is already delimited by one or more transactions.
 type TransactionalSubtest func(
 	db Db,
 	ctx context.Context,
@@ -58,21 +58,11 @@ func RunTestPairs(db Db, ctx context.Context, t *testing.T, name string, testPai
 	})
 }
 
-// RunTestPairs0 executes a list of TestPair.
-func RunTestPairs0(db Db, ctx context.Context, t *testing.T, testPairs []TestPair) {
-	for _, p := range testPairs {
-		testFunc := func(t *testing.T) {
-			p.Func(db, ctx, t)
-		}
-		t.Run(p.Name, testFunc)
-	}
-}
-
 // Parallel returns a decorated TransactionalSubtest that calls t.Parallel()
-// just before executing txnSubtest.
-func Parallel(txnSubtest TransactionalSubtest) TransactionalSubtest {
+// just before executing txnlSubtest.
+func Parallel(txnlSubtest TransactionalSubtest) TransactionalSubtest {
 	return func(db Db, ctx context.Context, t *testing.T) {
 		t.Parallel()
-		txnSubtest(db, ctx, t)
+		txnlSubtest(db, ctx, t)
 	}
 }

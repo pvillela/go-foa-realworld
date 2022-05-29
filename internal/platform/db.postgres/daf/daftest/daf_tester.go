@@ -22,10 +22,11 @@ import (
 
 var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
 
-func dafTester(t *testing.T, subtestName string, txnSubtest dbpgx.TransactionalSubtest) {
+// dafTester runs txnlSubtest by providing a database with repeatably initialized data.
+func dafTester(t *testing.T, txnlSubtest dbpgx.TransactionalSubtest) {
 	defer errx.PanicLog(log.Fatal)
 
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	ctx := context.Background()
 
@@ -43,10 +44,7 @@ func dafTester(t *testing.T, subtestName string, txnSubtest dbpgx.TransactionalS
 	err = tx.Commit(ctx)
 	errx.PanicOnError(err)
 
-	subtest := func(t *testing.T) {
-		txnSubtest(db, ctx, t)
-	}
-	t.Run(subtestName, subtest)
+	txnlSubtest(db, ctx, t)
 }
 
 func cleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
