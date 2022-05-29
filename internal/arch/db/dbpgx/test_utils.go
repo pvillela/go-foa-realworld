@@ -51,6 +51,7 @@ func RunTestPairs(db Db, ctx context.Context, t *testing.T, name string, testPai
 	t.Run(name, func(t *testing.T) {
 		for _, p := range testPairs {
 			testFunc := func(t *testing.T) {
+				defer util.Trace(p.Name)()
 				p.Func(db, ctx, t)
 			}
 			t.Run(p.Name, testFunc)
