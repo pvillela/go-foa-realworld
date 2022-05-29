@@ -14,17 +14,15 @@ import (
 	"testing"
 )
 
-// Subtest is the type of a function that implements a DAF subtest,
-// i.e., that is to be executed sequentially within a test suite,
+// DafSubtest is the type of a function that implements a DAF subtest
 // that is to be selimited by a transaction.
-type Subtest func(
+type DafSubtest func(
 	ctx context.Context,
 	tx pgx.Tx,
 	t *testing.T,
 )
 
-// TransactionalSubtest is the tyype of a function that implements a DAF subtest,
-// i.e., that is to be executed sequentially within a test suite,
+// TransactionalSubtest is the tyype of a function that implements a DAF subtest
 // that is already delimited by a transaction.
 type TransactionalSubtest func(
 	db Db,
@@ -38,9 +36,9 @@ type TestPair struct {
 	Func TransactionalSubtest
 }
 
-// TestWithTransaction is a convenience wrapper to transform a Subtest into a TransactionalSubtest.
+// TestWithTransaction is a convenience wrapper to transform a DafSubtest into a TransactionalSubtest.
 func TestWithTransaction(
-	f Subtest,
+	f DafSubtest,
 ) TransactionalSubtest {
 	return func(db Db, ctx context.Context, t *testing.T) {
 		fL := util.LiftContextualizer1V(WithTransaction[types.Unit], db, f)
@@ -48,12 +46,33 @@ func TestWithTransaction(
 	}
 }
 
-// RunTestPairs sequentially executes a list of TestPair.
-func RunTestPairs(db Db, ctx context.Context, t *testing.T, testPairs []TestPair) {
+// RunTestPairs executes a list of TestPair.
+func RunTestPairs(db Db, ctx context.Context, t *testing.T, name string, testPairs []TestPair) {
+	t.Run(name, func(t *testing.T) {
+		for _, p := range testPairs {
+			testFunc := func(t *testing.T) {
+				p.Func(db, ctx, t)
+			}
+			t.Run(p.Name, testFunc)
+		}
+	})
+}
+
+// RunTestPairs0 executes a list of TestPair.
+func RunTestPairs0(db Db, ctx context.Context, t *testing.T, testPairs []TestPair) {
 	for _, p := range testPairs {
 		testFunc := func(t *testing.T) {
 			p.Func(db, ctx, t)
 		}
 		t.Run(p.Name, testFunc)
+	}
+}
+
+// Parallel returns a decorated TransactionalSubtest that calls t.Parallel()
+// just before executing txnSubtest.
+func Parallel(txnSubtest TransactionalSubtest) TransactionalSubtest {
+	return func(db Db, ctx context.Context, t *testing.T) {
+		t.Parallel()
+		txnSubtest(db, ctx, t)
 	}
 }

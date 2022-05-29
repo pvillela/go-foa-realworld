@@ -7,14 +7,21 @@
 package daftest
 
 import (
+	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"testing"
 )
 
 func TestSuite1(t *testing.T) {
-	dafTester(t, []dbpgx.TestPair{
-		{Name: "userDafsSubt", Func: UserDafsSubt},
-		{Name: "articleDafsSubt", Func: articleDafsSubt},
-		{Name: "commentDafsSubt", Func: commentDafsSubt},
-	})
+	mainTxnSubtest := func(db dbpgx.Db, ctx context.Context, t *testing.T) {
+		dbpgx.RunTestPairs(db, ctx, t, "user_and_article_parallel", []dbpgx.TestPair{
+			{Name: "userDafsSubt", Func: dbpgx.Parallel(UserDafsSubt)},
+			{Name: "articleDafsSubt", Func: dbpgx.Parallel(articleDafsSubt)},
+		})
+		dbpgx.RunTestPairs(db, ctx, t, "other_dafs", []dbpgx.TestPair{
+			{Name: "commentDafsSubt", Func: commentDafsSubt},
+		})
+	}
+
+	dafTester(t, "DafTests", mainTxnSubtest)
 }

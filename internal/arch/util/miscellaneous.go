@@ -6,4 +6,6 @@
 
 package util
 
+// Ignore is used to remove "unused variable" compilation wrrors without having to remove
+// the variable(s).
 func Ignore(v ...any) {}
