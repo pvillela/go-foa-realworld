@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -24,8 +25,6 @@ var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=di
 
 // dafTester runs txnlSubtest by providing a database with repeatably initialized data.
 func dafTester(t *testing.T, txnlSubtest dbpgx.TransactionalSubtest) {
-	defer errx.PanicLog(log.Fatal)
-
 	log.SetLevel(log.InfoLevel)
 
 	ctx := context.Background()
@@ -36,13 +35,12 @@ func dafTester(t *testing.T, txnlSubtest dbpgx.TransactionalSubtest) {
 	db := dbpgx.Db{pool}
 	defer pool.Close()
 
-	tx, err := db.BeginTx(ctx)
-	errx.PanicOnError(err)
-	cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
-		"article_tags", "comments")
-	setupData(ctx, tx)
-	err = tx.Commit(ctx)
-	errx.PanicOnError(err)
+	ctx, err = dbpgx.WithTransaction(db, ctx, func(ctx context.Context, tx pgx.Tx) (context.Context, error) {
+		cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
+			"article_tags", "comments")
+		setupData(ctx, tx)
+		return ctx, nil
+	})
 
 	txnlSubtest(db, ctx, t)
 }
@@ -60,12 +58,18 @@ func setupData(ctx context.Context, tx pgx.Tx) {
 		errx.PanicOnError(err)
 		recCtxUsers[i] = recCtx
 		_, _ = spew.Printf("user from Create: %v\n", users[i])
-		fmt.Println("recCtx from Create:", recCtx)
+		log.Debug("recCtx from Create:", recCtx)
 	}
+
+	authors := []model.User{users[1], users[1]}
+	if len(authors) != len(articles) {
+		panic("len(authors) != len(articles)")
+	}
+
 	for i, _ := range articles {
-		articles[i].AuthorId = users[1].Id
+		articles[i].AuthorId = authors[i].Id
 		err := daf.ArticleCreateDafI(ctx, tx, &articles[i])
 		errx.PanicOnError(err)
-		fmt.Println("article from Create:", articles[i])
+		log.Debug("article from Create:", articles[i])
 	}
 }
