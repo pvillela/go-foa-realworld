@@ -95,6 +95,27 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 	}
 
+	{
+		userIdx := 1
+		pUser := &users[userIdx]
+		recCtx := &recCtxUsers[userIdx]
+		pUser.Bio = util.PointerFromValue("I'm a really famous person.")
+		*recCtx, err = daf.UserUpdateDafI(ctx, *pUser, *recCtx)
+		errx.PanicOnError(err)
+		//fmt.Println("\nUserUpdateDaf:", user)
+		//fmt.Println("recCtx from Update:", recCtx)
+
+		{
+			var returned model.User
+			returned, *recCtx, err = daf.UserGetByNameDafI(ctx, pUser.Username)
+			errx.PanicOnError(err)
+			//fmt.Println("UserGetByNameDaf:", userFromDb)
+			//fmt.Println("recCtx from Read:", recCtx)
+
+			assert.Equal(t, *pUser, returned)
+		}
+	}
+
 	_, err = ctxDb.Commit(ctx)
 	errx.PanicOnError(err)
 	//fmt.Println("\nFinal commit for userDafsSubt")

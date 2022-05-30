@@ -9,7 +9,6 @@ package daftest
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"testing"
 )
 
@@ -18,20 +17,10 @@ func TestDafSuite(t *testing.T) {
 		testPairs := []dbpgx.TestPair{
 			{Name: "userDafsSubt", Func: UserDafsSubt},
 			{Name: "articleDafsSubt", Func: articleDafsSubt},
-			{Name: "commentDafsSubt", Func: commentDafsSubt},
+			{Name: "commentDafsSubt", Func: dbpgx.Parallel(commentDafsSubt)},
 		}
 
-		// It is OK to run the tests in parallel because each executes in a serializable transaction.
-		parallelTestPairs := util.SliceMap(testPairs, func(tp dbpgx.TestPair) dbpgx.TestPair {
-			return dbpgx.TestPair{
-				Name: tp.Name,
-				Func: dbpgx.Parallel(tp.Func),
-			}
-		})
-		util.Ignore(parallelTestPairs)
-
 		dbpgx.RunTestPairs(db, ctx, t, "sequential", testPairs)
-		dbpgx.RunTestPairs(db, ctx, t, "parallel", parallelTestPairs)
 	}
 
 	dafTester(t, txnlSubtest)
