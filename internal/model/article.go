@@ -107,7 +107,7 @@ func (s ArticlePlus) ToArticle() Article {
 	}
 }
 
-func ArticlePlus_FromArticle(article Article, author Profile) ArticlePlus {
+func ArticlePlus_FromArticle(article Article, favorited bool, author Profile) ArticlePlus {
 	return ArticlePlus{
 		Id:   article.Id,
 		Slug: article.Slug,
@@ -116,7 +116,7 @@ func ArticlePlus_FromArticle(article Article, author Profile) ArticlePlus {
 			Username:  author.Username,
 			Bio:       author.Bio,
 			Image:     author.Image,
-			Following: false,
+			Following: author.Following,
 		},
 		Title:          article.Title,
 		Description:    article.Description,
@@ -124,7 +124,7 @@ func ArticlePlus_FromArticle(article Article, author Profile) ArticlePlus {
 		TagList:        article.TagList,
 		CreatedAt:      article.CreatedAt,
 		UpdatedAt:      article.UpdatedAt,
-		Favorited:      false,
-		FavoritesCount: 0,
+		Favorited:      favorited,
+		FavoritesCount: article.FavoritesCount,
 	}
 }

@@ -18,6 +18,7 @@ func TestDafSuite(t *testing.T) {
 			{Name: "userDafsSubt", Func: UserDafsSubt},
 			{Name: "articleDafsSubt", Func: articleDafsSubt},
 			{Name: "commentDafsSubt", Func: dbpgx.Parallel(commentDafsSubt)},
+			{Name: "favoriteDafsSubt", Func: dbpgx.Parallel(favoriteDafsSubt)},
 		}
 
 		dbpgx.RunTestPairs(db, ctx, t, "sequential", testPairs)

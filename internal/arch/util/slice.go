@@ -69,3 +69,16 @@ func SliceMap[S, T any](xs []S, f func(S) T) []T {
 	}
 	return ts
 }
+
+func SliceFilter[S any](xs []S, f func(S) bool) []S {
+	if xs == nil {
+		return nil
+	}
+	ts := make([]S, 0, len(xs))
+	for i := range xs {
+		if f(xs[i]) {
+			ts = append(ts, xs[i])
+		}
+	}
+	return ts
+}

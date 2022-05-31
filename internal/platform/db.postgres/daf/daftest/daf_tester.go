@@ -9,13 +9,10 @@ package daftest
 import (
 	"context"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
-	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"testing"
@@ -50,26 +47,4 @@ func cleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
 	sql := fmt.Sprintf("TRUNCATE %v", tablesStr)
 	_, err := tx.Exec(ctx, sql)
 	errx.PanicOnError(err)
-}
-
-func setupData(ctx context.Context, tx pgx.Tx) {
-	for i, _ := range users {
-		recCtx, err := daf.UserCreateExplicitTxDafI(ctx, tx, &users[i])
-		errx.PanicOnError(err)
-		recCtxUsers[i] = recCtx
-		_, _ = spew.Printf("user from Create: %v\n", users[i])
-		log.Debug("recCtx from Create:", recCtx)
-	}
-
-	authors := []model.User{users[1], users[1]}
-	if len(authors) != len(articles) {
-		panic("len(authors) != len(articles)")
-	}
-
-	for i, _ := range articles {
-		articles[i].AuthorId = authors[i].Id
-		err := daf.ArticleCreateDafI(ctx, tx, &articles[i])
-		errx.PanicOnError(err)
-		log.Debug("article from Create:", articles[i])
-	}
 }
