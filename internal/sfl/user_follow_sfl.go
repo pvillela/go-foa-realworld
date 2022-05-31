@@ -8,11 +8,11 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
@@ -27,7 +27,7 @@ type UserFollowSflT = func(
 // UserFollowSflC is the function that constructs a stereotype instance of type
 // UserFollowSflT with hard-wired stereotype dependencies.
 func UserFollowSflC(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 ) UserFollowSflT {
 	userGetByNameDaf := daf.UserGetByNameDafI
 	followingCreateDaf := daf.FollowingCreateDafI
@@ -41,7 +41,7 @@ func UserFollowSflC(
 // UserFollowSflC0 is the function that constructs a stereotype instance of type
 // UserFollowSflT without hard-wired stereotype dependencies.
 func UserFollowSflC0(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingCreateDaf daf.FollowingCreateDafT,
 ) UserFollowSflT {
@@ -52,7 +52,7 @@ func UserFollowSflC0(
 	) (rpc.ProfileOut, error) {
 		username := reqCtx.Username
 
-		return db.WithTransaction(ctxDb, ctx, func(
+		return cdb.WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.ProfileOut, error) {
 			var zero rpc.ProfileOut

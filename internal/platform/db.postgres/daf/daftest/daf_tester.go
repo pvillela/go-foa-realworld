@@ -35,7 +35,6 @@ func dafTester(t *testing.T, txnlSubtest dbpgx.TransactionalSubtest) {
 	ctx, err = dbpgx.WithTransaction(db, ctx, func(ctx context.Context, tx pgx.Tx) (context.Context, error) {
 		cleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
 			"article_tags", "comments")
-		setupData(ctx, tx)
 		return ctx, nil
 	})
 

@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -26,7 +26,7 @@ type UserRegisterSflT = func(
 // UserRegisterSflC is the function that constructs a stereotype instance of type
 // UserRegisterSflT with hard-wired stereotype dependencies.
 func UserRegisterSflC(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
 	userCreateDaf := daf.UserCreateDafI
@@ -40,7 +40,7 @@ func UserRegisterSflC(
 // UserRegisterSflC0 is the function that constructs a stereotype instance of type
 // UserRegisterSflT without hard-wired stereotype dependencies.
 func UserRegisterSflC0(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
@@ -49,7 +49,7 @@ func UserRegisterSflC0(
 		_ web.RequestContext,
 		in rpc.UserRegisterIn,
 	) (rpc.UserOut, error) {
-		return db.WithTransaction(ctxDb, ctx, func(
+		return cdb.WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.UserOut, error) {
 			user := in.ToUser()

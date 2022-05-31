@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	log "github.com/sirupsen/logrus"
 )
@@ -27,7 +27,7 @@ type CtxPgx struct {
 
 // Interface verification
 func _(p CtxPgx) {
-	func(cdb db.CtxDb) {}(p)
+	func(cdb cdb.CtxDb) {}(p)
 }
 
 func (p CtxPgx) SetPool(ctx context.Context) (context.Context, error) {

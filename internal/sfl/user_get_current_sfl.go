@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -27,7 +27,7 @@ type UserGetCurrentSflT = func(
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT with hard-wired stereotype dependencies.
 func UserGetCurrentSflC(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 ) UserGetCurrentSflT {
 	userGetByNameDaf := daf.UserGetByNameDafI
 	return UserGetCurrentSflC0(
@@ -39,7 +39,7 @@ func UserGetCurrentSflC(
 // UserGetCurrentSflC0 is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT without hard-wired stereotype dependencies.
 func UserGetCurrentSflC0(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {
 	return func(
@@ -47,7 +47,7 @@ func UserGetCurrentSflC0(
 		reqCtx web.RequestContext,
 		_ types.Unit,
 	) (rpc.UserOut, error) {
-		return db.WithTransaction(ctxDb, ctx, func(
+		return cdb.WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.UserOut, error) {
 			username := reqCtx.Username

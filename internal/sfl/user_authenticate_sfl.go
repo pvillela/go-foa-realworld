@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -26,7 +26,7 @@ type UserAuthenticateSflT = func(
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT with hard-wired stereotype dependencies.
 func UserAuthenticateSflC(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserAuthenticateSflT {
 	userGetByEmailDaf := daf.UserGetByEmailDafI
@@ -42,7 +42,7 @@ func UserAuthenticateSflC(
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT without hard-wired stereotype dependencies.
 func UserAuthenticateSflC0(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userGetByEmailDaf daf.UserGetByEmailDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
@@ -77,6 +77,6 @@ func UserAuthenticateSflC0(
 			return userOut, err
 		}
 
-		return db.WithTransaction(ctxDb, ctx, block)
+		return cdb.WithTransaction(ctxDb, ctx, block)
 	}
 }

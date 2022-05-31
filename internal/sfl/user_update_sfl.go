@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -25,7 +25,7 @@ type UserUpdateSflT = func(
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT with hard-wired stereotype dependencies.
 func UserUpdateSflC(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 ) UserUpdateSflT {
 	userGetByNameDaf := daf.UserGetByNameDafI
 	userUpdateDaf := daf.UserUpdateDafI
@@ -39,7 +39,7 @@ func UserUpdateSflC(
 // UserUpdateSflC0 is the function that constructs a stereotype instance of type
 // UserUpdateSflT without hard-wired stereotype dependencies.
 func UserUpdateSflC0(
-	ctxDb db.CtxDb,
+	ctxDb cdb.CtxDb,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	userUpdateDaf daf.UserUpdateDafT,
 ) UserUpdateSflT {
@@ -48,7 +48,7 @@ func UserUpdateSflC0(
 		reqCtx web.RequestContext,
 		in rpc.UserUpdateIn,
 	) (rpc.UserOut, error) {
-		return db.WithTransaction(ctxDb, ctx, func(
+		return cdb.WithTransaction(ctxDb, ctx, func(
 			ctx context.Context,
 		) (rpc.UserOut, error) {
 			username := reqCtx.Username

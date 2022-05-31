@@ -25,10 +25,40 @@ type MDb struct {
 }
 
 ///////////////////
+// Constructor
+
+func New() MDb {
+	return MDb{
+		users:        mUsersT{},
+		recCtxUsers:  mRecCtxUsersT{},
+		articlesPlus: mArticlesPlusT{},
+		favorites:    mFavoritesT{},
+		followings:   mFollowingsT{},
+		comments:     mCommentsT{},
+		tags:         mTagsT{},
+	}
+}
+
+///////////////////
 // Methods
 
 func (mdb MDb) UserGet(username string) (model.User, daf.RecCtxUser) {
 	return mdb.users[username], mdb.recCtxUsers[username]
+}
+
+func (mdb MDb) Users() ([]model.User, []daf.RecCtxUser) {
+	users := make([]model.User, len(mdb.users))
+	recCtxs := make([]daf.RecCtxUser, len(mdb.users))
+	i := 0
+	for _, v := range mdb.users {
+		users[i] = v
+		i++
+	}
+	for _, v := range mdb.recCtxUsers {
+		recCtxs[i] = v
+		i++
+	}
+	return users, recCtxs
 }
 
 func (mdb MDb) UserUpsert(username string, user model.User, recCtx daf.RecCtxUser) {

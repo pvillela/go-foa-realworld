@@ -8,21 +8,73 @@ package daftest
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
+func setupArticles(ctx context.Context, tx pgx.Tx) {
+	type AuthorAndArticle struct {
+		Authorname string
+		Article    model.Article
+	}
+
+	var authorsAndArticles = []AuthorAndArticle{
+		{
+			Authorname: "joebloe",
+			Article: model.Article{
+				Title:       "An interesting subject",
+				Slug:        "anintsubj",
+				Description: "Story about an interesting subject.",
+				Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
+			},
+		},
+		{
+			Authorname: "joebloe",
+			Article: model.Article{
+				Title:       "A dull story",
+				Slug:        "adullsubj",
+				Description: "Narrative about something dull.",
+				Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
+			},
+		},
+	}
+
+	for i := range authorsAndArticles {
+		authorname := authorsAndArticles[i].Authorname
+		author, _ := mdb.UserGet(authorname)
+		if author == (model.User{}) {
+			panic(fmt.Sprintf("invalid username %v", authorname))
+		}
+		article := authorsAndArticles[i].Article
+		article.AuthorId = author.Id
+		err := daf.ArticleCreateDafI(ctx, tx, &article)
+		errx.PanicOnError(err)
+		logrus.Debug("article from Create:", article)
+
+		mdb.ArticlePlusUpsert(article, false, author, false)
+	}
+}
+
 var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
+	
+	{
+		setupArticles(ctx, tx)
+	}
+
 	currUser, _ := mdb.UserGet("pvillela")
 	author, _ := mdb.UserGet("joebloe")
 
 	{
+		msg := "ArticlesListDafI - select author"
+
 		criteria := model.ArticleCriteria{
 			Tag:         nil,
 			Author:      &author.Username,
@@ -37,10 +89,12 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 			return a.Author.Username == author.Username
 		})
 
-		assert.ElementsMatch(t, expected, returned)
+		assert.ElementsMatch(t, expected, returned, msg)
 	}
 
 	{
+		msg := "ArticlesListDafI - select tag"
+
 		criteria := model.ArticleCriteria{
 			Tag:         util.PointerFromValue("FOOTAG"),
 			Author:      nil,
@@ -56,40 +110,30 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		//fmt.Println("\ncore info returned:", returned)
 		//fmt.Println("\ncore info expected:", expected)
 
-		assert.ElementsMatch(t, expected, returned)
+		assert.ElementsMatch(t, expected, returned, msg)
 	}
 
 	{
-		article := articles[1]
+		msg := "ArticleGetBySlugDafI"
 
-		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, article.Slug)
+		slug := "adullsubj"
+
+		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
 		errx.PanicOnError(err)
 
-		expected := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(&author, false))
+		expected := mdb.ArticlePlusGet(slug)
 
-		assert.Equal(t, expected, returned)
+		assert.Equal(t, expected, returned, msg)
 	}
 
 	{
-		pArticle := &articles[0]
-		pArticle.Title = "A very interesting subject"
-		err := daf.ArticleUpdateDafI(ctx, tx, pArticle)
-		errx.PanicOnError(err)
+		msg := "ArticlesFeedDafI"
 
-		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, pArticle.Slug)
-		errx.PanicOnError(err)
-
-		expected := model.ArticlePlus_FromArticle(*pArticle, model.Profile_FromUser(&author, false))
-
-		assert.Equal(t, expected, returned)
-	}
-
-	{
 		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
 		errx.PanicOnError(err)
 
 		var expected []model.ArticlePlus
 
-		assert.ElementsMatch(t, expected, returned)
+		assert.ElementsMatch(t, expected, returned, msg)
 	}
 })
