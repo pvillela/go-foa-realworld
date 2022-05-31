@@ -19,8 +19,8 @@ import (
 )
 
 var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
-	currUser := users[0]
-	author := users[1]
+	currUser, _ := mdb.UserGet("pvillela")
+	author, _ := mdb.UserGet("joebloe")
 
 	{
 		criteria := model.ArticleCriteria{
@@ -33,8 +33,8 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		expected := util.SliceMap(articles, func(a model.Article) model.ArticlePlus {
-			return model.ArticlePlus_FromArticle(a, model.Profile_FromUser(&author, false))
+		expected := util.SliceFilter(mdb.ArticlesPlus(), func(a model.ArticlePlus) bool {
+			return a.Author.Username == author.Username
 		})
 
 		assert.ElementsMatch(t, expected, returned)

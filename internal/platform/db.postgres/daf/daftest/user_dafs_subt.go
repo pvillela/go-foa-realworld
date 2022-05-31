@@ -8,13 +8,14 @@ package daftest
 
 import (
 	"context"
+	"testing"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
@@ -75,23 +76,24 @@ func UserDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	}
 
 	{
-		userIdx := 0
-		pUser := &users[userIdx]
-		recCtx := &recCtxUsers[userIdx]
-		pUser.ImageLink = util.PointerFromValue("https://xyz.com")
-		*recCtx, err = daf.UserUpdateDafI(ctx, *pUser, *recCtx)
+		username := "pvillela"
+		user := mdb.users[username]
+		recCtx := mdb.recCtxUsers[username]
+		user.ImageLink = util.PointerFromValue("https://xyz.com")
+
+		recCtx, err = daf.UserUpdateDafI(ctx, user, recCtx)
 		errx.PanicOnError(err)
 		//fmt.Println("\nUserUpdateDaf:", user)
 		//fmt.Println("recCtx from Update:", recCtx)
 
 		{
 			var returned model.User
-			returned, *recCtx, err = daf.UserGetByNameDafI(ctx, pUser.Username)
+			returned, *recCtx, err = daf.UserGetByNameDafI(ctx, user.Username)
 			errx.PanicOnError(err)
 			//fmt.Println("UserGetByNameDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
 
-			assert.Equal(t, *pUser, returned)
+			assert.Equal(t, *user, returned)
 		}
 	}
 

@@ -11,5 +11,5 @@ import "time"
 type Following struct {
 	FollowerID uint
 	FolloweeID uint
-	followedOn time.Time
+	FollowedOn time.Time
 }
