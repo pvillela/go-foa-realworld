@@ -15,8 +15,8 @@ import (
 func TestDafSuite(t *testing.T) {
 	txnlSubtest := func(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		testPairs := []dbpgx.TestPair{
-			//{Name: "userDafsSubt", Func: userDafsSubt},
-			//{Name: "articleDafsSubt", Func: articleDafsSubt},
+			{Name: "userDafsSubt", Func: userDafsSubt},
+			{Name: "articleDafsSubt", Func: articleDafsSubt},
 			//{Name: "commentDafsSubt", Func: dbpgx.Parallel(commentDafsSubt)},
 			//{Name: "favoriteDafsSubt", Func: dbpgx.Parallel(favoriteDafsSubt)},
 		}

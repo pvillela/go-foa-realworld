@@ -73,9 +73,6 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			tx, err := dbpgx.GetCtxTx(ctx)
 			errx.PanicOnError(err)
 			setupUsers(ctx, tx)
-			err = tx.Rollback(ctx)
-			errx.PanicOnError(err)
-			return types.UnitV, nil
 		}
 
 		{
@@ -186,7 +183,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 				//fmt.Println("recCtx from Read:", recCtx)
 
 				assert.Equal(t, user, retUser, msg+" - user must be equal to retUser")
-				assert.Equal(t, recCtx, retRecCtx, msg+" - reqCtx must be equal to retReqCtx")
+				assert.Equal(t, updRecCtx, retRecCtx, msg+" - reqCtx must be equal to retReqCtx")
 			}
 		}
 
@@ -216,7 +213,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 				//fmt.Println("recCtx from Read:", recCtx)
 
 				assert.Equal(t, user, retUser, msg+" - user must be equal to retUser")
-				assert.Equal(t, recCtx, retRecCtx, msg+" - reqCtx must be equal to retReqCtx")
+				assert.Equal(t, updRecCtx, retRecCtx, msg+" - reqCtx must be equal to retReqCtx")
 			}
 		}
 

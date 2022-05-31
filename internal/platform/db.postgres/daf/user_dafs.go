@@ -133,7 +133,7 @@ var UserUpdateDafI UserUpdateDafT = func(
 	sql := `
 	UPDATE users 
 	SET username = $1, email = $2, bio = $3, image = $4, password_hash = $5, password_salt = $6, 
-		updated_at = NOW()
+		updated_at = clock_timestamp()
 	WHERE id = $7 AND updated_at = $8
 	RETURNING updated_at
 	`
@@ -151,8 +151,9 @@ var UserUpdateDafI UserUpdateDafT = func(
 	log.Debug("UserUpdateDaf sql: ", sql)
 	log.Debug("UserUpdateDaf args: ", args)
 
+	newRecCtx := recCtx
 	row := tx.QueryRow(ctx, sql, args...)
-	err = row.Scan(&recCtx.UpdatedAt)
+	err = row.Scan(&newRecCtx.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrUniqueViolation {
 			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameDuplicate, user.Username)
@@ -163,7 +164,7 @@ var UserUpdateDafI UserUpdateDafT = func(
 		return RecCtxUser{}, kind.Make(err, "")
 	}
 
-	return recCtx, nil
+	return newRecCtx, nil
 }
 
 func userDeleteByUsernameDaf(

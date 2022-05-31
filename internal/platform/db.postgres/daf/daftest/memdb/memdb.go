@@ -54,6 +54,7 @@ func (mdb MDb) Users() ([]model.User, []daf.RecCtxUser) {
 		users[i] = v
 		i++
 	}
+	i = 0
 	for _, v := range mdb.recCtxUsers {
 		recCtxs[i] = v
 		i++

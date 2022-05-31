@@ -87,7 +87,7 @@ var ArticleUpdateDafI ArticleUpdateDafT = func(
 ) error {
 	sql := `
 	UPDATE articles 
-	SET title = $1, description = $2, body = $3, updated_at = NOW() 
+	SET title = $1, description = $2, body = $3, updated_at = clock_timestamp() 
 	WHERE slug = $4 AND updated_at = $5
 	RETURNING updated_at
 	`
