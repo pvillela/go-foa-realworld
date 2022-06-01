@@ -21,7 +21,7 @@ type User struct {
 	PasswordHash string
 	PasswordSalt string
 	Bio          *string
-	ImageLink    *string `db:"image"`
+	ImageLink    string `db:"image"`
 	// Below added to daf.RecCtx
 	//CreatedAt time.Time `json:"-"`
 	//UpdatedAt time.Time `json:"-"`
@@ -31,7 +31,7 @@ type Profile struct {
 	UserId    uint    `json:"-"`
 	Username  string  `json:"username"`
 	Bio       *string `json:"bio"`
-	Image     *string `json:"image"`
+	Image     string  `json:"image"`
 	Following bool    `json:"following"`
 }
 
@@ -56,8 +56,6 @@ func User_Create(
 		Email:        strings.ToLower(email),
 		PasswordHash: passwordHash,
 		PasswordSalt: passwordSalt,
-		Bio:          nil,
-		ImageLink:    nil,
 	}
 }
 
@@ -77,12 +75,12 @@ func (s User) Update(v UserPatch) User {
 		s.Bio = v.Bio
 	}
 	if v.ImageLink != nil {
-		s.ImageLink = v.ImageLink
+		s.ImageLink = *v.ImageLink
 	}
 	return s
 }
 
-func Profile_FromUser(user *User, follows bool) Profile {
+func Profile_FromUser(user User, follows bool) Profile {
 	return Profile{
 		Username:  user.Username,
 		Bio:       user.Bio,

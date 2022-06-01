@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
@@ -82,7 +83,7 @@ func ProfileGetSflC0(
 				follows = true
 			}
 
-			profileOut := rpc.ProfileOut_FromModel(&profileUser, follows)
+			profileOut := rpc.ProfileOut_FromModel(profileUser, follows)
 
 			return profileOut, nil
 		})

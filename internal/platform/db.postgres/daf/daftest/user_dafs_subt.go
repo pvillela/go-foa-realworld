@@ -30,7 +30,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			PasswordHash: "dakfljads0fj",
 			PasswordSalt: "2af8d0b50a",
 			Bio:          util.PointerFromValue("I am me."),
-			ImageLink:    nil,
+			ImageLink:    "",
 		},
 		{
 			Username:     "joebloe",
@@ -38,7 +38,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			PasswordHash: "9zdakfljads0",
 			PasswordSalt: "3ba9e9c611",
 			Bio:          util.PointerFromValue("Famous person."),
-			ImageLink:    util.PointerFromValue("https://myimage.com"),
+			ImageLink:    "https://myimage.com",
 		},
 		{
 			Username:     "johndoe",
@@ -46,7 +46,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			PasswordHash: "09fs8asfoasi",
 			PasswordSalt: "0000000000",
 			Bio:          util.PointerFromValue("Average guy."),
-			ImageLink:    util.PointerFromValue("https://johndooeimage.com"),
+			ImageLink:    "https://johndooeimage.com",
 		},
 	}
 
@@ -163,7 +163,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			username := "pvillela"
 
 			user, recCtx := mdb.UserGet(username)
-			user.ImageLink = util.PointerFromValue("https://xyz.com")
+			user.ImageLink = "https://xyz.com"
 
 			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
 			errx.PanicOnError(err)

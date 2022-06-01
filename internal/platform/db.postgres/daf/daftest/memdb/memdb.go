@@ -157,7 +157,7 @@ func (m mArticlesPlusT) upsert(
 	follows bool,
 ) {
 	slug := article.Slug
-	m[slug] = model.ArticlePlus_FromArticle(article, favorite, model.Profile_FromUser(&user, follows))
+	m[slug] = model.ArticlePlus_FromArticle(article, favorite, model.Profile_FromUser(user, follows))
 }
 
 // key is Username, value is a map from Slug to bool

@@ -28,7 +28,7 @@ func (in ArticleCreateIn) Validate() error {
 	return nil
 }
 
-func (in ArticleCreateIn) ToArticle(author *model.User) (model.Article, error) {
+func (in ArticleCreateIn) ToArticle(author model.User) (model.Article, error) {
 	tagList := in.Article.TagList
 	if tagList == nil {
 		tagList = new([]string)

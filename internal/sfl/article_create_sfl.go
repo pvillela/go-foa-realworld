@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -71,7 +72,7 @@ func ArticleCreateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			article, err := in.ToArticle(&user)
+			article, err := in.ToArticle(user)
 			if err != nil {
 				return rpc.ArticleOut{}, err
 			}
@@ -93,7 +94,7 @@ func ArticleCreateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			articlePlus := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(&user, false))
+			articlePlus := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(user, false))
 			articleOut := rpc.ArticleOut_FromModel(articlePlus)
 
 			return articleOut, nil

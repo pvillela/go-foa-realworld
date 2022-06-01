@@ -50,7 +50,7 @@ type ArticlePatch struct {
 }
 
 func Article_Create(
-	author *User,
+	author User,
 	title string,
 	description string,
 	body *string,

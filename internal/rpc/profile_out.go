@@ -12,7 +12,7 @@ type ProfileOut struct {
 	Profile model.Profile
 }
 
-func ProfileOut_FromModel(user *model.User, follows bool) ProfileOut {
+func ProfileOut_FromModel(user model.User, follows bool) ProfileOut {
 	s := ProfileOut{}
 	s.Profile = model.Profile_FromUser(user, follows)
 	return s

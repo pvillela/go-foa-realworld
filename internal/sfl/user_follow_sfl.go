@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -77,7 +78,7 @@ func UserFollowSflC0(
 				return zero, err
 			}
 
-			profileOut := rpc.ProfileOut_FromModel(&follower, true)
+			profileOut := rpc.ProfileOut_FromModel(follower, true)
 			return profileOut, nil
 		})
 	}

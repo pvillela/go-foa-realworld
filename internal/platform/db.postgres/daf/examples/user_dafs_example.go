@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/davecgh/go-spew/spew"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -25,7 +26,7 @@ var users = []model.User{
 		PasswordHash: "dakfljads0fj",
 		PasswordSalt: "2af8d0b50a",
 		Bio:          util.PointerFromValue("I am me."),
-		ImageLink:    nil,
+		ImageLink:    "",
 	},
 	{
 		Username:     "joebloe",
@@ -33,7 +34,7 @@ var users = []model.User{
 		PasswordHash: "9zdakfljads0",
 		PasswordSalt: "3ba9e9c611",
 		Bio:          util.PointerFromValue("Famous person."),
-		ImageLink:    util.PointerFromValue("https://myimage.com"),
+		ImageLink:    "https://myimage.com",
 	},
 	{
 		Username:     "johndoe",
@@ -41,7 +42,7 @@ var users = []model.User{
 		PasswordHash: "09fs8asfoasi",
 		PasswordSalt: "0000000000",
 		Bio:          util.PointerFromValue("Average guy."),
-		ImageLink:    util.PointerFromValue("https://johndooeimage.com"),
+		ImageLink:    "https://johndooeimage.com",
 	},
 }
 
@@ -96,7 +97,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 	errx.PanicOnError(err)
 
 	user := users[0]
-	user.ImageLink = util.PointerFromValue("https://xyz.com")
+	user.ImageLink = "https://xyz.com"
 	recCtx, err = daf.UserUpdateDafI(ctx, user, recCtx)
 	errx.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)

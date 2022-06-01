@@ -17,7 +17,7 @@ type userOut0 = struct {
 	Token    string  `json:"token"`
 	Username string  `json:"username"`
 	Bio      *string `json:"bio"`
-	Image    *string `json:"image"`
+	Image    string  `json:"image"`
 }
 
 func UserOut_FromModel(user model.User, token string) UserOut {
