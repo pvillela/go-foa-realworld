@@ -17,7 +17,7 @@ func TestDafSuite(t *testing.T) {
 		testPairs := []dbpgx.TestPair{
 			{Name: "userDafsSubt", Func: userDafsSubt},
 			{Name: "articleDafsSubt", Func: articleDafsSubt},
-			//{Name: "commentDafsSubt", Func: dbpgx.Parallel(commentDafsSubt)},
+			{Name: "commentDafsSubt", Func: dbpgx.Parallel(commentDafsSubt)},
 			//{Name: "favoriteDafsSubt", Func: dbpgx.Parallel(favoriteDafsSubt)},
 		}
 

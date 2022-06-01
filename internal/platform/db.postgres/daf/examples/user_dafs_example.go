@@ -21,7 +21,7 @@ import (
 
 var users = []model.User{
 	{
-		Username:     "pvillela",
+		Username:     username1,
 		Email:        "foo@bar.com",
 		PasswordHash: "dakfljads0fj",
 		PasswordSalt: "2af8d0b50a",
@@ -29,7 +29,7 @@ var users = []model.User{
 		ImageLink:    "",
 	},
 	{
-		Username:     "joebloe",
+		Username:     username2,
 		Email:        "joe@bloe.com",
 		PasswordHash: "9zdakfljads0",
 		PasswordSalt: "3ba9e9c611",
@@ -37,7 +37,7 @@ var users = []model.User{
 		ImageLink:    "https://myimage.com",
 	},
 	{
-		Username:     "johndoe",
+		Username:     username3,
 		Email:        "johndoe@foo.com",
 		PasswordHash: "09fs8asfoasi",
 		PasswordSalt: "0000000000",
@@ -60,7 +60,7 @@ func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
 		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
 
-	userFromDb, recCtx, err := daf.UserGetByNameDafI(ctx, "pvillela")
+	userFromDb, recCtx, err := daf.UserGetByNameDafI(ctx, username1)
 	// Commented-out lines below were used to daftest forced error due to multiple rows returned
 	//fmt.Println("Error classification:", dbpgx.ClassifyError(err))
 	//uerr := errors.Unwrap(err)

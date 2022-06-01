@@ -42,11 +42,15 @@ func New() MDb {
 ///////////////////
 // Methods
 
-func (mdb MDb) UserGet(username string) (model.User, daf.RecCtxUser) {
+func (mdb MDb) UserGet(username string) model.User {
+	return mdb.users[username]
+}
+
+func (mdb MDb) UserGet2(username string) (model.User, daf.RecCtxUser) {
 	return mdb.users[username], mdb.recCtxUsers[username]
 }
 
-func (mdb MDb) Users() ([]model.User, []daf.RecCtxUser) {
+func (mdb MDb) UserGetAll() ([]model.User, []daf.RecCtxUser) {
 	users := make([]model.User, len(mdb.users))
 	recCtxs := make([]daf.RecCtxUser, len(mdb.users))
 	i := 0
@@ -62,12 +66,16 @@ func (mdb MDb) Users() ([]model.User, []daf.RecCtxUser) {
 	return users, recCtxs
 }
 
-func (mdb MDb) UserUpsert(username string, user model.User, recCtx daf.RecCtxUser) {
+func (mdb *MDb) UserUpsert(username string, user model.User, recCtx daf.RecCtxUser) {
 	mdb.users.upsert(username, user)
 	mdb.recCtxUsers.upsert(username, recCtx)
 }
 
-func (mdb MDb) ArticlesPlus() []model.ArticlePlus {
+func (mdb MDb) ArticlePlusGet(slug string) model.ArticlePlus {
+	return mdb.articlesPlus[slug]
+}
+
+func (mdb MDb) ArticlePlusGetAll() []model.ArticlePlus {
 	result := make([]model.ArticlePlus, len(mdb.articlesPlus))
 	i := 0
 	for _, v := range mdb.articlesPlus {
@@ -77,11 +85,7 @@ func (mdb MDb) ArticlesPlus() []model.ArticlePlus {
 	return result
 }
 
-func (mdb MDb) ArticlePlusGet(slug string) model.ArticlePlus {
-	return mdb.articlesPlus[slug]
-}
-
-func (mdb MDb) ArticlePlusUpsert(
+func (mdb *MDb) ArticlePlusUpsert(
 	article model.Article,
 	favorite bool,
 	user model.User,
@@ -98,7 +102,7 @@ func (mdb MDb) FollowingGet(followerName string, followeeName string) model.Foll
 	return mdb.followings[followerName][followeeName]
 }
 
-func (mdb MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
+func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
 	follower := mdb.users[followerName]
 	followee := mdb.users[followeeName]
 	following := model.Following{
@@ -114,7 +118,7 @@ func (mdb MDb) CommentGet(username string, slug string, id uint) model.Comment {
 	return mdb.comments[commentKey][id]
 }
 
-func (mdb MDb) CommentsGet(username string, slug string) []model.Comment {
+func (mdb MDb) CommentGetAllForKey(username string, slug string) []model.Comment {
 	commentKey := mCommentKeyT{username: username, slug: slug}
 	comments := make([]model.Comment, len(mdb.comments))
 	i := 0
@@ -125,9 +129,49 @@ func (mdb MDb) CommentsGet(username string, slug string) []model.Comment {
 	return comments
 }
 
-func (mdb MDb) CommentInsert(username string, slug string, comment model.Comment) {
+func (mdb MDb) CommentGetAllBySlug(slug string) []model.Comment {
+	returnedComments := []model.Comment{}
+	for k, v := range mdb.comments {
+		if k.slug == slug {
+			var comments []model.Comment
+			for _, comment := range v {
+				comments = append(comments, comment)
+			}
+			returnedComments = append(returnedComments, comments...)
+		}
+	}
+	return returnedComments
+}
+
+func (mdb MDb) CommentGetAll() []model.Comment {
+	allComments := []model.Comment{}
+	for k, _ := range mdb.comments {
+		comments := mdb.CommentGetAllForKey(k.username, k.slug)
+		allComments = append(allComments, comments...)
+	}
+	return allComments
+}
+
+func (mdb *MDb) CommentInsert(username string, slug string, comment model.Comment) {
 	commentKey := mCommentKeyT{username: username, slug: slug}
+	if mdb.comments[commentKey] == nil {
+		mdb.comments[commentKey] = make(map[uint]model.Comment)
+	}
 	mdb.comments[commentKey][comment.Id] = comment
+}
+
+func (mdb *MDb) CommentDelete(username string, slug string, id uint) {
+	outerMap := mdb.comments
+	outerKey := mCommentKeyT{username, slug}
+	innerMap := outerMap[outerKey]
+	delete(innerMap, id)
+	if len(innerMap) == 0 {
+		delete(outerMap, outerKey)
+	}
+}
+
+func (mdb *MDb) CommentDeleteAll() {
+	mdb.comments = make(mCommentsT)
 }
 
 ///////////////////
@@ -136,15 +180,15 @@ func (mdb MDb) CommentInsert(username string, slug string, comment model.Comment
 // key is Username
 type mUsersT map[string]model.User
 
-func (m mUsersT) upsert(username string, user model.User) {
-	m[username] = user
+func (m *mUsersT) upsert(username string, user model.User) {
+	(*m)[username] = user
 }
 
 // key is Username
 type mRecCtxUsersT map[string]daf.RecCtxUser
 
-func (m mRecCtxUsersT) upsert(username string, recCtx daf.RecCtxUser) {
-	m[username] = recCtx
+func (m *mRecCtxUsersT) upsert(username string, recCtx daf.RecCtxUser) {
+	(*m)[username] = recCtx
 }
 
 // key is Slug
@@ -163,8 +207,8 @@ func (m mArticlesPlusT) upsert(
 // key is Username, value is a map from Slug to bool
 type mFavoritesT map[string]map[string]bool
 
-func (m mFavoritesT) upsert(username string, slug string) {
-	m[username][slug] = true
+func (m *mFavoritesT) upsert(username string, slug string) {
+	(*m)[username][slug] = true
 }
 
 // key is follower.Username, value is a map from followee.Usesrname to model.Following

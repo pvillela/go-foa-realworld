@@ -20,6 +20,11 @@ import (
 	"testing"
 )
 
+const (
+	slug1 = "anintsubj"
+	slug2 = "adullsubj"
+)
+
 func setupArticles(ctx context.Context, tx pgx.Tx) {
 	type AuthorAndArticle struct {
 		Authorname string
@@ -28,19 +33,19 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 
 	var authorsAndArticles = []AuthorAndArticle{
 		{
-			Authorname: "joebloe",
+			Authorname: username2,
 			Article: model.Article{
 				Title:       "An interesting subject",
-				Slug:        "anintsubj",
+				Slug:        slug1,
 				Description: "Story about an interesting subject.",
 				Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
 			},
 		},
 		{
-			Authorname: "joebloe",
+			Authorname: username2,
 			Article: model.Article{
 				Title:       "A dull story",
-				Slug:        "adullsubj",
+				Slug:        slug2,
 				Description: "Narrative about something dull.",
 				Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
 			},
@@ -49,7 +54,7 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 
 	for i := range authorsAndArticles {
 		authorname := authorsAndArticles[i].Authorname
-		author, _ := mdb.UserGet(authorname)
+		author := mdb.UserGet(authorname)
 		if author == (model.User{}) {
 			panic(fmt.Sprintf("invalid username %v", authorname))
 		}
@@ -64,13 +69,13 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 }
 
 var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
-	
+
 	{
 		setupArticles(ctx, tx)
 	}
 
-	currUser, _ := mdb.UserGet("pvillela")
-	author, _ := mdb.UserGet("joebloe")
+	currUser := mdb.UserGet(username1)
+	author := mdb.UserGet(username2)
 
 	{
 		msg := "ArticlesListDafI - select author"
@@ -85,7 +90,7 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		expected := util.SliceFilter(mdb.ArticlesPlus(), func(a model.ArticlePlus) bool {
+		expected := util.SliceFilter(mdb.ArticlePlusGetAll(), func(a model.ArticlePlus) bool {
 			return a.Author.Username == author.Username
 		})
 
@@ -116,7 +121,7 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 	{
 		msg := "ArticleGetBySlugDafI"
 
-		slug := "adullsubj"
+		slug := slug2
 
 		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
 		errx.PanicOnError(err)

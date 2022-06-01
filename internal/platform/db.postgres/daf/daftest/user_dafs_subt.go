@@ -22,10 +22,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	username1 = "pvillela"
+	username2 = "joebloe"
+	username3 = "johndoe"
+)
+
 func setupUsers(ctx context.Context, tx pgx.Tx) {
 	var users = []model.User{
 		{
-			Username:     "pvillela",
+			Username:     username1,
 			Email:        "foo@bar.com",
 			PasswordHash: "dakfljads0fj",
 			PasswordSalt: "2af8d0b50a",
@@ -33,7 +39,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			ImageLink:    "",
 		},
 		{
-			Username:     "joebloe",
+			Username:     username2,
 			Email:        "joe@bloe.com",
 			PasswordHash: "9zdakfljads0",
 			PasswordSalt: "3ba9e9c611",
@@ -41,7 +47,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			ImageLink:    "https://myimage.com",
 		},
 		{
-			Username:     "johndoe",
+			Username:     username3,
 			Email:        "johndoe@foo.com",
 			PasswordHash: "09fs8asfoasi",
 			PasswordSalt: "0000000000",
@@ -78,7 +84,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		{
 			msg := "UserGetByNameDafI with valid username"
 
-			username := "pvillela"
+			username := username1
 
 			retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, username)
 			errx.PanicOnError(err)
@@ -86,7 +92,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			//fmt.Println("UserGetByNameDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
 
-			expUser, expRecCtx := mdb.UserGet(username)
+			expUser, expRecCtx := mdb.UserGet2(username)
 
 			assert.Equal(t, expUser, retUser, msg+" - user")
 			assert.Equal(t, expRecCtx, retRecCtx, msg+" = recCtx")
@@ -110,9 +116,9 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		{
 			msg := "UserGetByEmailDafI with valid email"
 
-			username := "joebloe"
+			username := username2
 
-			expUser, expRecCtx := mdb.UserGet(username)
+			expUser, expRecCtx := mdb.UserGet2(username)
 
 			retUser, retRecCtx, err := daf.UserGetByEmailDafI(ctx, expUser.Email)
 			errx.PanicOnError(err)
@@ -152,7 +158,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 				return pw.Entity
 			})
 
-			expected, _ := mdb.Users()
+			expected, _ := mdb.UserGetAll()
 
 			assert.ElementsMatch(t, expected, returned, msg)
 		}
@@ -160,9 +166,9 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		{
 			msg := "UserUpdateDafI - image"
 
-			username := "pvillela"
+			username := username1
 
-			user, recCtx := mdb.UserGet(username)
+			user, recCtx := mdb.UserGet2(username)
 			user.ImageLink = "https://xyz.com"
 
 			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
@@ -190,9 +196,9 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		{
 			msg := "UserUpdateDafI - bio"
 
-			username := "joebloe"
+			username := username2
 
-			user, recCtx := mdb.UserGet(username)
+			user, recCtx := mdb.UserGet2(username)
 			user.Bio = util.PointerFromValue("I'm a really famous person.")
 
 			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
