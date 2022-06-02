@@ -53,8 +53,8 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		},
 	}
 
-	for _, cs := range commentSources {
-		username, slug, comment := makeComment(cs)
+	for _, csrc := range commentSources {
+		username, slug, comment := makeComment(csrc)
 		err := daf.CommentCreateDafI(ctx, tx, &comment)
 		errx.PanicOnError(err)
 		mdb.CommentInsert(username, slug, comment)

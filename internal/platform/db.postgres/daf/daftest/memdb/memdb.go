@@ -123,29 +123,6 @@ func (mdb MDb) ArticlePlusGetAll(currUsername string) []model.ArticlePlus {
 	return result
 }
 
-func (mdb MDb) Favorited(username string, slug string) bool {
-	return mdb.favorites[username][slug]
-}
-
-func (mdb MDb) FollowingGet(followerName string, followeeName string) model.Following {
-	return mdb.followings[followerName][followeeName]
-}
-
-func (mdb MDb) Follows(followerName string, followeeName string) bool {
-	return mdb.followings[followerName][followeeName] != model.Following{}
-}
-
-func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
-	follower := mdb.usersByName[followerName]
-	followee := mdb.usersByName[followeeName]
-	following := model.Following{
-		FollowerID: follower.Id,
-		FolloweeID: followee.Id,
-		FollowedOn: followedOn,
-	}
-	mdb.followings[followerName][followeeName] = following
-}
-
 func (mdb MDb) CommentGet(username string, slug string, id uint) model.Comment {
 	commentKey := mCommentKeyT{username: username, slug: slug}
 	return mdb.comments[commentKey][id]
@@ -207,6 +184,37 @@ func (mdb *MDb) CommentDeleteAll() {
 	mdb.comments = make(mCommentsT)
 }
 
+func (mdb MDb) Favorited(username string, slug string) bool {
+	return mdb.favorites[mFavoriteT{username, slug}]
+}
+
+func (mdb *MDb) FavoritePut(username string, slug string) {
+	mdb.favorites.put(username, slug)
+}
+
+func (mdb *MDb) FavoritedDelete(username string, slug string) {
+	delete(mdb.favorites, mFavoriteT{username, slug})
+}
+
+func (mdb MDb) FollowingGet(followerName string, followeeName string) model.Following {
+	return mdb.followings[followerName][followeeName]
+}
+
+func (mdb MDb) Follows(followerName string, followeeName string) bool {
+	return mdb.followings[followerName][followeeName] != model.Following{}
+}
+
+func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
+	follower := mdb.usersByName[followerName]
+	followee := mdb.usersByName[followeeName]
+	following := model.Following{
+		FollowerID: follower.Id,
+		FolloweeID: followee.Id,
+		FollowedOn: followedOn,
+	}
+	mdb.followings[followerName][followeeName] = following
+}
+
 ///////////////////
 // Supporting types
 
@@ -233,16 +241,6 @@ func (m mArticlesT) upsert(
 	m[slug] = article
 }
 
-// key is Username, value is a map from Slug to bool
-type mFavoritesT map[string]map[string]bool
-
-func (m *mFavoritesT) upsert(username string, slug string) {
-	(*m)[username][slug] = true
-}
-
-// key is follower.Username, value is a map from followee.Usesrname to model.Following
-type mFollowingsT map[string]map[string]model.Following
-
 type mCommentKeyT struct {
 	username string
 	slug     string
@@ -250,5 +248,19 @@ type mCommentKeyT struct {
 
 // key is an mCommentKeyT, value is a map from comment.Id to model.Comment
 type mCommentsT map[mCommentKeyT]map[uint]model.Comment
+
+type mFavoriteT struct {
+	username string
+	slug     string
+}
+
+type mFavoritesT map[mFavoriteT]bool
+
+func (m *mFavoritesT) put(username string, slug string) {
+	(*m)[mFavoriteT{username, slug}] = true
+}
+
+// key is follower.Username, value is a map from followee.Usesrname to model.Following
+type mFollowingsT map[string]map[string]model.Following
 
 type mTagsT map[string]types.Unit

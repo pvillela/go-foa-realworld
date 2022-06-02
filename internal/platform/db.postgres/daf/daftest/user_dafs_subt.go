@@ -104,9 +104,6 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			username := "xxxxxx"
 
 			_, _, err := daf.UserGetByNameDafI(ctx, username)
-			//fmt.Println("UserGetByNameDaf with invalid username")
-			//fmt.Println("Error:", err)
-
 			returnedErrxKind := dbpgx.ClassifyError(err)
 			expectedErrxKind := dbpgx.DbErrRecordNotFound
 

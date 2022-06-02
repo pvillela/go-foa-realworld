@@ -6,10 +6,8 @@
 
 package model
 
-// TODO: remove if not used.
 type Favorite struct {
-	ArticleId uint
-
 	// UserId is the ID of the user that favors the article.
-	UserId uint
+	UserId    uint
+	ArticleId uint
 }

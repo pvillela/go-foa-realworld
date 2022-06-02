@@ -115,7 +115,7 @@ func readArticles(
 		Favorited *uint
 		Tag       *string `db:"name"`
 	}
-	var results []model.ArticlePlus
+	results := []model.ArticlePlus{} // function never returns nil
 	var tags []string
 	var currRecord recordT
 	var prevRecord recordT

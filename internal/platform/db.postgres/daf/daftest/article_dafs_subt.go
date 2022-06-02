@@ -9,7 +9,6 @@ package daftest
 import (
 	"context"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -105,23 +104,23 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
 		errx.PanicOnError(err)
 
-		criteria := model.ArticleCriteria{
-			Tag:         nil,
-			Author:      &author.Username,
-			FavoritedBy: nil,
-			Limit:       nil,
-			Offset:      nil,
-		}
-		aps, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
-		errx.PanicOnError(err)
-		spew.Println("************* aps", aps)
+		//criteria := model.ArticleCriteria{
+		//	Tag:         nil,
+		//	Author:      &author.Username,
+		//	FavoritedBy: nil,
+		//	Limit:       nil,
+		//	Offset:      nil,
+		//}
+		//aps, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		//errx.PanicOnError(err)
+		//spew.Println("************* aps", aps)
 
 		actual := returned.ToArticle()
 		expected := changedArticle
 
-		spew.Println("************* returned", returned)
-		fmt.Println("************* expected", expected)
-		fmt.Println("************* actual", actual)
+		//spew.Println("************* returned", returned)
+		//fmt.Println("************* expected", expected)
+		//fmt.Println("************* actual", actual)
 
 		assert.Equal(t, expected, actual, msg+" - retrieved must equal in-memory")
 
