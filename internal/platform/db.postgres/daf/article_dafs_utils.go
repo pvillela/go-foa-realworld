@@ -150,6 +150,7 @@ func readArticles(
 		result := model.ArticlePlus{
 			Slug: ra.Slug,
 			Author: model.Profile{
+				UserId:    ra.AuthorId,
 				Username:  rp.Username,
 				Bio:       rp.Bio,
 				Image:     rp.Image,

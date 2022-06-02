@@ -82,6 +82,7 @@ func (s User) Update(v UserPatch) User {
 
 func Profile_FromUser(user User, follows bool) Profile {
 	return Profile{
+		UserId:    user.Id,
 		Username:  user.Username,
 		Bio:       user.Bio,
 		Image:     user.ImageLink,

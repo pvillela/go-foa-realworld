@@ -15,13 +15,14 @@ import (
 
 // MDb defines an in-memory view of the database to support testing.
 type MDb struct {
-	users        mUsersT
-	recCtxUsers  mRecCtxUsersT
-	articlesPlus mArticlesPlusT
-	favorites    mFavoritesT
-	followings   mFollowingsT
-	comments     mCommentsT
-	tags         mTagsT
+	usersByName mUsersByNameT
+	usersById   mUsersByIdT
+	recCtxUsers mRecCtxUsersT
+	articles    mArticlesT
+	favorites   mFavoritesT
+	followings  mFollowingsT
+	comments    mCommentsT
+	tags        mTagsT
 }
 
 ///////////////////
@@ -29,33 +30,38 @@ type MDb struct {
 
 func New() MDb {
 	return MDb{
-		users:        mUsersT{},
-		recCtxUsers:  mRecCtxUsersT{},
-		articlesPlus: mArticlesPlusT{},
-		favorites:    mFavoritesT{},
-		followings:   mFollowingsT{},
-		comments:     mCommentsT{},
-		tags:         mTagsT{},
+		usersByName: mUsersByNameT{},
+		usersById:   mUsersByIdT{},
+		recCtxUsers: mRecCtxUsersT{},
+		articles:    mArticlesT{},
+		favorites:   mFavoritesT{},
+		followings:  mFollowingsT{},
+		comments:    mCommentsT{},
+		tags:        mTagsT{},
 	}
 }
 
 ///////////////////
 // Methods
 
-func (mdb MDb) UserGet(username string) model.User {
-	return mdb.users[username]
+func (mdb MDb) UserGetByName(username string) model.User {
+	return *mdb.usersByName[username]
+}
+
+func (mdb MDb) userGetById(id uint) model.User {
+	return *mdb.usersById[id]
 }
 
 func (mdb MDb) UserGet2(username string) (model.User, daf.RecCtxUser) {
-	return mdb.users[username], mdb.recCtxUsers[username]
+	return *mdb.usersByName[username], mdb.recCtxUsers[username]
 }
 
-func (mdb MDb) UserGetAll() ([]model.User, []daf.RecCtxUser) {
-	users := make([]model.User, len(mdb.users))
-	recCtxs := make([]daf.RecCtxUser, len(mdb.users))
+func (mdb MDb) UserGet2All() ([]model.User, []daf.RecCtxUser) {
+	users := make([]model.User, len(mdb.usersByName))
+	recCtxs := make([]daf.RecCtxUser, len(mdb.usersByName))
 	i := 0
-	for _, v := range mdb.users {
-		users[i] = v
+	for _, v := range mdb.usersByName {
+		users[i] = *v
 		i++
 	}
 	i = 0
@@ -66,35 +72,58 @@ func (mdb MDb) UserGetAll() ([]model.User, []daf.RecCtxUser) {
 	return users, recCtxs
 }
 
-func (mdb *MDb) UserUpsert(username string, user model.User, recCtx daf.RecCtxUser) {
-	mdb.users.upsert(username, user)
-	mdb.recCtxUsers.upsert(username, recCtx)
+func (mdb *MDb) userUpsert(user model.User) {
+	existingUserByName := mdb.usersByName[user.Username]
+	if existingUserByName != nil && existingUserByName.Id != user.Id {
+		panic("attempt to clobber existing username in mdb")
+	}
+	userById := mdb.usersById[user.Id]
+	if userById == nil {
+		userById = &model.User{}
+		mdb.usersById[user.Id] = userById
+	}
+	currentUsername := userById.Username
+	if currentUsername != user.Username {
+		delete(mdb.usersByName, currentUsername)
+	}
+	*userById = user
+	mdb.usersByName[user.Username] = userById
 }
 
-func (mdb MDb) ArticlePlusGet(slug string) model.ArticlePlus {
-	return mdb.articlesPlus[slug]
+func (mdb *MDb) UserUpsert2(user model.User, recCtx daf.RecCtxUser) {
+	mdb.userUpsert(user)
+	mdb.recCtxUsers.upsert(user.Username, recCtx)
 }
 
-func (mdb MDb) ArticlePlusGetAll() []model.ArticlePlus {
-	result := make([]model.ArticlePlus, len(mdb.articlesPlus))
+func (mdb MDb) ArticleGetBySlug(slug string) model.Article {
+	return mdb.articles[slug]
+}
+
+func (mdb *MDb) ArticleUpsert(
+	article model.Article,
+) {
+	mdb.articles.upsert(article)
+}
+
+func (mdb MDb) ArticlePlusGet(currUsername string, slug string) model.ArticlePlus {
+	article := mdb.articles[slug]
+	author := mdb.userGetById(article.AuthorId)
+	favorited := mdb.Favorited(currUsername, slug)
+	follows := mdb.Follows(currUsername, author.Username)
+	return model.ArticlePlus_FromArticle(article, favorited, model.Profile_FromUser(author, follows))
+}
+
+func (mdb MDb) ArticlePlusGetAll(currUsername string) []model.ArticlePlus {
+	result := make([]model.ArticlePlus, len(mdb.articles))
 	i := 0
-	for _, v := range mdb.articlesPlus {
-		result[i] = v
+	for _, a := range mdb.articles {
+		result[i] = mdb.ArticlePlusGet(currUsername, a.Slug)
 		i++
 	}
 	return result
 }
 
-func (mdb *MDb) ArticlePlusUpsert(
-	article model.Article,
-	favorite bool,
-	user model.User,
-	follows bool,
-) {
-	mdb.articlesPlus.upsert(article, favorite, user, follows)
-}
-
-func (mdb MDb) FavoriteGet(username string, slug string) bool {
+func (mdb MDb) Favorited(username string, slug string) bool {
 	return mdb.favorites[username][slug]
 }
 
@@ -102,9 +131,13 @@ func (mdb MDb) FollowingGet(followerName string, followeeName string) model.Foll
 	return mdb.followings[followerName][followeeName]
 }
 
+func (mdb MDb) Follows(followerName string, followeeName string) bool {
+	return mdb.followings[followerName][followeeName] != model.Following{}
+}
+
 func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
-	follower := mdb.users[followerName]
-	followee := mdb.users[followeeName]
+	follower := mdb.usersByName[followerName]
+	followee := mdb.usersByName[followeeName]
 	following := model.Following{
 		FollowerID: follower.Id,
 		FolloweeID: followee.Id,
@@ -178,11 +211,10 @@ func (mdb *MDb) CommentDeleteAll() {
 // Supporting types
 
 // key is Username
-type mUsersT map[string]model.User
+type mUsersByNameT map[string]*model.User
 
-func (m *mUsersT) upsert(username string, user model.User) {
-	(*m)[username] = user
-}
+// key is user ID
+type mUsersByIdT map[uint]*model.User
 
 // key is Username
 type mRecCtxUsersT map[string]daf.RecCtxUser
@@ -192,16 +224,13 @@ func (m *mRecCtxUsersT) upsert(username string, recCtx daf.RecCtxUser) {
 }
 
 // key is Slug
-type mArticlesPlusT map[string]model.ArticlePlus
+type mArticlesT map[string]model.Article
 
-func (m mArticlesPlusT) upsert(
+func (m mArticlesT) upsert(
 	article model.Article,
-	favorite bool,
-	user model.User,
-	follows bool,
 ) {
 	slug := article.Slug
-	m[slug] = model.ArticlePlus_FromArticle(article, favorite, model.Profile_FromUser(user, follows))
+	m[slug] = article
 }
 
 // key is Username, value is a map from Slug to bool

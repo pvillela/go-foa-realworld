@@ -9,6 +9,7 @@ package daftest
 import (
 	"context"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
@@ -54,7 +55,7 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 
 	for i := range authorsAndArticles {
 		authorname := authorsAndArticles[i].Authorname
-		author := mdb.UserGet(authorname)
+		author := mdb.UserGetByName(authorname)
 		if author == (model.User{}) {
 			panic(fmt.Sprintf("invalid username %v", authorname))
 		}
@@ -64,7 +65,7 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 		errx.PanicOnError(err)
 		logrus.Debug("article from Create:", article)
 
-		mdb.ArticlePlusUpsert(article, false, author, false)
+		mdb.ArticleUpsert(article)
 	}
 }
 
@@ -74,8 +75,58 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		setupArticles(ctx, tx)
 	}
 
-	currUser := mdb.UserGet(username1)
-	author := mdb.UserGet(username2)
+	currUser := mdb.UserGetByName(username1)
+	author := mdb.UserGetByName(username2)
+
+	{
+		msg := "ArticleUpdateDafI"
+
+		slug := slug1
+
+		existingArticle := mdb.ArticleGetBySlug(slug)
+		changedArticle := existingArticle
+		newBody := util.PointerFromValue(*existingArticle.Body + " And so on and on.")
+		changedArticle.Body = newBody
+
+		err := daf.ArticleUpdateDafI(ctx, tx, &changedArticle)
+		errx.PanicOnError(err)
+
+		assert.Equal(t, newBody, changedArticle.Body, msg+" - changedArticle.Body must equal newBody")
+		assert.Greater(t, changedArticle.UpdatedAt, existingArticle.UpdatedAt,
+			msg+" - changedArticle must have an UpdatedAt value greater than existingArticle")
+
+		changedArticlePrime := changedArticle
+		changedArticlePrime.UpdatedAt = existingArticle.UpdatedAt
+		changedArticlePrime.Body = existingArticle.Body
+
+		assert.Equal(t, existingArticle, changedArticlePrime,
+			msg+" - changed article must equal existing article except for Body and ChangedAt")
+
+		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
+		errx.PanicOnError(err)
+
+		criteria := model.ArticleCriteria{
+			Tag:         nil,
+			Author:      &author.Username,
+			FavoritedBy: nil,
+			Limit:       nil,
+			Offset:      nil,
+		}
+		aps, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		errx.PanicOnError(err)
+		spew.Println("************* aps", aps)
+
+		actual := returned.ToArticle()
+		expected := changedArticle
+
+		spew.Println("************* returned", returned)
+		fmt.Println("************* expected", expected)
+		fmt.Println("************* actual", actual)
+
+		assert.Equal(t, expected, actual, msg+" - retrieved must equal in-memory")
+
+		mdb.ArticleUpsert(changedArticle)
+	}
 
 	{
 		msg := "ArticlesListDafI - select author"
@@ -90,7 +141,7 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
 		errx.PanicOnError(err)
 
-		expected := util.SliceFilter(mdb.ArticlePlusGetAll(), func(a model.ArticlePlus) bool {
+		expected := util.SliceFilter(mdb.ArticlePlusGetAll(author.Username), func(a model.ArticlePlus) bool {
 			return a.Author.Username == author.Username
 		})
 
@@ -126,7 +177,7 @@ var articleDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
 		errx.PanicOnError(err)
 
-		expected := mdb.ArticlePlusGet(slug)
+		expected := mdb.ArticlePlusGet(currUser.Username, slug)
 
 		assert.Equal(t, expected, returned, msg)
 	}

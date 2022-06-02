@@ -33,8 +33,8 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 
 	makeComment := func(src commentSourceT) (string, string, model.Comment) {
 		comment := model.Comment{
-			ArticleId: mdb.ArticlePlusGet(src.slug).Id,
-			AuthorId:  mdb.UserGet(src.username).Id,
+			ArticleId: mdb.ArticleGetBySlug(src.slug).Id,
+			AuthorId:  mdb.UserGetByName(src.username).Id,
 			Body:      util.PointerFromValue(src.body),
 		}
 		return src.username, src.slug, comment
@@ -97,7 +97,7 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		commentAuthorUsername := currUsername
 		slug := slug1
 
-		currUser := mdb.UserGet(currUsername)
+		currUser := mdb.UserGetByName(currUsername)
 		comment := mdb.CommentGetAllForKey(commentAuthorUsername, slug)[0]
 
 		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
@@ -121,7 +121,7 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		commentAuthorUsername := username3
 		slug := slug1
 
-		currUser := mdb.UserGet(currUsername)
+		currUser := mdb.UserGetByName(currUsername)
 		comment := mdb.CommentGetAllForKey(commentAuthorUsername, slug)[0]
 
 		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)

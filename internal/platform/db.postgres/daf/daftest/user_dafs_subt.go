@@ -64,7 +64,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 		logrus.Debug("user from Create:", user)
 		logrus.Debug("recCtx from Create:", recCtx)
 
-		mdb.UserUpsert(user.Username, user, recCtx)
+		mdb.UserUpsert2(user, recCtx)
 	}
 }
 
@@ -158,7 +158,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 				return pw.Entity
 			})
 
-			expected, _ := mdb.UserGetAll()
+			expected, _ := mdb.UserGet2All()
 
 			assert.ElementsMatch(t, expected, returned, msg)
 		}
@@ -180,7 +180,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			assert.NotEqual(t, recCtx.UpdatedAt, updRecCtx.UpdatedAt, msg+" - recCtx.UpdatedAt must be different from updRecCtx.UpdatedAt")
 
 			// Sync in-memory database
-			mdb.UserUpsert(username, user, updRecCtx)
+			mdb.UserUpsert2(user, updRecCtx)
 
 			{
 				retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
@@ -210,7 +210,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			assert.NotEqual(t, recCtx.UpdatedAt, updRecCtx.UpdatedAt, msg+" - recCtx.UpdatedAt must be different from updRecCtx.UpdatedAt")
 
 			// Sync in-memory database
-			mdb.UserUpsert(username, user, updRecCtx)
+			mdb.UserUpsert2(user, updRecCtx)
 
 			{
 				retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
