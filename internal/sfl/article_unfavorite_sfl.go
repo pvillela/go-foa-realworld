@@ -72,7 +72,7 @@ func ArticleUnfavoriteSflC0(
 			}
 
 			article := articlePlus.ToArticle()
-			article.IncrementFavoriteCount()
+			article.AdjustFavoriteCount(-1)
 
 			err = articleUpdateDaf(ctx, tx, &article)
 			if err != nil {

@@ -10,6 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
 )
 
 // RecCtxArticle is a type alias
@@ -29,6 +30,15 @@ type ArticleGetBySlugDafT = func(ctx context.Context, tx pgx.Tx, currUserId uint
 // ArticleUpdateDafT is the type of the stereotype instance for the DAF that
 // updates an article.
 type ArticleUpdateDafT = func(ctx context.Context, tx pgx.Tx, article *model.Article) error
+
+// ArticleAdjustFavoritesCountDafT is the type of the stereotype instance for the DAF that
+// increments the favorites count of an article.
+type ArticleAdjustFavoritesCountDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	slug string,
+	delta int,
+) (int, time.Time, error)
 
 // ArticleDeleteDafT is the type of the stereotype instance for the DAF that
 // deletes an article.

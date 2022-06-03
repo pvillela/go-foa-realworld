@@ -13,6 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
 )
 
 // ArticleCreateDafI implements a stereotype instance of type
@@ -107,6 +108,39 @@ var ArticleUpdateDafI ArticleUpdateDafT = func(
 	}
 
 	return nil
+}
+
+// ArticleAdjustFavoritesCountDafI implements a stereotype instance of type
+// ArticleAdjustFavoritesCountDafT.
+var ArticleAdjustFavoritesCountDafI ArticleAdjustFavoritesCountDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	slug string,
+	delta int,
+) (int, time.Time, error) {
+	sql := `
+	UPDATE articles 
+	SET favorites_count = favorites_count + $2, updated_at = clock_timestamp() 
+	WHERE slug = $1
+	RETURNING favorites_count, updated_at
+	`
+	args := []any{
+		slug,
+		delta,
+	}
+
+	var favoritesCount int
+	var updatedAt time.Time
+
+	row := tx.QueryRow(ctx, sql, args...)
+	if err := row.Scan(&favoritesCount, &updatedAt); err != nil {
+		if err == pgx.ErrNoRows {
+			err = dbpgx.DbErrRecordNotFound.Make(nil, bf.ErrMsgArticleSlugNotFound, slug)
+		}
+		return 0, time.Time{}, dbpgx.ClassifyError(err).Make(err, "")
+	}
+
+	return favoritesCount, updatedAt, nil
 }
 
 // ArticleDeleteDafI implements a stereotype instance of type

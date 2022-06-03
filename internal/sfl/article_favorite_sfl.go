@@ -41,6 +41,7 @@ func ArticleFavoriteSflC(
 	)
 }
 
+// TODO: consider reimplementing with daf.ArticleAdjustFavoritesCountDafI.
 // ArticleFavoriteSflC0 is the function that constructs a stereotype instance of type
 // ArticleFavoriteSflT without hard-wired stereotype dependencies.
 func ArticleFavoriteSflC0(
@@ -72,7 +73,7 @@ func ArticleFavoriteSflC0(
 			}
 
 			article := articlePlus.ToArticle()
-			article.IncrementFavoriteCount()
+			article.AdjustFavoriteCount(1)
 
 			err = articleUpdateDaf(ctx, tx, &article)
 			if err != nil {

@@ -73,7 +73,7 @@ func UserFollowSflC0(
 				return zero, err
 			}
 
-			err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
+			_, err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
 			if err != nil {
 				return zero, err
 			}

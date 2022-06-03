@@ -87,8 +87,8 @@ func (s Article) Update(src ArticlePatch) Article {
 	return s
 }
 
-func (s Article) IncrementFavoriteCount() Article {
-	s.FavoritesCount++
+func (s Article) AdjustFavoriteCount(delta int) Article {
+	s.FavoritesCount += delta
 	return s
 }
 
