@@ -31,15 +31,6 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 		body     string
 	}
 
-	makeComment := func(src commentSourceT) (string, string, model.Comment) {
-		comment := model.Comment{
-			ArticleId: mdb.ArticleGetBySlug(src.slug).Id,
-			AuthorId:  mdb.UserGetByName(src.username).Id,
-			Body:      util.PointerFromValue(src.body),
-		}
-		return src.username, src.slug, comment
-	}
-
 	commentSources := []commentSourceT{
 		{
 			username: username1,
@@ -51,6 +42,15 @@ var commentDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx
 			slug:     slug1,
 			body:     "What a terrible article.",
 		},
+	}
+
+	makeComment := func(src commentSourceT) (string, string, model.Comment) {
+		comment := model.Comment{
+			ArticleId: mdb.ArticleGetBySlug(src.slug).Id,
+			AuthorId:  mdb.UserGetByName(src.username).Id,
+			Body:      util.PointerFromValue(src.body),
+		}
+		return src.username, src.slug, comment
 	}
 
 	for _, csrc := range commentSources {

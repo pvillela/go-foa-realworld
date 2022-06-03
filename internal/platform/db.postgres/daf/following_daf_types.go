@@ -10,6 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
 )
 
 // FollowingCreateDafT is the type of the stereotype instance for the DAF that
@@ -19,7 +20,7 @@ type FollowingCreateDafT = func(
 	tx pgx.Tx,
 	followerId uint,
 	followeeId uint,
-) error
+) (time.Time, error)
 
 // FollowingGetDafT is the type of the stereotype instance for the DAF that
 // retrieves an association between a follower and a followee.

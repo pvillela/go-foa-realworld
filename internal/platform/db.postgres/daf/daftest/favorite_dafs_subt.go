@@ -54,7 +54,6 @@ var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pg
 
 		currUsername := username1
 		favoritedBy := username3
-		slug := slug1
 
 		currUser := mdb.UserGetByName(currUsername)
 
@@ -69,11 +68,18 @@ var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pg
 		errx.PanicOnError(err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 
-		favoritedArticlePlus := mdb.ArticlePlusGet(currUsername, slug)
+		actual := ArticlePlusesToArticles(returned)
 
-		expected := []model.ArticlePlus{favoritedArticlePlus}
+		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(favoritedBy),
+			func(ap model.ArticlePlus) bool {
+				return ap.Favorited
+			})
+		expected := ArticlePlusesToArticles(expected0)
 
-		assert.Equal(t, expected, returned, msg)
+		//_, _ = spew.Println("********* actual", actual)
+		//_, _ = spew.Println("********* expected", expected)
+
+		assert.ElementsMatch(t, expected, actual, msg)
 	}
 
 	{
@@ -97,29 +103,29 @@ var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pg
 
 		expected := []model.ArticlePlus{}
 
-		assert.Equal(t, expected, returned, msg)
+		assert.ElementsMatch(t, expected, returned, msg)
 	}
 
 	{
 		msg := "FavoriteDeleteDafI - delete existing favorite"
 
-		username := username1
-		currUsername := username2
+		currUsername := username1
+		favoritedBy := username3
 		slug := slug1
 
 		articleId := mdb.ArticleGetBySlug(slug).Id
-		userId := mdb.UserGetByName(username).Id
+		userId := mdb.UserGetByName(favoritedBy).Id
 		currUserId := mdb.UserGetByName(currUsername).Id
 
 		err := daf.FavoriteDeleteDafI(ctx, tx, articleId, userId)
 		errx.PanicOnError(err)
 
-		mdb.FavoritedDelete(username, slug)
+		mdb.FavoritedDelete(favoritedBy, slug)
 
 		criteria := model.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
-			FavoritedBy: &username,
+			FavoritedBy: &favoritedBy,
 			Limit:       nil,
 			Offset:      nil,
 		}
@@ -127,21 +133,25 @@ var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pg
 		errx.PanicOnError(err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:\n", returned)
 
-		expected := util.SliceFilter(mdb.ArticlePlusGetAll(currUsername), func(ap model.ArticlePlus) bool {
-			return ap.Favorited
-		})
+		actual := ArticlePlusesToArticles(returned)
 
-		assert.ElementsMatch(t, returned, expected, msg)
+		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(favoritedBy),
+			func(ap model.ArticlePlus) bool {
+				return ap.Favorited
+			})
+		expected := ArticlePlusesToArticles(expected0)
+
+		assert.ElementsMatch(t, expected, actual, msg)
 	}
 
 	{
 		msg := "FavoriteDeleteDafI - attempt to delete inexistent favorite"
 
-		username := username1
+		favoritedBy := username3
 		slug := slug1
 
 		articleId := mdb.ArticleGetBySlug(slug).Id
-		userId := mdb.UserGetByName(username).Id
+		userId := mdb.UserGetByName(favoritedBy).Id
 
 		err := daf.FavoriteDeleteDafI(ctx, tx, articleId, userId)
 		returnedErrxKind := dbpgx.ClassifyError(err)

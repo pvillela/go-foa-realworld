@@ -99,6 +99,16 @@ func (mdb MDb) ArticleGetBySlug(slug string) model.Article {
 	return mdb.articles[slug]
 }
 
+func (mdb MDb) ArticleGetAll() []model.Article {
+	result := make([]model.Article, len(mdb.articles))
+	i := 0
+	for _, a := range mdb.articles {
+		result[i] = a
+		i++
+	}
+	return result
+}
+
 func (mdb *MDb) ArticleUpsert(
 	article model.Article,
 ) {
@@ -197,11 +207,11 @@ func (mdb *MDb) FavoritedDelete(username string, slug string) {
 }
 
 func (mdb MDb) FollowingGet(followerName string, followeeName string) model.Following {
-	return mdb.followings[followerName][followeeName]
+	return mdb.followings[mFollowingT{followerName, followeeName}]
 }
 
 func (mdb MDb) Follows(followerName string, followeeName string) bool {
-	return mdb.followings[followerName][followeeName] != model.Following{}
+	return mdb.followings[mFollowingT{followerName, followeeName}] != model.Following{}
 }
 
 func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
@@ -212,7 +222,7 @@ func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, follow
 		FolloweeID: followee.Id,
 		FollowedOn: followedOn,
 	}
-	mdb.followings[followerName][followeeName] = following
+	mdb.followings[mFollowingT{followerName, followeeName}] = following
 }
 
 ///////////////////
@@ -260,7 +270,11 @@ func (m *mFavoritesT) put(username string, slug string) {
 	(*m)[mFavoriteT{username, slug}] = true
 }
 
-// key is follower.Username, value is a map from followee.Usesrname to model.Following
-type mFollowingsT map[string]map[string]model.Following
+type mFollowingT struct {
+	followerName string
+	followeeName string
+}
+
+type mFollowingsT map[mFollowingT]model.Following
 
 type mTagsT map[string]types.Unit

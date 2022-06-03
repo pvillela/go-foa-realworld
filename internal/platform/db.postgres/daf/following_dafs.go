@@ -13,6 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"time"
 )
 
 // FollowingCreateDafI is the instance of the DAF stereotype that
@@ -22,7 +23,7 @@ var FollowingCreateDafI FollowingCreateDafT = func(
 	tx pgx.Tx,
 	followerId uint,
 	followeeId uint,
-) error {
+) (time.Time, error) {
 	sql := `
 	INSERT INTO followings (follower_id, followee_id)
 	VALUES ($1, $2)
@@ -30,15 +31,17 @@ var FollowingCreateDafI FollowingCreateDafT = func(
 	`
 	args := []any{followerId, followeeId}
 
-	_, err := tx.Exec(ctx, sql, args...)
+	var followedOn time.Time
+	row := tx.QueryRow(ctx, sql, args...)
+	err := row.Scan(&followedOn)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrUniqueViolation {
-			return kind.Make(err, bf.ErrMsgUserAlreadyFollowed, followeeId)
+			return time.Time{}, kind.Make(err, bf.ErrMsgUserAlreadyFollowed, followeeId)
 		}
-		return kind.Make(err, "")
+		return time.Time{}, kind.Make(err, "")
 	}
 
-	return nil
+	return followedOn, nil
 }
 
 // FollowingGetDafI implements a stereotype instance of type
