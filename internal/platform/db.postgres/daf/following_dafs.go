@@ -35,8 +35,9 @@ var FollowingCreateDafI FollowingCreateDafT = func(
 	row := tx.QueryRow(ctx, sql, args...)
 	err := row.Scan(&followedOn)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
-		if kind == dbpgx.DbErrUniqueViolation {
-			return time.Time{}, kind.Make(err, bf.ErrMsgUserAlreadyFollowed, followeeId)
+		if kind == dbpgx.DbErrRecordNotFound {
+			return time.Time{},
+				dbpgx.DbErrUniqueViolation.Make(err, bf.ErrMsgUserAlreadyFollowed, followeeId)
 		}
 		return time.Time{}, kind.Make(err, "")
 	}

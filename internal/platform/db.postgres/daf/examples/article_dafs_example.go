@@ -16,6 +16,11 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
+const (
+	slug1 = "anintsubj"
+	slug2 = "adullsubj"
+)
+
 var articles = []model.Article{
 	{
 		Title:       "An interesting subject",

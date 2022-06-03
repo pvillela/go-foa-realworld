@@ -23,17 +23,17 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 
 	followings := []model.Following{
 		{
-			FollowerID: users[0].Id,
-			FolloweeID: users[1].Id,
+			FollowerId: users[0].Id,
+			FolloweeId: users[1].Id,
 		},
 		{
-			FollowerID: users[2].Id,
-			FolloweeID: users[1].Id,
+			FollowerId: users[2].Id,
+			FolloweeId: users[1].Id,
 		},
 	}
 
 	for i, _ := range followings {
-		err := daf.FollowingCreateDafI(ctx, tx, followings[i].FollowerID, followings[i].FolloweeID)
+		_, err := daf.FollowingCreateDafI(ctx, tx, followings[i].FollowerId, followings[i].FolloweeId)
 		errx.PanicOnError(err)
 	}
 
@@ -54,7 +54,7 @@ func followingDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	{
-		err := daf.FollowingDeleteDafI(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
+		err := daf.FollowingDeleteDafI(ctx, tx, followings[1].FollowerId, followings[1].FolloweeId)
 		errx.PanicOnError(err)
 
 		currUserId := users[2].Id

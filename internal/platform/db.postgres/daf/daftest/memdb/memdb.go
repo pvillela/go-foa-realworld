@@ -214,12 +214,16 @@ func (mdb MDb) Follows(followerName string, followeeName string) bool {
 	return mdb.followings[mFollowingT{followerName, followeeName}] != model.Following{}
 }
 
+func (mdb MDb) FollowingDelete(followerName string, followeeName string) {
+	delete(mdb.followings, mFollowingT{followerName, followeeName})
+}
+
 func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, followedOn time.Time) {
 	follower := mdb.usersByName[followerName]
 	followee := mdb.usersByName[followeeName]
 	following := model.Following{
-		FollowerID: follower.Id,
-		FolloweeID: followee.Id,
+		FollowerId: follower.Id,
+		FolloweeId: followee.Id,
 		FollowedOn: followedOn,
 	}
 	mdb.followings[mFollowingT{followerName, followeeName}] = following

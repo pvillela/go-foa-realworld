@@ -9,7 +9,7 @@ package model
 import "time"
 
 type Following struct {
-	FollowerID uint
-	FolloweeID uint
+	FollowerId uint
+	FolloweeId uint
 	FollowedOn time.Time
 }

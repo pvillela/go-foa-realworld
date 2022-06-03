@@ -19,6 +19,12 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
 
+const (
+	username1 = "pvillela"
+	username2 = "joebloe"
+	username3 = "johndoe"
+)
+
 var users = []model.User{
 	{
 		Username:     username1,

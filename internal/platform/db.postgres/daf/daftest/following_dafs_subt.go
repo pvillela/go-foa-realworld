@@ -74,22 +74,75 @@ var followingDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx p
 		assert.ElementsMatch(t, expected, actual, msg)
 	}
 
-	//{
-	//	currUserId := users[2].Id
-	//
-	//	articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
-	//	errx.PanicOnError(err)
-	//	fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
-	//}
-	//
-	//{
-	//	err := daf.FollowingDeleteDafI(ctx, tx, followings[1].FollowerID, followings[1].FolloweeID)
-	//	errx.PanicOnError(err)
-	//
-	//	currUserId := users[2].Id
-	//
-	//	articlePluses, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
-	//	errx.PanicOnError(err)
-	//	fmt.Println("\nArticlesFeedDaf:", articlePluses, "\n")
-	//}
+	{
+		msg := "FollowingCreateDafI - attempt to create an existing following"
+
+		followerName := username3
+		followeeName := username2
+
+		following := mdb.FollowingGet(followerName, followeeName)
+		followerId := following.FollowerId
+		followeeId := following.FolloweeId
+
+		// --> start nested transaction to avoid invalidating main transaction tx
+		subTx, err := tx.Begin(ctx)
+		errx.PanicOnError(err)
+
+		_, err = daf.FollowingCreateDafI(ctx, subTx, followerId, followeeId)
+
+		retErrxKind := dbpgx.ClassifyError(err)
+		expErrxKind := dbpgx.DbErrUniqueViolation
+
+		err = subTx.Rollback(ctx)
+		errx.PanicOnError(err)
+		// <-- rolled back nested transaction
+
+		assert.Equal(t, expErrxKind, retErrxKind, msg)
+	}
+
+	{
+		msg := "FollowingDeleteDafI -- delete an existing following."
+
+		followerName := username3
+		followeeName := username2
+
+		following := mdb.FollowingGet(followerName, followeeName)
+		followerId := following.FollowerId
+		followeeId := following.FolloweeId
+
+		err := daf.FollowingDeleteDafI(ctx, tx, followerId, followeeId)
+		errx.PanicOnError(err)
+
+		mdb.FollowingDelete(followerName, followeeName)
+
+		returned, err := daf.ArticlesFeedDafI(ctx, tx, followerId, nil, nil)
+		errx.PanicOnError(err)
+
+		actual := ArticlePlusesToArticles(returned)
+
+		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(followerName),
+			func(ap model.ArticlePlus) bool {
+				return ap.Author.Following
+			})
+		expected := ArticlePlusesToArticles(expected0)
+
+		assert.ElementsMatch(t, expected, actual, msg)
+	}
+
+	{
+		msg := "FollowingDeleteDafI - attempt to delete a nonexistent following"
+
+		followerName := username3
+		followeeName := username2
+
+		following := mdb.FollowingGet(followerName, followeeName)
+		followerId := following.FollowerId
+		followeeId := following.FolloweeId
+
+		err := daf.FollowingDeleteDafI(ctx, tx, followerId, followeeId)
+		retErrxKind := dbpgx.ClassifyError(err)
+		expErrxKind := dbpgx.DbErrRecordNotFound
+
+		assert.Equal(t, expErrxKind, retErrxKind, msg)
+	}
 })

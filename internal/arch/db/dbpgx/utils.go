@@ -105,6 +105,10 @@ func ClassifyError(err error) *errx.Kind {
 		return nil
 	}
 
+	if errX, ok := err.(errx.Errx); ok {
+		return errX.Kind()
+	}
+
 	if ok := errors.As(err, &pgx.ErrNoRows); ok || pgxscan.NotFound(err) {
 		return DbErrRecordNotFound
 	}
