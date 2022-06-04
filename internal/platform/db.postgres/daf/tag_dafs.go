@@ -42,8 +42,8 @@ var TagCreateDafI TagCreateDafT = func(
 	row := tx.QueryRow(ctx, sql, args...)
 	err := row.Scan(&tag.Id)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
-		if kind == dbpgx.DbErrUniqueViolation {
-			return kind.Make(err, bf.ErrMsgTagNameAlreadyExists, tag.Name)
+		if kind == dbpgx.DbErrRecordNotFound {
+			return dbpgx.DbErrUniqueViolation.Make(err, bf.ErrMsgTagNameAlreadyExists, tag.Name)
 		}
 		return kind.Make(err, "")
 	}

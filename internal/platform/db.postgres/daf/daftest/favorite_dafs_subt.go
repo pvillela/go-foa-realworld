@@ -19,6 +19,7 @@ import (
 )
 
 var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx, t *testing.T) {
+
 	// Create favorites.
 
 	type favoriteSourceT struct {

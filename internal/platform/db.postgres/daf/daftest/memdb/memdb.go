@@ -7,7 +7,7 @@
 package memdb
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/types"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"time"
@@ -57,18 +57,11 @@ func (mdb MDb) UserGet2(username string) (model.User, daf.RecCtxUser) {
 }
 
 func (mdb MDb) UserGet2All() ([]model.User, []daf.RecCtxUser) {
-	users := make([]model.User, len(mdb.usersByName))
-	recCtxs := make([]daf.RecCtxUser, len(mdb.usersByName))
-	i := 0
-	for _, v := range mdb.usersByName {
-		users[i] = *v
-		i++
-	}
-	i = 0
-	for _, v := range mdb.recCtxUsers {
-		recCtxs[i] = v
-		i++
-	}
+	userPs := util.MapToSlice(mdb.usersByName)
+	users := util.SliceMap(userPs, func(puser *model.User) model.User {
+		return *puser
+	})
+	recCtxs := util.MapToSlice(mdb.recCtxUsers)
 	return users, recCtxs
 }
 
@@ -96,17 +89,18 @@ func (mdb *MDb) UserUpsert2(user model.User, recCtx daf.RecCtxUser) {
 }
 
 func (mdb MDb) ArticleGetBySlug(slug string) model.Article {
-	return mdb.articles[slug]
+	article := mdb.articles[slug]
+	if article == nil {
+		panic("attempt to get article for invalid slug " + slug)
+	}
+	return *article
 }
 
 func (mdb MDb) ArticleGetAll() []model.Article {
-	result := make([]model.Article, len(mdb.articles))
-	i := 0
-	for _, a := range mdb.articles {
-		result[i] = a
-		i++
-	}
-	return result
+	var articlePs = util.MapToSlice(mdb.articles)
+	return util.SliceMap(articlePs, func(pa *model.Article) model.Article {
+		return *pa
+	})
 }
 
 func (mdb *MDb) ArticleUpsert(
@@ -116,7 +110,7 @@ func (mdb *MDb) ArticleUpsert(
 }
 
 func (mdb MDb) ArticlePlusGet(currUsername string, slug string) model.ArticlePlus {
-	article := mdb.articles[slug]
+	article := mdb.ArticleGetBySlug(slug)
 	author := mdb.userGetById(article.AuthorId)
 	favorited := mdb.Favorited(currUsername, slug)
 	follows := mdb.Follows(currUsername, author.Username)
@@ -140,13 +134,7 @@ func (mdb MDb) CommentGet(username string, slug string, id uint) model.Comment {
 
 func (mdb MDb) CommentGetAllForKey(username string, slug string) []model.Comment {
 	commentKey := mCommentKeyT{username: username, slug: slug}
-	comments := make([]model.Comment, len(mdb.comments))
-	i := 0
-	for _, comment := range mdb.comments[commentKey] {
-		comments[i] = comment
-		i++
-	}
-	return comments
+	return util.MapToSlice(mdb.comments[commentKey])
 }
 
 func (mdb MDb) CommentGetAllBySlug(slug string) []model.Comment {
@@ -229,6 +217,41 @@ func (mdb *MDb) FollowingUpsert(followerName string, followeeName string, follow
 	mdb.followings[mFollowingT{followerName, followeeName}] = following
 }
 
+func (mdb MDb) TagGet(name string) model.Tag {
+	return mdb.tags[name]
+}
+
+func (mdb MDb) TagExists(name string) bool {
+	_, ok := mdb.tags[name]
+	return ok
+}
+
+func (mdb MDb) TagGetAll() []model.Tag {
+	return util.MapToSlice(mdb.tags)
+}
+
+func (mdb MDb) TagGetAllNames() []string {
+	return util.SliceMap(mdb.TagGetAll(), func(tag model.Tag) string {
+		return tag.Name
+	})
+}
+
+func (mdb *MDb) TagUpsert(name string, tag model.Tag) {
+	mdb.tags[name] = tag
+}
+
+func (mdb *MDb) TagAssignToSlug(name string, slug string) {
+	if !mdb.TagExists(name) {
+		panic("attempt to assign an inexistent tag")
+	}
+	article := mdb.ArticleGetBySlug(slug)
+	if article.TagList == nil {
+		article.TagList = []string{}
+	}
+	article.TagList = append(article.TagList, name)
+	mdb.ArticleUpsert(article)
+}
+
 ///////////////////
 // Supporting types
 
@@ -246,13 +269,13 @@ func (m *mRecCtxUsersT) upsert(username string, recCtx daf.RecCtxUser) {
 }
 
 // key is Slug
-type mArticlesT map[string]model.Article
+type mArticlesT map[string]*model.Article
 
 func (m mArticlesT) upsert(
 	article model.Article,
 ) {
 	slug := article.Slug
-	m[slug] = article
+	m[slug] = &article
 }
 
 type mCommentKeyT struct {
@@ -281,4 +304,5 @@ type mFollowingT struct {
 
 type mFollowingsT map[mFollowingT]model.Following
 
-type mTagsT map[string]types.Unit
+// key is tag name.
+type mTagsT map[string]model.Tag

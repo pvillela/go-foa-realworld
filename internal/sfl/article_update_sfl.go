@@ -83,7 +83,7 @@ func ArticleUpdateSflC0(
 				return rpc.ArticleOut{}, err
 			}
 
-			articlePlus = model.ArticlePlus_FromArticle(article, articlePlus.Author)
+			articlePlus = model.ArticlePlus_FromArticle(article, articlePlus.Favorited, articlePlus.Author)
 			articleOut := rpc.ArticleOut_FromModel(articlePlus)
 
 			return articleOut, err

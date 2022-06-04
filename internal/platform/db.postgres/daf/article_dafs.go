@@ -200,11 +200,18 @@ var ArticlesListDafI ArticlesListDafT = func(
 	var join string
 	var joinArgs []any
 	if v := criteria.FavoritedBy; v != nil {
-		join = `
+		join = join + `
 		LEFT JOIN favorites fa1 ON a.id = fa1.article_id -- at most one due to below
-		LEFT JOIN users ufa1 ON ufa1.id = fa1.user_id AND ufa1.username = $2
+		LEFT JOIN users ufa1 ON ufa1.id = fa1.user_id -- AND ufa1.username = $2
 		`
-		joinArgs = []any{*v}
+		//joinArgs = append(joinArgs, *v)
+	}
+	if v := criteria.Tag; v != nil {
+		join = join + `
+		LEFT JOIN article_tags at1 ON at1.article_id = a.id		
+		LEFT JOIN tags t1 ON t1.id = at1.tag_id -- AND t1.name = $2
+		`
+		//joinArgs = append(joinArgs, *v)
 	}
 
 	var whereTuples []types.Tuple2[string, any]
@@ -212,17 +219,12 @@ var ArticlesListDafI ArticlesListDafT = func(
 		whereTuples = append(whereTuples, types.Tuple2[string, any]{"ufa1.username = $%d", *v})
 	}
 	if v := criteria.Tag; v != nil {
-		whereTuples = append(whereTuples, types.Tuple2[string, any]{"t.name = $%d", *v})
+		whereTuples = append(whereTuples, types.Tuple2[string, any]{"t1.name = $%d", *v})
 	}
 	if v := criteria.Author; v != nil {
 		whereTuples = append(whereTuples, types.Tuple2[string, any]{"ua.username = $%d", *v})
 	}
-	var initialIndex int
-	if len(join) == 0 {
-		initialIndex = 2
-	} else {
-		initialIndex = 3
-	}
+	initialIndex := 2 + len(joinArgs)
 	where, whereArgs := whereClauseFromTuples(initialIndex, whereTuples)
 
 	additionalSql := join + where

@@ -22,7 +22,7 @@ var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=di
 
 // dafTester runs txnlSubtest by providing a database with repeatably initialized data.
 func dafTester(t *testing.T, txnlSubtest dbpgx.TransactionalSubtest) {
-	log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.DebugLevel)
 
 	ctx := context.Background()
 

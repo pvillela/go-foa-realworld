@@ -27,7 +27,7 @@ func SliceWindow(slice []any, limit, offset int) []any {
 	return slice[offset:limit]
 }
 
-func SliceContains(slice []any, value any) bool {
+func SliceContains[T comparable](slice []T, value T) bool {
 	for _, v := range slice {
 		if v == value {
 			return true
@@ -36,16 +36,26 @@ func SliceContains(slice []any, value any) bool {
 	return false
 }
 
-// SliceToSet returns a set containing the values in the receiver.
-func SliceToSet[T comparable](s []T) map[T]types.Unit {
+// sliceToSet returns a set implemented as a map[T]V that maps all values in the receiver to v.
+func sliceToSet[T comparable, V any](s []T, v V) map[T]V {
 	if s == nil {
 		return nil
 	}
-	set := make(map[T]types.Unit, len(s)) // optimize for speed vs space
+	set := make(map[T]V, len(s)) // optimize for speed vs space
 	for _, x := range s {
-		set[x] = types.UnitV
+		set[x] = v
 	}
 	return set
+}
+
+// SliceToBoolSet returns a set containing the values in the receiver.
+func SliceToBoolSet[T comparable](s []T) map[T]bool {
+	return sliceToSet[T, bool](s, true)
+}
+
+// SliceToUnitSet returns a set containing the values in the receiver.
+func SliceToUnitSet[T comparable](s []T) map[T]types.Unit {
+	return sliceToSet[T, types.Unit](s, types.UnitV)
 }
 
 func SliceMapWithIndex[S, T any](xs []S, f func(int, S) T) []T {
@@ -81,4 +91,14 @@ func SliceFilter[S any](xs []S, f func(S) bool) []S {
 		}
 	}
 	return ts
+}
+
+func MapToSlice[K comparable, V any](m map[K]V) []V {
+	slice := make([]V, len(m))
+	i := 0
+	for _, v := range m {
+		slice[i] = v
+		i++
+	}
+	return slice
 }
