@@ -43,32 +43,28 @@ func UserUpdateSflC0(
 	userGetByNameDaf daf.UserGetByNameDafT,
 	userUpdateDaf daf.UserUpdateDafT,
 ) UserUpdateSflT {
-	return func(
+	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
 		in rpc.UserUpdateIn,
 	) (rpc.UserOut, error) {
-		return cdb.WithTransaction(ctxDb, ctx, func(
-			ctx context.Context,
-		) (rpc.UserOut, error) {
-			username := reqCtx.Username
+		username := reqCtx.Username
 
-			user, rc, err := userGetByNameDaf(ctx, username)
-			if err != nil {
-				return rpc.UserOut{}, err
-			}
+		user, rc, err := userGetByNameDaf(ctx, username)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
 
-			user = user.Update(in.User)
+		user = user.Update(in.User)
 
-			_, err = userUpdateDaf(ctx, user, rc)
-			if err != nil {
-				return rpc.UserOut{}, err
-			}
+		_, err = userUpdateDaf(ctx, user, rc)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
 
-			token := reqCtx.Token
+		token := reqCtx.Token
 
-			userOut := rpc.UserOut_FromModel(user, token.Raw)
-			return userOut, nil
-		})
-	}
+		userOut := rpc.UserOut_FromModel(user, token.Raw)
+		return userOut, nil
+	})
 }

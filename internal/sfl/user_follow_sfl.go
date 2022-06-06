@@ -46,40 +46,35 @@ func UserFollowSflC0(
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingCreateDaf daf.FollowingCreateDafT,
 ) UserFollowSflT {
-	return func(
+	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
 		followeeUsername string,
 	) (rpc.ProfileOut, error) {
 		username := reqCtx.Username
+		var zero rpc.ProfileOut
 
-		return cdb.WithTransaction(ctxDb, ctx, func(
-			ctx context.Context,
-		) (rpc.ProfileOut, error) {
-			var zero rpc.ProfileOut
+		follower, _, err := userGetByNameDaf(ctx, username)
+		if err != nil {
+			return zero, err
+		}
 
-			follower, _, err := userGetByNameDaf(ctx, username)
-			if err != nil {
-				return zero, err
-			}
+		followee, _, err := userGetByNameDaf(ctx, followeeUsername)
+		if err != nil {
+			return zero, err
+		}
 
-			followee, _, err := userGetByNameDaf(ctx, followeeUsername)
-			if err != nil {
-				return zero, err
-			}
+		tx, err := dbpgx.GetCtxTx(ctx)
+		if err != nil {
+			return zero, err
+		}
 
-			tx, err := dbpgx.GetCtxTx(ctx)
-			if err != nil {
-				return zero, err
-			}
+		_, err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
+		if err != nil {
+			return zero, err
+		}
 
-			_, err = followingCreateDaf(ctx, tx, follower.Id, followee.Id)
-			if err != nil {
-				return zero, err
-			}
-
-			profileOut := rpc.ProfileOut_FromModel(follower, true)
-			return profileOut, nil
-		})
-	}
+		profileOut := rpc.ProfileOut_FromModel(follower, true)
+		return profileOut, nil
+	})
 }

@@ -47,45 +47,41 @@ func ProfileGetSflC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	followingGetDaf daf.FollowingGetDafT,
 ) ProfileGetSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		profileName string,
 	) (rpc.ProfileOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ProfileOut, error) {
-			var zero rpc.ProfileOut
-			var err error
-			username := reqCtx.Username
-			var currUser model.User
-			var profileUser model.User
-			follows := false
+		var zero rpc.ProfileOut
+		var err error
+		username := reqCtx.Username
+		var currUser model.User
+		var profileUser model.User
+		follows := false
 
-			if username != "" {
-				currUser, _, err = userGetByNameDaf(ctx, tx, username)
-				if err != nil {
-					return zero, nil
-				}
-			}
-
-			profileUser, _, err = userGetByNameDaf(ctx, tx, profileName)
+		if username != "" {
+			currUser, _, err = userGetByNameDaf(ctx, tx, username)
 			if err != nil {
 				return zero, nil
 			}
+		}
 
-			following, err := followingGetDaf(ctx, tx, currUser.Id, profileUser.Id)
-			if err != nil {
-				return zero, nil
-			}
-			if following != (model.Following{}) {
-				follows = true
-			}
+		profileUser, _, err = userGetByNameDaf(ctx, tx, profileName)
+		if err != nil {
+			return zero, nil
+		}
 
-			profileOut := rpc.ProfileOut_FromModel(profileUser, follows)
+		following, err := followingGetDaf(ctx, tx, currUser.Id, profileUser.Id)
+		if err != nil {
+			return zero, nil
+		}
+		if following != (model.Following{}) {
+			follows = true
+		}
 
-			return profileOut, nil
-		})
-	}
+		profileOut := rpc.ProfileOut_FromModel(profileUser, follows)
+
+		return profileOut, nil
+	})
 }

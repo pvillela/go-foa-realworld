@@ -41,21 +41,21 @@ func ArticleDeleteSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
-	return func(ctx context.Context, reqCtx web.RequestContext, slug string) (types.Unit, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (types.Unit, error) {
-			username := reqCtx.Username
+	return dbpgx.SflWithTransaction(db, func(
+		ctx context.Context,
+		tx pgx.Tx,
+		reqCtx web.RequestContext,
+		slug string,
+	) (types.Unit, error) {
+		username := reqCtx.Username
 
-			_, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
-			if err != nil {
-				return types.UnitV, err
-			}
-
-			// Record existence is guaranteed by above code.
-			err = articleDeleteDaf(ctx, tx, slug)
+		_, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
+		if err != nil {
 			return types.UnitV, err
-		})
-	}
+		}
+
+		// Record existence is guaranteed by above code.
+		err = articleDeleteDaf(ctx, tx, slug)
+		return types.UnitV, err
+	})
 }

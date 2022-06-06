@@ -39,3 +39,15 @@ func WithTransaction[T any](
 	_, err = ctxDb.Commit(ctx)
 	return t, errx.ErrxOf(err)
 }
+
+func SflWithTransaction[R, S, T any](
+	ctxDb CtxDb,
+	block func(ctx context.Context, reqCtx R, in S) (T, error),
+) func(ctx context.Context, reqCtx R, in S) (T, error) {
+	return func(ctx context.Context, reqCtx R, in S) (T, error) {
+		block1 := func(ctx context.Context) (T, error) {
+			return block(ctx, reqCtx, in)
+		}
+		return WithTransaction(ctxDb, ctx, block1)
+	}
+}

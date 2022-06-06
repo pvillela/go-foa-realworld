@@ -46,31 +46,27 @@ func ArticlesFeedSflC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesFeedDaf daf.ArticlesFeedDafT,
 ) ArticlesFeedSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		in rpc.ArticlesFeedIn,
 	) (rpc.ArticlesOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ArticlesOut, error) {
-			username := reqCtx.Username
-			zero := rpc.ArticlesOut{}
+		username := reqCtx.Username
+		zero := rpc.ArticlesOut{}
 
-			user, _, err := userGetByNameDaf(ctx, tx, username)
-			if err != nil {
-				return zero, err
-			}
+		user, _, err := userGetByNameDaf(ctx, tx, username)
+		if err != nil {
+			return zero, err
+		}
 
-			articlesPlus, err := articlesFeedDaf(ctx, tx, user.Id, in.Limit, in.Offset)
-			if err != nil {
-				return zero, err
-			}
+		articlesPlus, err := articlesFeedDaf(ctx, tx, user.Id, in.Limit, in.Offset)
+		if err != nil {
+			return zero, err
+		}
 
-			articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
+		articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
 
-			return articlesOut, err
-		})
-	}
+		return articlesOut, err
+	})
 }

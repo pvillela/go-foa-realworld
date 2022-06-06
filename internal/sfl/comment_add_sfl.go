@@ -46,36 +46,32 @@ func CommentAddSflC0(
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 	commentCreateDaf daf.CommentCreateDafT,
 ) CommentAddSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		in rpc.CommentAddIn,
 	) (rpc.CommentOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.CommentOut, error) {
-			err := in.Validate()
-			if err != nil {
-				return rpc.CommentOut{}, err
-			}
+		err := in.Validate()
+		if err != nil {
+			return rpc.CommentOut{}, err
+		}
 
-			username := reqCtx.Username
+		username := reqCtx.Username
 
-			articlePlus, user, err := articleAndUserGetFl(ctx, tx, in.Slug, username)
-			if err != nil {
-				return rpc.CommentOut{}, err
-			}
+		articlePlus, user, err := articleAndUserGetFl(ctx, tx, in.Slug, username)
+		if err != nil {
+			return rpc.CommentOut{}, err
+		}
 
-			comment := in.ToComment(articlePlus.Id, user.Id)
+		comment := in.ToComment(articlePlus.Id, user.Id)
 
-			err = commentCreateDaf(ctx, tx, &comment)
-			if err != nil {
-				return rpc.CommentOut{}, err
-			}
+		err = commentCreateDaf(ctx, tx, &comment)
+		if err != nil {
+			return rpc.CommentOut{}, err
+		}
 
-			commentOut := rpc.CommentOut_FromModel(comment)
-			return commentOut, nil
-		})
-	}
+		commentOut := rpc.CommentOut_FromModel(comment)
+		return commentOut, nil
+	})
 }

@@ -42,25 +42,21 @@ func UserGetCurrentSflC0(
 	ctxDb cdb.CtxDb,
 	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {
-	return func(
+	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
 		_ types.Unit,
 	) (rpc.UserOut, error) {
-		return cdb.WithTransaction(ctxDb, ctx, func(
-			ctx context.Context,
-		) (rpc.UserOut, error) {
-			username := reqCtx.Username
+		username := reqCtx.Username
 
-			user, _, err := userGetByNameDaf(ctx, username)
-			if err != nil {
-				return rpc.UserOut{}, err
-			}
+		user, _, err := userGetByNameDaf(ctx, username)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
 
-			token := reqCtx.Token
+		token := reqCtx.Token
 
-			userOut := rpc.UserOut_FromModel(user, token.Raw)
-			return userOut, nil
-		})
-	}
+		userOut := rpc.UserOut_FromModel(user, token.Raw)
+		return userOut, nil
+	})
 }

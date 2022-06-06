@@ -22,6 +22,15 @@ type TagsGetSflT = func(ctx context.Context, reqCtx web.RequestContext, _ types.
 
 // TagsGetSflC is the function that constructs a stereotype instance of type
 // TagsGetSflT with hard-wired stereotype dependencies.
+func TagsGetSflC(
+	db dbpgx.Db,
+) TagsGetSflT {
+	tagsGetAllDaf := daf.TagsGetAllDafI
+	return TagsGetSflC0(
+		db,
+		tagsGetAllDaf,
+	)
+}
 
 // TagsGetSflC0 is the function that constructs a stereotype instance of type
 // TagsGetSflT without hard-wired stereotype dependencies.
@@ -29,19 +38,19 @@ func TagsGetSflC0(
 	db dbpgx.Db,
 	tagsGetAllDaf daf.TagsGetAllDafT,
 ) TagsGetSflT {
-	return func(ctx context.Context, reqCtx web.RequestContext, _ types.Unit) (rpc.TagsOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.TagsOut, error) {
-			tags, err := tagsGetAllDaf(ctx, tx)
-			if err != nil {
-				return rpc.TagsOut{}, err
-			}
+	return dbpgx.SflWithTransaction(db, func(
+		ctx context.Context,
+		tx pgx.Tx,
+		reqCtx web.RequestContext,
+		_ types.Unit,
+	) (rpc.TagsOut, error) {
+		tags, err := tagsGetAllDaf(ctx, tx)
+		if err != nil {
+			return rpc.TagsOut{}, err
+		}
 
-			tagsOut := rpc.TagsOut_FromModel(tags)
+		tagsOut := rpc.TagsOut_FromModel(tags)
 
-			return tagsOut, err
-		})
-	}
+		return tagsOut, err
+	})
 }

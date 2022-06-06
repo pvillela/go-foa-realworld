@@ -47,33 +47,29 @@ func CommentDeleteSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	commentDeleteDaf daf.CommentDeleteDafT,
 ) CommentDeleteSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		in rpc.CommentDeleteIn,
 	) (types.Unit, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (types.Unit, error) {
-			err := in.Validate()
-			if err != nil {
-				return types.UnitV, err
-			}
+		err := in.Validate()
+		if err != nil {
+			return types.UnitV, err
+		}
 
-			username := reqCtx.Username
+		username := reqCtx.Username
 
-			articlePlus, user, err := articleGetAndCheckOwnerFl(ctx, tx, in.Slug, username)
-			if err != nil {
-				return types.UnitV, err
-			}
+		articlePlus, user, err := articleGetAndCheckOwnerFl(ctx, tx, in.Slug, username)
+		if err != nil {
+			return types.UnitV, err
+		}
 
-			err = commentDeleteDaf(ctx, tx, uint(in.Id), articlePlus.Id, user.Id)
-			if err != nil {
-				return types.UnitV, err
-			}
+		err = commentDeleteDaf(ctx, tx, uint(in.Id), articlePlus.Id, user.Id)
+		if err != nil {
+			return types.UnitV, err
+		}
 
-			return types.UnitV, nil
-		})
-	}
+		return types.UnitV, nil
+	})
 }

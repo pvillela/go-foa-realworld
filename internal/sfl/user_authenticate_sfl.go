@@ -47,36 +47,32 @@ func UserAuthenticateSflC0(
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
-	return func(
+	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
-		_ web.RequestContext,
+		reqCtx web.RequestContext,
 		in rpc.UserAuthenticateIn,
 	) (rpc.UserOut, error) {
-		block := func(ctx context.Context) (rpc.UserOut, error) {
-			var zero rpc.UserOut
-			email := in.User.Email
-			password := in.User.Password
+		var zero rpc.UserOut
+		email := in.User.Email
+		password := in.User.Password
 
-			user, _, err := userGetByEmailDaf(ctx, email)
-			if err != nil {
-				return zero, err
-			}
-
-			if !userAuthenticateBf(user, password, user.PasswordSalt) {
-				// The error info below is not secure but OK for now for debugging
-				return zero, bf.ErrAuthenticationFailed.Make(nil,
-					bf.ErrMsgAuthenticationFailed, user.Username, password)
-			}
-
-			token, err := userGenTokenBf(user)
-			if err != nil {
-				return zero, err
-			}
-
-			userOut := rpc.UserOut_FromModel(user, token)
-			return userOut, err
+		user, _, err := userGetByEmailDaf(ctx, email)
+		if err != nil {
+			return zero, err
 		}
 
-		return cdb.WithTransaction(ctxDb, ctx, block)
-	}
+		if !userAuthenticateBf(user, password, user.PasswordSalt) {
+			// The error info below is not secure but OK for now for debugging
+			return zero, bf.ErrAuthenticationFailed.Make(nil,
+				bf.ErrMsgAuthenticationFailed, user.Username, password)
+		}
+
+		token, err := userGenTokenBf(user)
+		if err != nil {
+			return zero, err
+		}
+
+		userOut := rpc.UserOut_FromModel(user, token)
+		return userOut, err
+	})
 }

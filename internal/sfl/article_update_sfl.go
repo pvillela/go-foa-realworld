@@ -48,45 +48,41 @@ func ArticleUpdateSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleUpdateSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		in rpc.ArticleUpdateIn,
 	) (rpc.ArticleOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ArticleOut, error) {
-			err := in.Validate()
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
+		err := in.Validate()
+		if err != nil {
+			return rpc.ArticleOut{}, err
+		}
 
-			username := reqCtx.Username
-			slug := in.Article.Slug
-			var zero rpc.ArticleOut
+		username := reqCtx.Username
+		slug := in.Article.Slug
+		var zero rpc.ArticleOut
 
-			articlePlus, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
-			if err != nil {
-				return zero, err
-			}
+		articlePlus, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
+		if err != nil {
+			return zero, err
+		}
 
-			article := articlePlus.ToArticle()
-			updateSrc := model.ArticlePatch{
-				Title:       in.Article.Title,
-				Description: in.Article.Description,
-				Body:        in.Article.Body,
-			}
-			article = article.Update(updateSrc)
+		article := articlePlus.ToArticle()
+		updateSrc := model.ArticlePatch{
+			Title:       in.Article.Title,
+			Description: in.Article.Description,
+			Body:        in.Article.Body,
+		}
+		article = article.Update(updateSrc)
 
-			if err := articleUpdateDaf(ctx, tx, &article); err != nil {
-				return rpc.ArticleOut{}, err
-			}
+		if err := articleUpdateDaf(ctx, tx, &article); err != nil {
+			return rpc.ArticleOut{}, err
+		}
 
-			articlePlus = model.ArticlePlus_FromArticle(article, articlePlus.Favorited, articlePlus.Author)
-			articleOut := rpc.ArticleOut_FromModel(articlePlus)
+		articlePlus = model.ArticlePlus_FromArticle(article, articlePlus.Favorited, articlePlus.Author)
+		articleOut := rpc.ArticleOut_FromModel(articlePlus)
 
-			return articleOut, err
-		})
-	}
+		return articleOut, err
+	})
 }

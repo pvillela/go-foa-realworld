@@ -52,63 +52,6 @@ func ArticleCreateSflC0(
 	tagsAddNewDaf daf.TagsAddNewDafT,
 	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
 ) ArticleCreateSflT {
-	return func(
-		ctx context.Context,
-		reqCtx web.RequestContext,
-		in rpc.ArticleCreateIn,
-	) (rpc.ArticleOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ArticleOut, error) {
-			err := in.Validate()
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
-			username := reqCtx.Username
-
-			user, _, err := userGetByNameDaf(ctx, tx, username)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
-
-			article, err := in.ToArticle(user)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
-
-			err = articleCreateDaf(ctx, tx, &article)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
-
-			names := article.TagList
-
-			err = tagsAddNewDaf(ctx, tx, names)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
-
-			err = tagsAddToArticleDaf(ctx, tx, names, article)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
-
-			articlePlus := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(user, false))
-			articleOut := rpc.ArticleOut_FromModel(articlePlus)
-
-			return articleOut, nil
-		})
-	}
-}
-
-func ArticleCreateSflC1(
-	db dbpgx.Db,
-	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
-	articleCreateDaf daf.ArticleCreateDafT,
-	tagsAddNewDaf daf.TagsAddNewDafT,
-	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
-) ArticleCreateSflT {
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
@@ -126,7 +69,7 @@ func ArticleCreateSflC1(
 			return rpc.ArticleOut{}, err
 		}
 
-		article, err := in.ToArticle(&user)
+		article, err := in.ToArticle(user)
 		if err != nil {
 			return rpc.ArticleOut{}, err
 		}
@@ -148,7 +91,7 @@ func ArticleCreateSflC1(
 			return rpc.ArticleOut{}, err
 		}
 
-		articlePlus := model.ArticlePlus_FromArticle(article, model.Profile_FromUser(&user, false))
+		articlePlus := model.ArticlePlus_FromArticle(article, false, model.Profile_FromUser(user, false))
 		articleOut := rpc.ArticleOut_FromModel(articlePlus)
 
 		return articleOut, nil

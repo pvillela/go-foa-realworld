@@ -50,38 +50,34 @@ func ArticleFavoriteSflC0(
 	favoriteCreateDaf daf.FavoriteCreateDafT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleFavoriteSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		slug string,
 	) (rpc.ArticleOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ArticleOut, error) {
-			username := reqCtx.Username
-			var zero rpc.ArticleOut
+		username := reqCtx.Username
+		var zero rpc.ArticleOut
 
-			articlePlus, user, err := articleAndUserGetFl(ctx, tx, slug, username)
-			if err != nil {
-				return zero, err
-			}
+		articlePlus, user, err := articleAndUserGetFl(ctx, tx, slug, username)
+		if err != nil {
+			return zero, err
+		}
 
-			err = favoriteCreateDaf(ctx, tx, articlePlus.Id, user.Id)
-			if err != nil {
-				return zero, err
-			}
+		err = favoriteCreateDaf(ctx, tx, articlePlus.Id, user.Id)
+		if err != nil {
+			return zero, err
+		}
 
-			article := articlePlus.ToArticle()
-			article.AdjustFavoriteCount(1)
+		article := articlePlus.ToArticle()
+		article.AdjustFavoriteCount(1)
 
-			err = articleUpdateDaf(ctx, tx, &article)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
+		err = articleUpdateDaf(ctx, tx, &article)
+		if err != nil {
+			return rpc.ArticleOut{}, err
+		}
 
-			articleOut := rpc.ArticleOut_FromModel(articlePlus)
-			return articleOut, err
-		})
-	}
+		articleOut := rpc.ArticleOut_FromModel(articlePlus)
+		return articleOut, err
+	})
 }

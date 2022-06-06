@@ -44,28 +44,24 @@ func UserRegisterSflC0(
 	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
-	return func(
+	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
-		_ web.RequestContext,
+		reqCtx web.RequestContext,
 		in rpc.UserRegisterIn,
 	) (rpc.UserOut, error) {
-		return cdb.WithTransaction(ctxDb, ctx, func(
-			ctx context.Context,
-		) (rpc.UserOut, error) {
-			user := in.ToUser()
+		user := in.ToUser()
 
-			_, err := userCreateDaf(ctx, &user)
-			if err != nil {
-				return rpc.UserOut{}, err
-			}
+		_, err := userCreateDaf(ctx, &user)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
 
-			token, err := userGenTokenBf(user)
-			if err != nil {
-				return rpc.UserOut{}, err
-			}
+		token, err := userGenTokenBf(user)
+		if err != nil {
+			return rpc.UserOut{}, err
+		}
 
-			userOut := rpc.UserOut_FromModel(user, token)
-			return userOut, nil
-		})
-	}
+		userOut := rpc.UserOut_FromModel(user, token)
+		return userOut, nil
+	})
 }

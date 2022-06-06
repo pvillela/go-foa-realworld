@@ -124,8 +124,8 @@ var tagDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx,
 		returnedArticlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
 		errx.PanicOnError(err)
 
-		returnedArticleTagsMap := ArticlePlusesToArticleTagsMaps(returnedArticlePluses)
-		expectedArticleTagsMap := ArticlePlusesToArticleTagsMaps(mdb.ArticlePlusGetAll(currUsername))
+		returnedArticleTagsMap := articlePlusesToArticleTagsMap(returnedArticlePluses)
+		expectedArticleTagsMap := articlePlusesToArticleTagsMap(mdb.ArticlePlusGetAll(currUsername))
 
 		assert.Equal(t, expectedArticleTagsMap, returnedArticleTagsMap, msg)
 	}
@@ -147,11 +147,11 @@ var tagDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx,
 		returnedArticlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
 		errx.PanicOnError(err)
 
-		returnedArticleTagsMap := ArticlePlusesToArticleTagsMaps(returnedArticlePluses)
+		returnedArticleTagsMap := articlePlusesToArticleTagsMap(returnedArticlePluses)
 		expectedArticlePluses := util.SliceFilter(mdb.ArticlePlusGetAll(currUsername), func(ap model.ArticlePlus) bool {
 			return util.SliceContains(ap.TagList, tagName1)
 		})
-		expectedArticleTagsMap := ArticlePlusesToArticleTagsMaps(expectedArticlePluses)
+		expectedArticleTagsMap := articlePlusesToArticleTagsMap(expectedArticlePluses)
 
 		assert.Equal(t, expectedArticleTagsMap, returnedArticleTagsMap, msg)
 	}
@@ -214,8 +214,8 @@ var tagDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx,
 				returnedArticlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
 				errx.PanicOnError(err)
 
-				returnedArticleTagsMap := ArticlePlusesToArticleTagsMaps(returnedArticlePluses)
-				expectedArticleTagsMap := ArticlePlusesToArticleTagsMaps(mdb.ArticlePlusGetAll(currUsername))
+				returnedArticleTagsMap := articlePlusesToArticleTagsMap(returnedArticlePluses)
+				expectedArticleTagsMap := articlePlusesToArticleTagsMap(mdb.ArticlePlusGetAll(currUsername))
 
 				assert.Equal(t, expectedArticleTagsMap, returnedArticleTagsMap, msg)
 			}
@@ -223,7 +223,9 @@ var tagDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pgx.Tx,
 	}
 })
 
-func ArticlePlusesToArticleTagsMaps(aps []model.ArticlePlus) map[string]map[string]bool {
+// articlePlusesToArticleTagsMap transforms a list of ArticlePlus into a map from
+// slug to the set of tag names for the article.
+func articlePlusesToArticleTagsMap(aps []model.ArticlePlus) map[string]map[string]bool {
 	articleTagsMap := map[string]map[string]bool{}
 	for _, ap := range aps {
 		tagSet := map[string]bool{}

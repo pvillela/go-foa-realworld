@@ -41,25 +41,21 @@ func ArticleGetSflC0(
 	db dbpgx.Db,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 ) ArticleGetSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		slug string,
 	) (rpc.ArticleOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ArticleOut, error) {
-			username := reqCtx.Username
+		username := reqCtx.Username
 
-			article, _, err := articleAndUserGetFl(ctx, tx, slug, username)
-			if err != nil {
-				return rpc.ArticleOut{}, err
-			}
+		article, _, err := articleAndUserGetFl(ctx, tx, slug, username)
+		if err != nil {
+			return rpc.ArticleOut{}, err
+		}
 
-			articleOut := rpc.ArticleOut_FromModel(article)
+		articleOut := rpc.ArticleOut_FromModel(article)
 
-			return articleOut, nil
-		})
-	}
+		return articleOut, nil
+	})
 }

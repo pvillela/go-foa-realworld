@@ -26,7 +26,18 @@ type ArticlesListSflT = func(
 ) (rpc.ArticlesOut, error)
 
 // ArticlesListSflC is the function that constructs a stereotype instance of type
-// ArticlesListSflT without hard-wired stereotype dependencies.
+// ArticlesListSflT with hard-wired stereotype dependencies.
+func ArticlesListSflC(
+	db dbpgx.Db,
+) ArticlesListSflT {
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
+	articlesListDaf := daf.ArticlesListDafI
+	return ArticlesListSflC0(
+		db,
+		userGetByNameDaf,
+		articlesListDaf,
+	)
+}
 
 // ArticlesListSflC0 is the function that constructs a stereotype instance of type
 // ArticlesListSflT without hard-wired stereotype dependencies.
@@ -35,31 +46,27 @@ func ArticlesListSflC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesListDaf daf.ArticlesListDafT,
 ) ArticlesListSflT {
-	return func(
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		in model.ArticleCriteria,
 	) (rpc.ArticlesOut, error) {
-		return dbpgx.WithTransaction(db, ctx, func(
-			ctx context.Context,
-			tx pgx.Tx,
-		) (rpc.ArticlesOut, error) {
-			username := reqCtx.Username
-			zero := rpc.ArticlesOut{}
+		username := reqCtx.Username
+		zero := rpc.ArticlesOut{}
 
-			user, _, err := userGetByNameDaf(ctx, tx, username)
-			if err != nil {
-				return zero, err
-			}
+		user, _, err := userGetByNameDaf(ctx, tx, username)
+		if err != nil {
+			return zero, err
+		}
 
-			articlesPlus, err := articlesListDaf(ctx, tx, user.Id, in)
-			if err != nil {
-				return zero, err
-			}
+		articlesPlus, err := articlesListDaf(ctx, tx, user.Id, in)
+		if err != nil {
+			return zero, err
+		}
 
-			articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
+		articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
 
-			return articlesOut, err
-		})
-	}
+		return articlesOut, err
+	})
 }
