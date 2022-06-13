@@ -14,6 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -63,13 +64,13 @@ var followingDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx p
 		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
 		errx.PanicOnError(err)
 
-		actual := ArticlePlusesToArticles(returned)
+		actual := testutil.ArticlePlusesToArticles(returned)
 
 		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(currUsername),
 			func(ap model.ArticlePlus) bool {
 				return ap.Author.Following
 			})
-		expected := ArticlePlusesToArticles(expected0)
+		expected := testutil.ArticlePlusesToArticles(expected0)
 
 		assert.ElementsMatch(t, expected, actual, msg)
 	}
@@ -118,13 +119,13 @@ var followingDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx p
 		returned, err := daf.ArticlesFeedDafI(ctx, tx, followerId, nil, nil)
 		errx.PanicOnError(err)
 
-		actual := ArticlePlusesToArticles(returned)
+		actual := testutil.ArticlePlusesToArticles(returned)
 
 		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(followerName),
 			func(ap model.ArticlePlus) bool {
 				return ap.Author.Following
 			})
-		expected := ArticlePlusesToArticles(expected0)
+		expected := testutil.ArticlePlusesToArticles(expected0)
 
 		assert.ElementsMatch(t, expected, actual, msg)
 	}

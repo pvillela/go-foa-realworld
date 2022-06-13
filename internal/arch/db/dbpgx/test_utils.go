@@ -8,9 +8,12 @@ package dbpgx
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"strings"
 	"testing"
 )
 
@@ -66,4 +69,13 @@ func Parallel(txnlSubtest TransactionalSubtest) TransactionalSubtest {
 		t.Parallel()
 		txnlSubtest(db, ctx, t)
 	}
+}
+
+// CleanupTables truncates tables. Should be called with all tables at once to reset
+// the database while respecting referential integrity constraints.
+func CleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
+	tablesStr := strings.Join(tables, ", ")
+	sql := fmt.Sprintf("TRUNCATE %v", tablesStr)
+	_, err := tx.Exec(ctx, sql)
+	errx.PanicOnError(err)
 }

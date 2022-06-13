@@ -9,6 +9,7 @@ package daftest
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"testing"
 )
 
@@ -26,5 +27,5 @@ func TestDafSuite(t *testing.T) {
 		dbpgx.RunTestPairs(db, ctx, t, "sequential", testPairs)
 	}
 
-	dafTester(t, txnlSubtest)
+	testutil.DbTester(t, txnlSubtest)
 }

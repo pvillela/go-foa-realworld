@@ -14,6 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -69,13 +70,13 @@ var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pg
 		errx.PanicOnError(err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 
-		actual := ArticlePlusesToArticles(returned)
+		actual := testutil.ArticlePlusesToArticles(returned)
 
 		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(favoritedBy),
 			func(ap model.ArticlePlus) bool {
 				return ap.Favorited
 			})
-		expected := ArticlePlusesToArticles(expected0)
+		expected := testutil.ArticlePlusesToArticles(expected0)
 
 		//_, _ = spew.Println("********* actual", actual)
 		//_, _ = spew.Println("********* expected", expected)
@@ -134,13 +135,13 @@ var favoriteDafsSubt = dbpgx.TestWithTransaction(func(ctx context.Context, tx pg
 		errx.PanicOnError(err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:\n", returned)
 
-		actual := ArticlePlusesToArticles(returned)
+		actual := testutil.ArticlePlusesToArticles(returned)
 
 		expected0 := util.SliceFilter(mdb.ArticlePlusGetAll(favoritedBy),
 			func(ap model.ArticlePlus) bool {
 				return ap.Favorited
 			})
-		expected := ArticlePlusesToArticles(expected0)
+		expected := testutil.ArticlePlusesToArticles(expected0)
 
 		assert.ElementsMatch(t, expected, actual, msg)
 	}

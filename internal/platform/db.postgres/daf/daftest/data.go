@@ -7,7 +7,7 @@
 package daftest
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf/daftest/memdb"
+	"github.com/pvillela/go-foa-realworld/internal/testutil/memdb"
 )
 
 var mdb = memdb.New()
