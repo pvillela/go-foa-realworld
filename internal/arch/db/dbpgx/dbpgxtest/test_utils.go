@@ -4,15 +4,18 @@
  * that can be found in the LICENSE file.
  */
 
-package dbpgx
+package dbpgxtest
 
 import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
+	"github.com/sirupsen/logrus"
 	"strings"
 	"testing"
 )
@@ -28,7 +31,7 @@ type DafSubtest func(
 // TransactionalSubtest is the tyype of a function that implements a DAF subtest
 // that is already delimited by one or more transactions.
 type TransactionalSubtest func(
-	db Db,
+	db dbpgx.Db,
 	ctx context.Context,
 	t *testing.T,
 )
@@ -43,14 +46,14 @@ type TestPair struct {
 func TestWithTransaction(
 	f DafSubtest,
 ) TransactionalSubtest {
-	return func(db Db, ctx context.Context, t *testing.T) {
-		fL := util.LiftContextualizer1V(WithTransaction[types.Unit], db, f)
+	return func(db dbpgx.Db, ctx context.Context, t *testing.T) {
+		fL := util.LiftContextualizer1V(dbpgx.WithTransaction[types.Unit], db, f)
 		fL(ctx, t)
 	}
 }
 
 // RunTestPairs executes a list of TestPair.
-func RunTestPairs(db Db, ctx context.Context, t *testing.T, name string, testPairs []TestPair) {
+func RunTestPairs(db dbpgx.Db, ctx context.Context, t *testing.T, name string, testPairs []TestPair) {
 	t.Run(name, func(t *testing.T) {
 		for _, p := range testPairs {
 			testFunc := func(t *testing.T) {
@@ -65,7 +68,7 @@ func RunTestPairs(db Db, ctx context.Context, t *testing.T, name string, testPai
 // Parallel returns a decorated TransactionalSubtest that calls t.Parallel()
 // just before executing txnlSubtest.
 func Parallel(txnlSubtest TransactionalSubtest) TransactionalSubtest {
-	return func(db Db, ctx context.Context, t *testing.T) {
+	return func(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		t.Parallel()
 		txnlSubtest(db, ctx, t)
 	}
@@ -78,4 +81,26 @@ func CleanupTables(ctx context.Context, tx pgx.Tx, tables ...string) {
 	sql := fmt.Sprintf("TRUNCATE %v", tablesStr)
 	_, err := tx.Exec(ctx, sql)
 	errx.PanicOnError(err)
+}
+
+// DbTester runs txnlSubtest with a clean database.
+func DbTester(
+	t *testing.T,
+	txnlSubtest TransactionalSubtest,
+	connStr string,
+	cleanupTables func(db dbpgx.Db, ctx context.Context),
+) {
+	logrus.SetLevel(logrus.DebugLevel)
+
+	ctx := context.Background()
+
+	pool, err := pgxpool.Connect(ctx, connStr)
+	errx.PanicOnError(err)
+
+	db := dbpgx.Db{pool}
+	defer pool.Close()
+
+	cleanupTables(db, ctx)
+
+	txnlSubtest(db, ctx, t)
 }

@@ -9,13 +9,16 @@ package daftest
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"testing"
 )
 
+var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
+
 func TestDafSuite(t *testing.T) {
 	txnlSubtest := func(db dbpgx.Db, ctx context.Context, t *testing.T) {
-		testPairs := []dbpgx.TestPair{
+		testPairs := []dbpgxtest.TestPair{
 			{Name: "userDafsSubt", Func: userDafsSubt},
 			{Name: "articleDafsSubt", Func: articleDafsSubt},
 			{Name: "commentDafsSubt", Func: commentDafsSubt},
@@ -24,8 +27,8 @@ func TestDafSuite(t *testing.T) {
 			{Name: "tagDafsSubt", Func: tagDafsSubt},
 		}
 
-		dbpgx.RunTestPairs(db, ctx, t, "sequential", testPairs)
+		dbpgxtest.RunTestPairs(db, ctx, t, "sequential", testPairs)
 	}
 
-	testutil.DbTester(t, txnlSubtest)
+	dbpgxtest.DbTester(t, txnlSubtest, connStr, testutil.CleanupAllTables)
 }
