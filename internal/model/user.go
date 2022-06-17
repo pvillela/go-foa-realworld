@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const password_salt_bytes = 16
+const password_salt_size = 16
 
 // User represents a user account in the system
 type User struct {
@@ -19,7 +19,7 @@ type User struct {
 	Username     string
 	Email        string
 	PasswordHash string
-	PasswordSalt string
+	PasswordSalt string // TODO: remove this field from code and databse
 	Bio          *string
 	ImageLink    string `db:"image"`
 	// Below added to daf.RecCtx
@@ -48,14 +48,12 @@ func User_Create(
 	email string,
 	password string,
 ) User {
-	passwordSalt := crypto.RandomString(password_salt_bytes)
-	passwordHash := crypto.ArgonPasswordHash(password + passwordSalt)
+	passwordHash := crypto.ArgonPasswordHash(password)
 
 	return User{
 		Username:     username,
 		Email:        strings.ToLower(email),
 		PasswordHash: passwordHash,
-		PasswordSalt: passwordSalt,
 	}
 }
 
@@ -68,7 +66,7 @@ func (s User) Update(v UserPatch) User {
 	}
 	if v.Password != nil {
 		password := *v.Password
-		s.PasswordSalt = crypto.RandomString(password_salt_bytes)
+		s.PasswordSalt = crypto.RandomString(password_salt_size)
 		s.PasswordHash = crypto.ArgonPasswordHash(password + s.PasswordSalt)
 	}
 	if v.Bio != nil {

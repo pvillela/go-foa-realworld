@@ -7,19 +7,18 @@
 package bf
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/crypto"
+	"github.com/alexedwards/argon2id"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-type UserAuthenticateBfT = func(user model.User, password string, passwordSalt string) bool
+type UserAuthenticateBfT = func(user model.User, password string) bool
 
 var UserAuthenticateBfI UserAuthenticateBfT = func(
 	user model.User,
 	password string,
-	passwordSalt string,
 ) bool {
-	if crypto.ArgonPasswordHash(password+user.PasswordSalt) != user.PasswordHash {
-		return false
-	}
-	return true
+	ok, err := argon2id.ComparePasswordAndHash(password, user.PasswordHash)
+	errx.PanicOnError(err)
+	return ok
 }

@@ -17,4 +17,10 @@ func main() {
 	password := "a fairly lengthy password"
 	hash := crypto.ArgonPasswordHash(password)
 	fmt.Println(hash)
+
+	hash = crypto.ArgonPasswordHash("password_pvillela")
+	fmt.Println(hash)
+
+	hash = crypto.ArgonPasswordHash("password_pvillela")
+	fmt.Println(hash)
 }

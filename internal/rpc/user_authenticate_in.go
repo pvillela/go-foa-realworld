@@ -7,8 +7,10 @@
 package rpc
 
 type UserAuthenticateIn struct {
-	User struct {
-		Email    string
-		Password string
-	}
+	User UserAuthenticateIn0
+}
+
+type UserAuthenticateIn0 struct {
+	Email    string
+	Password string
 }

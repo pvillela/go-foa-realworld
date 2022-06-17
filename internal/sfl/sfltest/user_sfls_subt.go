@@ -21,7 +21,7 @@ import (
 )
 
 ///////////////////
-// Constants
+// Shared constants and data
 
 const (
 	username1 = "pvillela"
@@ -38,6 +38,24 @@ var tokenTimeToLive = func() time.Duration {
 	return dur
 }()
 
+var userSources = []rpc.UserRegisterIn0{
+	{
+		Username: username1,
+		Email:    "foo@bar.com",
+		Password: "password_" + username1,
+	},
+	{
+		Username: username2,
+		Email:    "joe@bloe.com",
+		Password: "password_" + username2,
+	},
+	{
+		Username: username3,
+		Email:    "johndoe@foo.com",
+		Password: "password_" + username3,
+	},
+}
+
 ///////////////////
 // In-memory data
 
@@ -53,37 +71,6 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
 	userRegisterSfl := sfl.UserRegisterSflC(ctxDb, userGenTokenBf)
-
-	userSources := []rpc.UserRegisterIn0{
-		{
-			Username: username1,
-			Email:    "foo@bar.com",
-			Password: "password_" + username1,
-		},
-		{
-			Username: username2,
-			Email:    "joe@bloe.com",
-			Password: "password_" + username2,
-		},
-		{
-			Username: username3,
-			Email:    "johndoe@foo.com",
-			Password: "password_" + username3,
-		},
-	}
-
-	badUserSources := []rpc.UserRegisterIn0{
-		{ // Existing username
-			Username: username1,
-			Email:    "foo@bar.com",
-			Password: "password_" + username1,
-		},
-		{ // Existing email
-			Username: "dkdkddkdk",
-			Email:    "joe@bloe.com",
-			Password: "adsklkfjad7809790",
-		},
-	}
 
 	{
 		msg := "user_register_sfl - valid registration"
@@ -103,6 +90,20 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 	{
 		msg := "user_register_sfl - invalid registration"
+
+		badUserSources := []rpc.UserRegisterIn0{
+			{ // Existing username
+				Username: username1,
+				Email:    "foo@bar.com",
+				Password: "password_" + username1,
+			},
+			{ // Existing email
+				Username: "dkdkddkdk",
+				Email:    "joe@bloe.com",
+				Password: "adsklkfjad7809790",
+			},
+		}
+
 		for i, _ := range badUserSources {
 			userSrc := userSources[i]
 			in := rpc.UserRegisterIn{userSrc}
@@ -117,13 +118,50 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	}
 }
 
-//func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-//	ctxDb := dbpgx.CtxPgx{db.Pool}
-//	ctx, err := ctxDb.SetPool(ctx)
-//	errx.PanicOnError(err)
-//
-//	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
-//	userRegisterSfl := sfl.UserAuthenticateSflC(ctxDb, userGenTokenBf)
-//
-//	for
-//}
+func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	ctxDb := dbpgx.CtxPgx{db.Pool}
+	ctx, err := ctxDb.SetPool(ctx)
+	errx.PanicOnError(err)
+
+	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
+	userAuthenticateSfl := sfl.UserAuthenticateSflC(ctxDb, userGenTokenBf)
+
+	{
+		msg := "user_authenticate_sfl - valid authentication"
+		for i, _ := range userSources {
+			userSrc := userSources[i]
+			in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
+				Email:    userSrc.Email,
+				Password: userSrc.Password,
+			}}
+
+			out, err := userAuthenticateSfl(ctx, web.RequestContext{}, in)
+			errx.PanicOnError(err)
+
+			// Save tokens in memory
+			usertokenMap[out.User.Username] = out.User.Token
+
+			assert.Equal(t, in.User.Email, out.User.Email, msg+" - input Email must match output Email")
+		}
+	}
+
+	{
+		msg := "user_authenticate_sfl - invalid authentication"
+
+		email := "foo@bar.com"
+		password := "abcdefg"
+
+		in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
+			Email:    email,
+			Password: password,
+		}}
+
+		_, err := userAuthenticateSfl(ctx, web.RequestContext{}, in)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := bf.ErrAuthenticationFailed
+		expectedErrMsgPrefix := "user authentication failed with name"
+
+		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
+	}
+}
