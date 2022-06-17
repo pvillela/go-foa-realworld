@@ -110,8 +110,13 @@ var UserCreateExplicitTxDafI UserCreateExplicitTxDafT = func(
 	var recCtx RecCtxUser
 	err := row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
-		if kind == dbpgx.DbErrUniqueViolation {
-			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameDuplicate, user.Username)
+		if kind == dbpgx.DbErrRecordNotFound {
+			return RecCtxUser{}, dbpgx.DbErrUniqueViolation.Make(
+				err,
+				bf.ErrMsgUsernameOrEmailDuplicate,
+				user.Username,
+				user.Email,
+			)
 		}
 		return RecCtxUser{}, kind.Make(err, "")
 	}

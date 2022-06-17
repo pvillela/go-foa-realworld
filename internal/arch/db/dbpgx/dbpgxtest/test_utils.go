@@ -15,7 +15,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/sirupsen/logrus"
 	"strings"
 	"testing"
 )
@@ -90,8 +89,6 @@ func DbTester(
 	connStr string,
 	cleanupTables func(db dbpgx.Db, ctx context.Context),
 ) {
-	logrus.SetLevel(logrus.DebugLevel)
-
 	ctx := context.Background()
 
 	pool, err := pgxpool.Connect(ctx, connStr)

@@ -21,6 +21,7 @@ var (
 	ErrMsgTagNameAlreadyExists       = "tag name %v already exists"
 	ErrMsgTagOnArticleAlreadyExists  = "tag with name %v already exists on article with slug %v"
 	ErrMsgUserEmailNotFound          = "user not found for email %v"
+	ErrMsgUsernameOrEmailDuplicate   = "user with name \"%v\" or email \"%v\" already exists"
 	ErrMsgUsernameDuplicate          = "user with name \"%v\" already exists"
 	ErrMsgUsernameNotFound           = "user not found for username \"%v\""
 	ErrMsgUserAlreadyFollowed        = "user with username \"%v\" was already followed"

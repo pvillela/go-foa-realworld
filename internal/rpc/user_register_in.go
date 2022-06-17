@@ -11,11 +11,13 @@ import (
 )
 
 type UserRegisterIn struct {
-	User struct {
-		Username string
-		Email    string
-		Password string
-	}
+	User UserRegisterIn0
+}
+
+type UserRegisterIn0 struct {
+	Username string
+	Email    string
+	Password string
 }
 
 func (s UserRegisterIn) ToUser() model.User {

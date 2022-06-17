@@ -4,31 +4,29 @@
  * that can be found in the LICENSE file.
  */
 
-package daftest
+package sfltest
 
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
-	"github.com/sirupsen/logrus"
 	"testing"
 )
 
 var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
 
-func TestDafSuite(t *testing.T) {
+func TestSflSuite(t *testing.T) {
 
-	logrus.SetLevel(logrus.DebugLevel)
+	//logrus.SetLevel(logrus.DebugLevel)
 
 	txnlSubtest := func(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		testPairs := []dbpgxtest.TestPair{
-			{Name: "userDafsSubt", Func: userDafsSubt},
-			{Name: "articleDafsSubt", Func: articleDafsSubt},
-			{Name: "commentDafsSubt", Func: commentDafsSubt},
-			{Name: "favoriteDafsSubt", Func: favoriteDafsSubt},
-			{Name: "followingDafsSubt", Func: followingDafsSubt},
-			{Name: "tagDafsSubt", Func: tagDafsSubt},
+			{Name: "userRegisterSflSubt", Func: userRegisterSflSubt},
+			//{Name: "articleSflsSubt", Func: articleSflsSubt},
+			//{Name: "commentSflsSubt", Func: commentSflsSubt},
+			//{Name: "profileSflsSubt", Func: profileSflsSubt},
+			//{Name: "tagSflsSubt", Func: tagSflsSubt},
 		}
 
 		dbpgxtest.RunTestPairs(db, ctx, t, "sequential", testPairs)
