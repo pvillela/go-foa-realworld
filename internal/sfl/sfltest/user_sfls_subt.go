@@ -8,6 +8,8 @@ package sfltest
 
 import (
 	"context"
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
@@ -163,5 +165,99 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
 		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
+	}
+}
+
+func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	ctxDb := dbpgx.CtxPgx{db.Pool}
+	ctx, err := ctxDb.SetPool(ctx)
+	errx.PanicOnError(err)
+
+	userFollowSfl := sfl.UserFollowSflC(ctxDb)
+
+	reqCtx := web.RequestContext{
+		Username: username1,
+		Token:    &jwt.Token{},
+	}
+
+	{
+		msg := "user_follow_sfl - follow a valid user not yet followed"
+
+		followeeUsername := username2
+
+		out, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		errx.PanicOnError(err)
+
+		assert.Equal(t, followeeUsername, out.Profile.Username, msg+" - output profile username must equal followee username")
+		assert.True(t, out.Profile.Following, msg+" - output profile Following attribute must be true")
+	}
+
+	{
+		msg := "user_follow_sfl - follow a valid user already followed"
+
+		followeeUsername := username2
+
+		_, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrUniqueViolation
+		expectedErrMsgPrefix := "DbErrUniqueViolation[user with username"
+
+		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when followee was already followed")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when followee was already followed")
+	}
+
+	{
+		msg := "user_follow_sfl - follow an invalid user"
+
+		followeeUsername := "dkdkdkd"
+
+		_, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[user not found for username"
+
+		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when username is not valid")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username is not valid")
+	}
+}
+
+func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	ctxDb := dbpgx.CtxPgx{db.Pool}
+	ctx, err := ctxDb.SetPool(ctx)
+	errx.PanicOnError(err)
+
+	userGetCurrentSfl := sfl.UserGetCurrentSflC(ctxDb)
+
+	{
+		msg := "user_get_current_sfl - valid username"
+
+		reqCtx := web.RequestContext{
+			Username: username1,
+			Token:    &jwt.Token{},
+		}
+
+		out, err := userGetCurrentSfl(ctx, reqCtx, types.UnitV)
+		errx.PanicOnError(err)
+
+		assert.Equal(t, out.User.Username, reqCtx.Username, msg)
+	}
+
+	{
+		// This test is artificial. In practice, this can never occur due to authentication.
+
+		msg := "user_get_current_sfl - invalid username"
+
+		reqCtx := web.RequestContext{
+			Username: "dkdkdkdkd",
+			Token:    &jwt.Token{},
+		}
+
+		_, err := userGetCurrentSfl(ctx, reqCtx, types.UnitV)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[user not found for username"
+
+		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when username is not valid")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username is not valid")
 	}
 }

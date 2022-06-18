@@ -29,6 +29,8 @@ func TestSflSuite(t *testing.T) {
 		testPairs := []dbpgxtest.TestPair{
 			{Name: "userRegisterSflSubt", Func: userRegisterSflSubt},
 			{Name: "userAuthenticateSflSubt", Func: userAuthenticateSflSubt},
+			{Name: "userFollowSflSubt", Func: userFollowSflSubt},
+			{Name: "userGetCurrentSflSubt", Func: userGetCurrentSflSubt},
 			//{Name: "articleSflsSubt", Func: articleSflsSubt},
 			//{Name: "commentSflsSubt", Func: commentSflsSubt},
 			//{Name: "profileSflsSubt", Func: profileSflsSubt},

@@ -30,16 +30,29 @@ func BcryptPasswordCheck(password string, hash string) bool {
 	return err == nil
 }
 
-// argonParams defines the cost parameters for the argon2id hashing algorithm.
+// argonParamsProd defines the cost parameters for the argon2id hashing algorithm in production.
 // On an intel Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz with 16 GB of memory, hash creation
 // requires ~400-500ms.
-var argonParams = &argon2id.Params{
+var argonParamsProd = &argon2id.Params{
 	Memory:      1 * 1024 * 1024,
 	Iterations:  1,
 	Parallelism: 3,
 	SaltLength:  16,
 	KeyLength:   32,
 }
+
+// argonParamsDev defines the cost parameters for the argon2id hashing algorithm in development.
+// Unlike production, the parameters are chosen for fast execution.
+var argonParamsDev = &argon2id.Params{
+	Memory:      10 * 1024,
+	Iterations:  1,
+	Parallelism: 1,
+	SaltLength:  8,
+	KeyLength:   8,
+}
+
+// argonParams defines the cost parameters for the ArgonPasswordHash function.
+var argonParams = argonParamsDev
 
 func ArgonPasswordHash(password string) string {
 	hash, err := argon2id.CreateHash(password, argonParams)
