@@ -261,3 +261,56 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username is not valid")
 	}
 }
+
+func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	ctxDb := dbpgx.CtxPgx{db.Pool}
+	ctx, err := ctxDb.SetPool(ctx)
+	errx.PanicOnError(err)
+
+	userFollowSfl := sfl.UserUnfollowSflC(ctxDb)
+
+	reqCtx := web.RequestContext{
+		Username: username1,
+		Token:    &jwt.Token{},
+	}
+
+	{
+		msg := "user_unfollow_sfl - unfollow a valid user currently followed"
+
+		followeeUsername := username2
+
+		out, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		errx.PanicOnError(err)
+
+		assert.Equal(t, followeeUsername, out.Profile.Username, msg+" - output profile username must equal followee username")
+		assert.False(t, out.Profile.Following, msg+" - output profile Following attribute must be false")
+	}
+
+	{
+		msg := "user_unfollow_sfl - unfollow a valid user not already followed"
+
+		followeeUsername := username2
+
+		_, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[user with username"
+
+		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when followee was not already followed")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when followee was not already followed")
+	}
+
+	{
+		msg := "user_unfollow_sfl - unfollow an invalid user"
+
+		followeeUsername := "dkdkdkd"
+
+		_, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[user not found for username"
+
+		assert.Equal(t, returnedErrxKind, expectedErrxKind, msg+" - must fail with appropriate error kind when username is not valid")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username is not valid")
+	}
+}

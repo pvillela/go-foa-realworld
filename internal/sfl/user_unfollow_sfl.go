@@ -74,7 +74,7 @@ func UserUnfollowSflC0(
 			return zero, err
 		}
 
-		profileOut := rpc.ProfileOut_FromModel(follower, true)
+		profileOut := rpc.ProfileOut_FromModel(followee, false)
 		return profileOut, nil
 	})
 }
