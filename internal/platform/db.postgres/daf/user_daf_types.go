@@ -29,7 +29,7 @@ type UserGetByNameDafT = func(ctx context.Context, userName string) (model.User,
 type UserGetByNameExplicitTxDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
-	userName string,
+	username string,
 ) (model.User, RecCtxUser, error)
 
 // UserGetByEmailDafT is the type of the stereotype instance for the DAF that

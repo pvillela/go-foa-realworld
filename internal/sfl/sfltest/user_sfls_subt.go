@@ -67,11 +67,6 @@ var userSources = map[string]rpc.UserRegisterIn0{
 }
 
 ///////////////////
-// In-memory data
-
-var usertokenMap = make(map[string]string)
-
-///////////////////
 // Tests
 
 func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
@@ -89,9 +84,6 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			in := rpc.UserRegisterIn{userSrc}
 			out, err := userRegisterSfl(ctx, web.RequestContext{}, in)
 			errx.PanicOnError(err)
-
-			// Save tokens in memory
-			usertokenMap[in.User.Username] = out.User.Token
 
 			assert.Equal(t, in.User.Username, out.User.Username, msg+" - input Username must match output Username")
 			assert.Equal(t, in.User.Email, out.User.Email, msg+" - input Email must match output Email")
@@ -147,9 +139,6 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 			out, err := userAuthenticateSfl(ctx, web.RequestContext{}, in)
 			errx.PanicOnError(err)
-
-			// Save tokens in memory
-			usertokenMap[out.User.Username] = out.User.Token
 
 			assert.Equal(t, in.User.Email, out.User.Email, msg+" - input Email must match output Email")
 		}

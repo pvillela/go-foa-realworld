@@ -12,12 +12,14 @@ import (
 )
 
 type ArticleCreateIn struct {
-	Article struct {
-		Title       string
-		Description string
-		Body        *string   // mandatory
-		TagList     *[]string // optional
-	}
+	Article ArticleCreateIn0
+}
+
+type ArticleCreateIn0 struct {
+	Title       string
+	Description string
+	Body        *string   // mandatory
+	TagList     *[]string // optional
 }
 
 func (in ArticleCreateIn) Validate() error {

@@ -33,7 +33,7 @@ func TestSflSuite(t *testing.T) {
 			{Name: "userGetCurrentSflSubt", Func: userGetCurrentSflSubt},
 			{Name: "userUnfollowSflSubt", Func: userUnfollowSflSubt},
 			{Name: "userUpdateSflSubt", Func: userUpdateSflSubt},
-			//{Name: "articleSflsSubt", Func: articleSflsSubt},
+			{Name: "articleCreateSflSubt", Func: articleCreateSflSubt},
 			//{Name: "commentSflsSubt", Func: commentSflsSubt},
 			//{Name: "profileSflsSubt", Func: profileSflsSubt},
 			//{Name: "tagSflsSubt", Func: tagSflsSubt},

@@ -121,6 +121,10 @@ var TagsAddToArticleDafI TagsAddToArticleDafT = func(
 	names []string,
 	article model.Article,
 ) error {
+	if len(names) == 0 {
+		return nil
+	}
+
 	preSql := `
 	INSERT INTO article_tags (article_id, tag_id)
 	SELECT $1, t.id
