@@ -109,11 +109,16 @@ func ClassifyError(err error) *errx.Kind {
 		return errX.Kind()
 	}
 
+	sqlState := SqlState(err)
+
+	if sqlState == "23505" {
+		return DbErrUniqueViolation
+	}
+
 	if ok := errors.As(err, &pgx.ErrNoRows); ok || pgxscan.NotFound(err) {
 		return DbErrRecordNotFound
 	}
 
-	sqlState := SqlState(err)
 	prefix := sqlState[:2]
 	switch prefix {
 	case "08":
@@ -128,10 +133,6 @@ func ClassifyError(err error) *errx.Kind {
 		return DbErrExternalSystemError
 	case "XX":
 		return DbErrEngineError
-	}
-
-	if sqlState == "23505" {
-		return DbErrUniqueViolation
 	}
 
 	if strings.Contains(err.Error(), "scany") &&

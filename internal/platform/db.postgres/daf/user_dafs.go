@@ -110,8 +110,8 @@ var UserCreateExplicitTxDafI UserCreateExplicitTxDafT = func(
 	var recCtx RecCtxUser
 	err := row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
-		if kind == dbpgx.DbErrRecordNotFound {
-			return RecCtxUser{}, dbpgx.DbErrUniqueViolation.Make(
+		if kind == dbpgx.DbErrUniqueViolation {
+			return RecCtxUser{}, kind.Make(
 				err,
 				bf.ErrMsgUsernameOrEmailDuplicate,
 				user.Username,
@@ -160,10 +160,8 @@ var UserUpdateDafI UserUpdateDafT = func(
 	row := tx.QueryRow(ctx, sql, args...)
 	err = row.Scan(&newRecCtx.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
-		// TODO: need better error classification to distinguish between unique violation and
-		//  concurrency conflict.
-		if kind == dbpgx.DbErrRecordNotFound {
-			return RecCtxUser{}, dbpgx.DbErrUniqueViolation.Make(
+		if kind == dbpgx.DbErrUniqueViolation {
+			return RecCtxUser{}, kind.Make(
 				err,
 				bf.ErrMsgUsernameOrEmailDuplicate,
 				user.Username,
