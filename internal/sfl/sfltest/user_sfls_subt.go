@@ -9,6 +9,7 @@ package sfltest
 import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -20,7 +21,6 @@ import (
 	"time"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -72,7 +72,7 @@ var userSources = map[string]rpc.UserRegisterIn0{
 func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
 	userRegisterSfl := sfl.UserRegisterSflC(ctxDb, userGenTokenBf)
@@ -83,7 +83,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			userSrc := userSources[k]
 			in := rpc.UserRegisterIn{userSrc}
 			out, err := userRegisterSfl(ctx, web.RequestContext{}, in)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 
 			assert.Equal(t, in.User.Username, out.User.Username, msg+" - input Username must match output Username")
 			assert.Equal(t, in.User.Email, out.User.Email, msg+" - input Email must match output Email")
@@ -123,7 +123,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
 	userAuthenticateSfl := sfl.UserAuthenticateSflC(ctxDb, userGenTokenBf)
@@ -138,7 +138,7 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			}}
 
 			out, err := userAuthenticateSfl(ctx, web.RequestContext{}, in)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 
 			assert.Equal(t, in.User.Email, out.User.Email, msg+" - input Email must match output Email")
 		}
@@ -168,7 +168,7 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	userFollowSfl := sfl.UserFollowSflC(ctxDb)
 
@@ -183,7 +183,7 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		followeeUsername := username2
 
 		out, err := userFollowSfl(ctx, reqCtx, followeeUsername)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		assert.Equal(t, followeeUsername, out.Profile.Username, msg+" - output profile username must equal followee username")
 		assert.True(t, out.Profile.Following, msg+" - output profile Following attribute must be true")
@@ -221,7 +221,7 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	userGetCurrentSfl := sfl.UserGetCurrentSflC(ctxDb)
 
@@ -234,7 +234,7 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		out, err := userGetCurrentSfl(ctx, reqCtx, types.UnitV)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		assert.Equal(t, out.User.Username, reqCtx.Username, msg)
 	}
@@ -262,7 +262,7 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	userFollowSfl := sfl.UserUnfollowSflC(ctxDb)
 
@@ -277,7 +277,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		followeeUsername := username2
 
 		out, err := userFollowSfl(ctx, reqCtx, followeeUsername)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		assert.Equal(t, followeeUsername, out.Profile.Username, msg+" - output profile username must equal followee username")
 		assert.False(t, out.Profile.Following, msg+" - output profile Following attribute must be false")
@@ -315,7 +315,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	userUpdateSfl := sfl.UserUpdateSflC(ctxDb)
 
@@ -339,7 +339,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}}
 
 		out, err := userUpdateSfl(ctx, reqCtx, in)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		expected := rpc.UserOut{User: rpc.UserOut0{
 			Email:    *in.User.Email,
@@ -410,7 +410,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}}
 
 		out, err := userUpdateSfl(ctx, reqCtx, in)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		expected := rpc.UserOut{User: rpc.UserOut0{
 			Email:    *in.User.Email,

@@ -57,7 +57,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	for _, csrc := range commentSources {
 		username, slug, comment := makeComment(csrc)
 		err := daf.CommentCreateDafI(ctx, tx, &comment)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		mdb.CommentInsert(username, slug, comment)
 	}
 
@@ -69,7 +69,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		slug := slug1
 
 		returned, err := daf.CommentsGetBySlugDafI(ctx, tx, slug)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		expected := mdb.CommentGetAllBySlug(slug)
 
@@ -82,7 +82,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		slug := slug2
 
 		returned, err := daf.CommentsGetBySlugDafI(ctx, tx, slug)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		expected := mdb.CommentGetAllBySlug(slug)
 
@@ -102,7 +102,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		comment := mdb.CommentGetAllForKey(commentAuthorUsername, slug)[0]
 
 		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		// Sync in-memory data
 		mdb.CommentDelete(currUsername, slug, comment.Id)

@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -49,7 +48,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 	for _, fsrc := range followingSources {
 		followerId, followeeId := makeFollowing(fsrc)
 		followedOn, err := daf.FollowingCreateDafI(ctx, tx, followerId, followeeId)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		mdb.FollowingUpsert(fsrc.followerName, fsrc.followeeName, followedOn)
 	}
 
@@ -63,7 +62,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 		currUserId := mdb.UserGetByName(currUsername).Id
 
 		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		actual := testutil.ArticlePlusesToArticles(returned)
 
@@ -88,7 +87,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 
 		// --> start nested transaction to avoid invalidating main transaction tx
 		subTx, err := tx.Begin(ctx)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		_, err = daf.FollowingCreateDafI(ctx, subTx, followerId, followeeId)
 
@@ -96,7 +95,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 		expErrxKind := dbpgx.DbErrUniqueViolation
 
 		err = subTx.Rollback(ctx)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		// <-- rolled back nested transaction
 
 		assert.Equal(t, expErrxKind, retErrxKind, msg)
@@ -113,12 +112,12 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 		followeeId := following.FolloweeId
 
 		err := daf.FollowingDeleteDafI(ctx, tx, followerId, followeeId)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		mdb.FollowingDelete(followerName, followeeName)
 
 		returned, err := daf.ArticlesFeedDafI(ctx, tx, followerId, nil, nil)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		actual := testutil.ArticlePlusesToArticles(returned)
 

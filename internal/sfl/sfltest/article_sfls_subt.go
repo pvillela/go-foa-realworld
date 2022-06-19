@@ -10,7 +10,6 @@ import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
@@ -77,7 +76,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 	userGetCurrentSfl := sfl.UserGetCurrentSflC(ctxDb)
 
 	{
@@ -99,7 +98,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			}}
 
 			articleOut, err := articleCreateSfl(ctx, reqCtx, in)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 
 			userOut, err := userGetCurrentSfl(ctx, reqCtx, types.UnitV)
 

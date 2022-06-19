@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -46,7 +45,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 		articleId := mdb.ArticleGetBySlug(slug).Id
 		userId := mdb.UserGetByName(username).Id
 		err := daf.FavoriteCreateDafI(ctx, tx, articleId, userId)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		mdb.FavoritePut(username, slug)
 	}
 
@@ -68,7 +67,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 			Offset:      nil,
 		}
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 
 		actual := testutil.ArticlePlusesToArticles(returned)
@@ -101,7 +100,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 			Offset:      nil,
 		}
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 
 		expected := []model.ArticlePlus{}
@@ -121,7 +120,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 		currUserId := mdb.UserGetByName(currUsername).Id
 
 		err := daf.FavoriteDeleteDafI(ctx, tx, articleId, userId)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		mdb.FavoritedDelete(favoritedBy, slug)
 
@@ -133,7 +132,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 			Offset:      nil,
 		}
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:\n", returned)
 
 		actual := testutil.ArticlePlusesToArticles(returned)

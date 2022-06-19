@@ -88,7 +88,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		changedArticle.Body = newBody
 
 		err := daf.ArticleUpdateDafI(ctx, tx, &changedArticle)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		assert.Equal(t, newBody, changedArticle.Body, msg+" - changedArticle.Body must equal newBody")
 		assert.Greater(t, changedArticle.UpdatedAt, existingArticle.UpdatedAt,
@@ -102,7 +102,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 			msg+" - changed article must equal existing article except for Body and ChangedAt")
 
 		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		//criteria := model.ArticleCriteria{
 		//	Tag:         nil,
@@ -112,7 +112,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		//	Offset:      nil,
 		//}
 		//aps, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
-		//errx.PanicOnError(err)
+		//assert.NoError(t, err)
 		//spew.Println("************* aps", aps)
 
 		actual := returned.ToArticle()
@@ -138,7 +138,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 			Offset:      nil,
 		}
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		expected := util.SliceFilter(mdb.ArticlePlusGetAll(author.Username), func(a model.ArticlePlus) bool {
 			return a.Author.Username == author.Username
@@ -158,7 +158,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 			Offset:      nil,
 		}
 		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		var expected []model.ArticlePlus
 
@@ -174,7 +174,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		slug := slug2
 
 		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		expected := mdb.ArticlePlusGet(currUser.Username, slug)
 
@@ -185,7 +185,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		msg := "ArticlesFeedDafI"
 
 		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
-		errx.PanicOnError(err)
+		assert.NoError(t, err)
 
 		var expected []model.ArticlePlus
 

@@ -10,12 +10,12 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/sirupsen/logrus"
 	"testing"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
@@ -71,13 +71,13 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 
 	_, err = cdb.WithTransaction(ctxDb, ctx, func(ctx context.Context) (types.Unit, error) {
 
 		{
 			tx, err := dbpgx.GetCtxTx(ctx)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 			setupUsers(ctx, tx)
 		}
 
@@ -87,7 +87,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			username := username1
 
 			retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, username)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 			util.Ignore(retRecCtx)
 			//fmt.Println("UserGetByNameDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
@@ -118,7 +118,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			expUser, expRecCtx := mdb.UserGet2(username)
 
 			retUser, retRecCtx, err := daf.UserGetByEmailDafI(ctx, expUser.Email)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 			//fmt.Println("UserGetByEmailDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
 
@@ -145,7 +145,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			msg := "Retrieve all users"
 
 			tx, err := dbpgx.GetCtxTx(ctx)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 
 			readManySql := "SELECT * FROM users"
 			pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql, -1, -1)
@@ -169,7 +169,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			user.ImageLink = "https://xyz.com"
 
 			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 			//fmt.Println("\nUserUpdateDaf:", user)
 			//fmt.Println("recCtx from Update:", recCtx)
 
@@ -181,7 +181,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 			{
 				retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
-				errx.PanicOnError(err)
+				assert.NoError(t, err)
 				//fmt.Println("UserGetByNameDaf:", userFromDb)
 				//fmt.Println("recCtx from Read:", recCtx)
 
@@ -199,7 +199,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			user.Bio = util.PointerFromValue("I'm a really famous person.")
 
 			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
-			errx.PanicOnError(err)
+			assert.NoError(t, err)
 			//fmt.Println("\nUserUpdateDaf:", user)
 			//fmt.Println("recCtx from Update:", recCtx)
 
@@ -211,7 +211,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 			{
 				retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
-				errx.PanicOnError(err)
+				assert.NoError(t, err)
 				//fmt.Println("UserGetByNameDaf:", userFromDb)
 				//fmt.Println("recCtx from Read:", recCtx)
 
@@ -223,5 +223,5 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		return types.UnitV, err
 	})
 
-	errx.PanicOnError(err)
+	assert.NoError(t, err)
 }
