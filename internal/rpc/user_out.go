@@ -9,10 +9,10 @@ package rpc
 import "github.com/pvillela/go-foa-realworld/internal/model"
 
 type UserOut struct {
-	User userOut0 `json:"user"`
+	User UserOut0 `json:"user"`
 }
 
-type userOut0 = struct {
+type UserOut0 = struct {
 	Email    string  `json:"email"`
 	Token    string  `json:"token"`
 	Username string  `json:"username"`
@@ -22,7 +22,7 @@ type userOut0 = struct {
 
 func UserOut_FromModel(user model.User, token string) UserOut {
 	return UserOut{
-		User: userOut0{
+		User: UserOut0{
 			Email:    user.Email,
 			Token:    token,
 			Username: user.Username,

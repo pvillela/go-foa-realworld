@@ -160,11 +160,15 @@ var UserUpdateDafI UserUpdateDafT = func(
 	row := tx.QueryRow(ctx, sql, args...)
 	err = row.Scan(&newRecCtx.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
-		if kind == dbpgx.DbErrUniqueViolation {
-			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameDuplicate, user.Username)
-		}
+		// TODO: need better error classification to distinguish between unique violation and
+		//  concurrency conflict.
 		if kind == dbpgx.DbErrRecordNotFound {
-			return RecCtxUser{}, kind.Make(err, bf.ErrMsgUsernameNotFound, user.Username)
+			return RecCtxUser{}, dbpgx.DbErrUniqueViolation.Make(
+				err,
+				bf.ErrMsgUsernameOrEmailDuplicate,
+				user.Username,
+				user.Email,
+			)
 		}
 		return RecCtxUser{}, kind.Make(err, "")
 	}
