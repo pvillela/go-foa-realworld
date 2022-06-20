@@ -10,12 +10,12 @@ import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
+	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -55,20 +55,6 @@ var authorsAndArticles = []AuthorAndArticle{
 }
 
 ///////////////////
-// Helper
-
-func profileFromUserOut(out rpc.UserOut, userid uint) model.Profile {
-	out0 := out.User
-	return model.Profile{
-		UserId:    userid,
-		Username:  out0.Username,
-		Bio:       out0.Bio,
-		Image:     out0.Image,
-		Following: false,
-	}
-}
-
-///////////////////
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
@@ -77,7 +63,6 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
-	userGetCurrentSfl := sfl.UserGetCurrentSflC(ctxDb)
 
 	{
 		msg := "article_create_sfl - valid article"
@@ -100,12 +85,13 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			articleOut, err := articleCreateSfl(ctx, reqCtx, in)
 			assert.NoError(t, err)
 
-			userOut, err := userGetCurrentSfl(ctx, reqCtx, types.UnitV)
+			user, err := testutil.UserGetByName(db, ctx, authorname)
+			assert.NoError(t, err)
 
 			expected := rpc.ArticleOut{Article: model.ArticlePlus{
 				Id:             articleOut.Article.Id, // not independently checked
 				Slug:           util.Slug(article.Title),
-				Author:         profileFromUserOut(userOut, articleOut.Article.Author.UserId),
+				Author:         model.Profile_FromUser(user, false),
 				Title:          article.Title,
 				Description:    article.Description,
 				Body:           article.Body,
