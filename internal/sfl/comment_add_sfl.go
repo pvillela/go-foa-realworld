@@ -30,7 +30,7 @@ type CommentAddSflT = func(
 func CommentAddSflC(
 	db dbpgx.Db,
 ) CommentAddSflT {
-	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	articleAndUserGetFl := fl.ArticleAndUserGetFl
 	commentCreateDaf := daf.CommentCreateDaf
 	return CommentAddSflC0(
 		db,

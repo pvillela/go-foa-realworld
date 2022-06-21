@@ -31,7 +31,7 @@ type CommentDeleteSflT = func(
 func CommentDeleteSflC(
 	db dbpgx.Db,
 ) CommentDeleteSflT {
-	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	articleAndUserGetFl := fl.ArticleAndUserGetFl
 	commentDeleteDaf := daf.CommentDeleteDaf
 	return CommentDeleteSflC0(
 		db,

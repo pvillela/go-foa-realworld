@@ -30,7 +30,7 @@ type ArticleFavoriteSflT = func(
 func ArticleFavoriteSflC(
 	db dbpgx.Db,
 ) ArticleFavoriteSflT {
-	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	articleAndUserGetFl := fl.ArticleAndUserGetFl
 	favoriteCreateDaf := daf.FavoriteCreateDaf
 	articleUpdateDaf := daf.ArticleUpdateDaf
 	return ArticleFavoriteSflC0(

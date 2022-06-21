@@ -28,7 +28,7 @@ type ArticleGetSflT = func(
 func ArticleGetSflC(
 	db dbpgx.Db,
 ) ArticleGetSflT {
-	articleAndUserGetFl := fl.ArticleAndUserGetFlI
+	articleAndUserGetFl := fl.ArticleAndUserGetFl
 	return ArticleGetSflC0(
 		db,
 		articleAndUserGetFl,

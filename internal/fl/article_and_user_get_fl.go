@@ -23,9 +23,9 @@ type ArticleAndUserGetFlT = func(
 	username string,
 ) (model.ArticlePlus, model.User, error)
 
-// ArticleAndUserGetFlI implements a stereotype instance of type
+// ArticleAndUserGetFl implements a stereotype instance of type
 // ArticleAndUserGetFlT.
-var ArticleAndUserGetFlI ArticleAndUserGetFlT = func(
+var ArticleAndUserGetFl ArticleAndUserGetFlT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,

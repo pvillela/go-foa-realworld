@@ -25,7 +25,7 @@ type ArticleDeleteSflT = func(ctx context.Context, reqCtx web.RequestContext, sl
 func ArticleDeleteSflC(
 	db dbpgx.Db,
 ) ArticleDeleteSflT {
-	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFlI
+	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFl
 	articleDeleteDaf := daf.ArticleDeleteDaf
 	return ArticleDeleteSflC0(
 		db,

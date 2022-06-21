@@ -32,7 +32,7 @@ type ArticleUpdateSflT = func(
 func ArticleUpdateSflC(
 	db dbpgx.Db,
 ) ArticleUpdateSflT {
-	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFlI
+	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFl
 	articleUpdateDaf := daf.ArticleUpdateDaf
 	return ArticleUpdateSflC0(
 		db,

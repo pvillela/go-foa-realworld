@@ -22,15 +22,15 @@ type ArticleGetAndCheckOwnerFlT = func(
 	username string,
 ) (model.ArticlePlus, model.User, error)
 
-// ArticleGetAndCheckOwnerFlI implements a stereotype instance of type
+// ArticleGetAndCheckOwnerFl implements a stereotype instance of type
 // ArticleGetAndCheckOwnerFlT.
-var ArticleGetAndCheckOwnerFlI ArticleGetAndCheckOwnerFlT = func(
+var ArticleGetAndCheckOwnerFl ArticleGetAndCheckOwnerFlT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
 	username string,
 ) (model.ArticlePlus, model.User, error) {
-	articleAndUserGetFl := ArticleAndUserGetFlI
+	articleAndUserGetFl := ArticleAndUserGetFl
 	articleCheckOwnerBf := bf.ArticleCheckOwnerBf
 	return ArticleGetAndCheckOwnerFlC0(
 		articleAndUserGetFl,
