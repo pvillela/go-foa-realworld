@@ -46,7 +46,7 @@ func TestWithTransaction(
 	f DafSubtest,
 ) TransactionalSubtest {
 	return func(db dbpgx.Db, ctx context.Context, t *testing.T) {
-		fL := util.LiftContextualizer1V(dbpgx.WithTransaction[types.Unit], db, f)
+		fL := util.Contextualize1V(dbpgx.WithTransaction[types.Unit], db, f)
 		fL(ctx, t)
 	}
 }

@@ -62,10 +62,10 @@ func SflWithTransaction[R, S, T any](
 	db Db,
 	block func(ctx context.Context, tx pgx.Tx, reqCtx R, in S) (T, error),
 ) func(ctx context.Context, reqCtx R, in S) (T, error) {
-	return util.LiftContextualizer2(WithTransaction[T], db, block)
+	return util.Contextualize2(WithTransaction[T], db, block)
 }
 
-// Implementation from scratch of above, without use of util.LiftContextualizer2
+// Implementation from scratch of above, without use of util.Contextualize2
 func sflWithTransaction0[R, S, T any](
 	db Db,
 	block func(ctx context.Context, tx pgx.Tx, reqCtx R, in S) (T, error),

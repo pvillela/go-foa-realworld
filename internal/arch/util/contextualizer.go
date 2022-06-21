@@ -31,24 +31,21 @@ type Contextualizer[CC, ERC, IRC, T any] func(
 	block func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error),
 ) (T, error)
 
-// LiftContextualizer returns a function that is the partial application of f
+// Contextualize returns a function that is the partial application of f
 // within the execution context provided by contextualizer.
-func LiftContextualizer[CC, ERC, IRC, T any](
+func Contextualize[CC, ERC, IRC, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
 	f func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error),
 ) func(externalRuntimeCtx ERC) (T, error) {
 	return func(externalRuntimeCtx ERC) (T, error) {
-		block := func(externalRuntimeCtx ERC, internalRuntimeCtx IRC) (T, error) {
-			return f(externalRuntimeCtx, internalRuntimeCtx)
-		}
-		return contextualizer(configCtx, externalRuntimeCtx, block)
+		return contextualizer(configCtx, externalRuntimeCtx, f)
 	}
 }
 
-// LiftContextualizer1 returns a function that is the partial application of f
+// Contextualize1 returns a function that is the partial application of f
 // within the execution context provided by contextualizer.
-func LiftContextualizer1[CC, ERC, IRC, S1, T any](
+func Contextualize1[CC, ERC, IRC, S1, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
 	f func(externalRuntimeCtx ERC, internalRuntimeCtx IRC, s1 S1) (T, error),
@@ -61,9 +58,9 @@ func LiftContextualizer1[CC, ERC, IRC, S1, T any](
 	}
 }
 
-// LiftContextualizer2 returns a function that is the partial application of f
+// Contextualize2 returns a function that is the partial application of f
 // within the execution context provided by contextualizer.
-func LiftContextualizer2[CC, ERC, IRC, S1, S2, T any](
+func Contextualize2[CC, ERC, IRC, S1, S2, T any](
 	contextualizer Contextualizer[CC, ERC, IRC, T],
 	configCtx CC,
 	f func(externalRuntimeCtx ERC, internalRuntimeCtx IRC, s1 S1, s2 S2) (T, error),
@@ -76,9 +73,9 @@ func LiftContextualizer2[CC, ERC, IRC, S1, S2, T any](
 	}
 }
 
-// LiftContextualizer1V returns a function that is the partial application of f
+// Contextualize1V returns a function that is the partial application of f
 // within the execution context provided by contextualizer.
-func LiftContextualizer1V[CC, ERC, IRC, S1 any](
+func Contextualize1V[CC, ERC, IRC, S1 any](
 	contextualizer Contextualizer[CC, ERC, IRC, types.Unit],
 	configCtx CC,
 	f func(externalRuntimeCtx ERC, internalRuntimeCtx IRC, s1 S1),
