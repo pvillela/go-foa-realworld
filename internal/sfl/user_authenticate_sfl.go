@@ -30,7 +30,7 @@ func UserAuthenticateSflC(
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserAuthenticateSflT {
 	userGetByEmailDaf := daf.UserGetByEmailDaf
-	userAuthenticateBf := bf.UserAuthenticateBfI
+	userAuthenticateBf := bf.UserAuthenticateBf
 	return UserAuthenticateSflC0(
 		ctxDb,
 		userGetByEmailDaf,

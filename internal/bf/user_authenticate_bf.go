@@ -13,7 +13,7 @@ import (
 
 type UserAuthenticateBfT = func(user model.User, password string) bool
 
-var UserAuthenticateBfI UserAuthenticateBfT = func(
+var UserAuthenticateBf UserAuthenticateBfT = func(
 	user model.User,
 	password string,
 ) bool {

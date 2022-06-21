@@ -12,7 +12,7 @@ import (
 
 type ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) error
 
-var ArticleCheckOwnerBfI ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) error {
+var ArticleCheckOwnerBf ArticleCheckOwnerBfT = func(article model.ArticlePlus, username string) error {
 	if article.Author.Username != username {
 		return ErrUnauthorizedUser.Make(nil, ErrMsgUnauthorizedUser, username)
 	}

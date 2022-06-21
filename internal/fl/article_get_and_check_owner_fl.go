@@ -31,7 +31,7 @@ var ArticleGetAndCheckOwnerFlI ArticleGetAndCheckOwnerFlT = func(
 	username string,
 ) (model.ArticlePlus, model.User, error) {
 	articleAndUserGetFl := ArticleAndUserGetFlI
-	articleCheckOwnerBf := bf.ArticleCheckOwnerBfI
+	articleCheckOwnerBf := bf.ArticleCheckOwnerBf
 	return ArticleGetAndCheckOwnerFlC0(
 		articleAndUserGetFl,
 		articleCheckOwnerBf,
