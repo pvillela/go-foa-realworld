@@ -13,9 +13,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 )
 
-// FavoriteCreateDafI is the instance of the DAF stereotype that
+// FavoriteCreateDaf is the instance of the DAF stereotype that
 // associates an article with a user that favors it.
-var FavoriteCreateDafI FavoriteCreateDafT = func(
+var FavoriteCreateDaf FavoriteCreateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	articleId uint,
@@ -36,9 +36,9 @@ var FavoriteCreateDafI FavoriteCreateDafT = func(
 	return nil
 }
 
-// FavoriteDeleteDafI is the instance of the DAF stereotype that
+// FavoriteDeleteDaf is the instance of the DAF stereotype that
 // disaassociates an article from a user that favors it.
-var FavoriteDeleteDafI FavoriteDeleteDafT = func(
+var FavoriteDeleteDaf FavoriteDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	articleId uint,

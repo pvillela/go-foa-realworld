@@ -27,8 +27,8 @@ type UserUpdateSflT = func(
 func UserUpdateSflC(
 	ctxDb cdb.CtxDb,
 ) UserUpdateSflT {
-	userGetByNameDaf := daf.UserGetByNameDafI
-	userUpdateDaf := daf.UserUpdateDafI
+	userGetByNameDaf := daf.UserGetByNameDaf
+	userUpdateDaf := daf.UserUpdateDaf
 	return UserUpdateSflC0(
 		ctxDb,
 		userGetByNameDaf,

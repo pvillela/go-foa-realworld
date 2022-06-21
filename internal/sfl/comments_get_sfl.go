@@ -28,7 +28,7 @@ type CommentsGetSflT = func(
 func CommentsGetSflC(
 	db dbpgx.Db,
 ) CommentsGetSflT {
-	commentsGetBySlugDaf := daf.CommentsGetBySlugDafI
+	commentsGetBySlugDaf := daf.CommentsGetBySlugDaf
 	return CommentsGetSflC0(
 		db,
 		commentsGetBySlugDaf,

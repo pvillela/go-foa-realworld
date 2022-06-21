@@ -35,15 +35,15 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 	errx.PanicOnError(err)
 
 	for i, _ := range tags {
-		err := daf.TagCreateDafI(ctx, tx, &tags[i])
+		err := daf.TagCreateDaf(ctx, tx, &tags[i])
 		errx.PanicOnError(err)
 		fmt.Println("tag from Create:", tags[i], "\n")
 
-		err = daf.TagAddToArticleDafI(ctx, tx, tags[i], articles[1])
+		err = daf.TagAddToArticleDaf(ctx, tx, tags[i], articles[1])
 		errx.PanicOnError(err)
 	}
 
-	tagsFromDb, err := daf.TagsGetAllDafI(ctx, tx)
+	tagsFromDb, err := daf.TagsGetAllDaf(ctx, tx)
 	fmt.Println("Tags from database:", tagsFromDb, "\n")
 
 	// Try to insert same tag again
@@ -53,7 +53,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 		tx, err = db.BeginTx(ctx)
 		errx.PanicOnError(err)
 
-		err = daf.TagCreateDafI(ctx, tx, &tags[0])
+		err = daf.TagCreateDaf(ctx, tx, &tags[0])
 		fmt.Println("Duplicate tag insert:", err)
 		fmt.Printf("pgconn.PgError: %+v", *errors.Unwrap(err).(*pgconn.PgError))
 		fmt.Println("SqlState(err):", dbpgx.SqlState(err), "\n")
@@ -74,21 +74,21 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 	}
 
 	{
 		// Add some more tags to database.
-		err = daf.TagsAddNewDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"})
+		err = daf.TagsAddNewDaf(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"})
 		errx.PanicOnError(err)
 
-		tagsFromDb, err = daf.TagsGetAllDafI(ctx, tx)
+		tagsFromDb, err = daf.TagsGetAllDaf(ctx, tx)
 		fmt.Println("Tags from database:", tagsFromDb, "\n")
 
 		// Add the new tags to an article.
-		err = daf.TagsAddToArticleDafI(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"}, articles[1])
+		err = daf.TagsAddToArticleDaf(ctx, tx, []string{"ZZZ", "FOOTAG", "WWW"}, articles[1])
 		errx.PanicOnError(err)
 	}
 
@@ -100,7 +100,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 	}
@@ -113,13 +113,13 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 			Limit:       nil,
 			Offset:      nil,
 		}
-		articlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		articlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 		errx.PanicOnError(err)
 		fmt.Println("\narticlesListDaf - by tag:", articlePluses, "\n")
 	}
 
 	{
-		articleFromDb, err := daf.ArticleGetBySlugDafI(ctx, tx, currUserId, articles[1].Slug)
+		articleFromDb, err := daf.ArticleGetBySlugDaf(ctx, tx, currUserId, articles[1].Slug)
 		errx.PanicOnError(err)
 		fmt.Println("\nArticleGetBySlugDaf:", articleFromDb, "\n")
 	}

@@ -31,7 +31,7 @@ func CommentAddSflC(
 	db dbpgx.Db,
 ) CommentAddSflT {
 	articleAndUserGetFl := fl.ArticleAndUserGetFlI
-	commentCreateDaf := daf.CommentCreateDafI
+	commentCreateDaf := daf.CommentCreateDaf
 	return CommentAddSflC0(
 		db,
 		articleAndUserGetFl,

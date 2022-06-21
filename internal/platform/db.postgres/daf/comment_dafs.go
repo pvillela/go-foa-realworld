@@ -14,9 +14,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
-// CommentCreateDafI implements a stereotype instance of type
+// CommentCreateDaf implements a stereotype instance of type
 // CommentCreateDafT.
-var CommentCreateDafI CommentCreateDafT = func(
+var CommentCreateDaf CommentCreateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	comment *model.Comment,
@@ -40,9 +40,9 @@ var CommentCreateDafI CommentCreateDafT = func(
 	return nil
 }
 
-// CommentsGetBySlugDafI implements a stereotype instance of type
+// CommentsGetBySlugDaf implements a stereotype instance of type
 // CommentGetBySlugDafT.
-var CommentsGetBySlugDafI CommentsGetBySlugDafT = func(
+var CommentsGetBySlugDaf CommentsGetBySlugDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
@@ -58,9 +58,9 @@ var CommentsGetBySlugDafI CommentsGetBySlugDafT = func(
 	return comments, err
 }
 
-// CommentDeleteDafI implements a stereotype instance of type
+// CommentDeleteDaf implements a stereotype instance of type
 // CommentDeleteDafT.
-var CommentDeleteDafI CommentDeleteDafT = func(
+var CommentDeleteDaf CommentDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	commentId uint,

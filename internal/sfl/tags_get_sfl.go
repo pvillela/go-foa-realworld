@@ -25,7 +25,7 @@ type TagsGetSflT = func(ctx context.Context, reqCtx web.RequestContext, _ types.
 func TagsGetSflC(
 	db dbpgx.Db,
 ) TagsGetSflT {
-	tagsGetAllDaf := daf.TagsGetAllDafI
+	tagsGetAllDaf := daf.TagsGetAllDaf
 	return TagsGetSflC0(
 		db,
 		tagsGetAllDaf,

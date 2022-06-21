@@ -30,8 +30,8 @@ type UserUnfollowSflT = func(
 func UserUnfollowSflC(
 	ctxDb cdb.CtxDb,
 ) UserFollowSflT {
-	userGetByNameDaf := daf.UserGetByNameDafI
-	followingDeleteDaf := daf.FollowingDeleteDafI
+	userGetByNameDaf := daf.UserGetByNameDaf
+	followingDeleteDaf := daf.FollowingDeleteDaf
 	return UserUnfollowSflC0(
 		ctxDb,
 		userGetByNameDaf,

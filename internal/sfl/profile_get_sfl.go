@@ -31,8 +31,8 @@ type ProfileGetSflT = func(
 func ProfileGetSflC(
 	db dbpgx.Db,
 ) ProfileGetSflT {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
-	followingGetDaf := daf.FollowingGetDafI
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDaf
+	followingGetDaf := daf.FollowingGetDaf
 	return ProfileGetSflC0(
 		db,
 		userGetByNameDaf,

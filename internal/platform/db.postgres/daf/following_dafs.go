@@ -16,9 +16,9 @@ import (
 	"time"
 )
 
-// FollowingCreateDafI is the instance of the DAF stereotype that
+// FollowingCreateDaf is the instance of the DAF stereotype that
 // associates a follower with a followee.
-var FollowingCreateDafI FollowingCreateDafT = func(
+var FollowingCreateDaf FollowingCreateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	followerId uint,
@@ -44,10 +44,10 @@ var FollowingCreateDafI FollowingCreateDafT = func(
 	return followedOn, nil
 }
 
-// FollowingGetDafI implements a stereotype instance of type
+// FollowingGetDaf implements a stereotype instance of type
 // FollowingGetDafT.
 // Returns the association record if found or a zero model.Following otherwise.
-var FollowingGetDafI FollowingGetDafT = func(
+var FollowingGetDaf FollowingGetDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	followerId uint,
@@ -82,9 +82,9 @@ var FollowingGetDafI FollowingGetDafT = func(
 	return following, nil
 }
 
-// FollowingDeleteDafI is the instance of the DAF stereotype that
+// FollowingDeleteDaf is the instance of the DAF stereotype that
 // disaassociates a follower from a followee.
-var FollowingDeleteDafI FollowingDeleteDafT = func(
+var FollowingDeleteDaf FollowingDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	followerId uint,

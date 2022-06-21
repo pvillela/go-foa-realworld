@@ -56,7 +56,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 
 	for _, csrc := range commentSources {
 		username, slug, comment := makeComment(csrc)
-		err := daf.CommentCreateDafI(ctx, tx, &comment)
+		err := daf.CommentCreateDaf(ctx, tx, &comment)
 		assert.NoError(t, err)
 		mdb.CommentInsert(username, slug, comment)
 	}
@@ -68,7 +68,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 
 		slug := slug1
 
-		returned, err := daf.CommentsGetBySlugDafI(ctx, tx, slug)
+		returned, err := daf.CommentsGetBySlugDaf(ctx, tx, slug)
 		assert.NoError(t, err)
 
 		expected := mdb.CommentGetAllBySlug(slug)
@@ -81,7 +81,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 
 		slug := slug2
 
-		returned, err := daf.CommentsGetBySlugDafI(ctx, tx, slug)
+		returned, err := daf.CommentsGetBySlugDaf(ctx, tx, slug)
 		assert.NoError(t, err)
 
 		expected := mdb.CommentGetAllBySlug(slug)
@@ -101,7 +101,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		currUser := mdb.UserGetByName(currUsername)
 		comment := mdb.CommentGetAllForKey(commentAuthorUsername, slug)[0]
 
-		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
+		err := daf.CommentDeleteDaf(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
 		assert.NoError(t, err)
 
 		// Sync in-memory data
@@ -125,7 +125,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		currUser := mdb.UserGetByName(currUsername)
 		comment := mdb.CommentGetAllForKey(commentAuthorUsername, slug)[0]
 
-		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
+		err := daf.CommentDeleteDaf(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
 		returnedErrxKind := dbpgx.ClassifyError(err)
 		expectedErrxKind := dbpgx.DbErrRecordNotFound
 

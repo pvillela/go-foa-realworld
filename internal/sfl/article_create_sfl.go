@@ -30,10 +30,10 @@ type ArticleCreateSflT = func(
 func ArticleCreateSflC(
 	db dbpgx.Db,
 ) ArticleCreateSflT {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
-	articleCreateDaf := daf.ArticleCreateDafI
-	tagsAddNewDaf := daf.TagsAddNewDafI
-	tagsAddToArticleDaf := daf.TagsAddToArticleDafI
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDaf
+	articleCreateDaf := daf.ArticleCreateDaf
+	tagsAddNewDaf := daf.TagsAddNewDaf
+	tagsAddToArticleDaf := daf.TagsAddToArticleDaf
 	return ArticleCreateSflC0(
 		db,
 		userGetByNameDaf,

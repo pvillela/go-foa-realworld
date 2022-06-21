@@ -29,7 +29,7 @@ func UserRegisterSflC(
 	ctxDb cdb.CtxDb,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
-	userCreateDaf := daf.UserCreateDafI
+	userCreateDaf := daf.UserCreateDaf
 	return UserRegisterSflC0(
 		ctxDb,
 		userCreateDaf,

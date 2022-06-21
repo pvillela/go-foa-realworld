@@ -58,7 +58,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 
 	for i, _ := range users {
 		user := users[i]
-		recCtx, err := daf.UserCreateExplicitTxDafI(ctx, tx, &user)
+		recCtx, err := daf.UserCreateExplicitTxDaf(ctx, tx, &user)
 		errx.PanicOnError(err)
 		//_, _ = spew.Printf("user from Create: %v\n", user)
 		logrus.Debug("user from Create:", user)
@@ -82,11 +82,11 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		{
-			msg := "UserGetByNameDafI with valid username"
+			msg := "UserGetByNameDaf with valid username"
 
 			username := username1
 
-			retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, username)
+			retUser, retRecCtx, err := daf.UserGetByNameDaf(ctx, username)
 			assert.NoError(t, err)
 			util.Ignore(retRecCtx)
 			//fmt.Println("UserGetByNameDaf:", userFromDb)
@@ -99,11 +99,11 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		{
-			msg := "UserGetByNameDafI with invalid username"
+			msg := "UserGetByNameDaf with invalid username"
 
 			username := "xxxxxx"
 
-			_, _, err := daf.UserGetByNameDafI(ctx, username)
+			_, _, err := daf.UserGetByNameDaf(ctx, username)
 			returnedErrxKind := dbpgx.ClassifyError(err)
 			expectedErrxKind := dbpgx.DbErrRecordNotFound
 
@@ -111,13 +111,13 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		{
-			msg := "UserGetByEmailDafI with valid email"
+			msg := "UserGetByEmailDaf with valid email"
 
 			username := username2
 
 			expUser, expRecCtx := mdb.UserGet2(username)
 
-			retUser, retRecCtx, err := daf.UserGetByEmailDafI(ctx, expUser.Email)
+			retUser, retRecCtx, err := daf.UserGetByEmailDaf(ctx, expUser.Email)
 			assert.NoError(t, err)
 			//fmt.Println("UserGetByEmailDaf:", userFromDb)
 			//fmt.Println("recCtx from Read:", recCtx)
@@ -127,11 +127,11 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		{
-			msg := "UserGetByEmailDafI with invalid email"
+			msg := "UserGetByEmailDaf with invalid email"
 
 			email := "xxxxxx@xxx.xx"
 
-			_, _, err := daf.UserGetByEmailDafI(ctx, email)
+			_, _, err := daf.UserGetByEmailDaf(ctx, email)
 			//fmt.Println("UserGetByNameDaf with invalid username")
 			//fmt.Println("Error:", err)
 
@@ -161,14 +161,14 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		{
-			msg := "UserUpdateDafI - image"
+			msg := "UserUpdateDaf - image"
 
 			username := username1
 
 			user, recCtx := mdb.UserGet2(username)
 			user.ImageLink = "https://xyz.com"
 
-			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
+			updRecCtx, err := daf.UserUpdateDaf(ctx, user, recCtx)
 			assert.NoError(t, err)
 			//fmt.Println("\nUserUpdateDaf:", user)
 			//fmt.Println("recCtx from Update:", recCtx)
@@ -180,7 +180,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			mdb.UserUpsert2(user, updRecCtx)
 
 			{
-				retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
+				retUser, retRecCtx, err := daf.UserGetByNameDaf(ctx, user.Username)
 				assert.NoError(t, err)
 				//fmt.Println("UserGetByNameDaf:", userFromDb)
 				//fmt.Println("recCtx from Read:", recCtx)
@@ -191,14 +191,14 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		}
 
 		{
-			msg := "UserUpdateDafI - bio"
+			msg := "UserUpdateDaf - bio"
 
 			username := username2
 
 			user, recCtx := mdb.UserGet2(username)
 			user.Bio = util.PointerFromValue("I'm a really famous person.")
 
-			updRecCtx, err := daf.UserUpdateDafI(ctx, user, recCtx)
+			updRecCtx, err := daf.UserUpdateDaf(ctx, user, recCtx)
 			assert.NoError(t, err)
 			//fmt.Println("\nUserUpdateDaf:", user)
 			//fmt.Println("recCtx from Update:", recCtx)
@@ -210,7 +210,7 @@ func userDafsSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			mdb.UserUpsert2(user, updRecCtx)
 
 			{
-				retUser, retRecCtx, err := daf.UserGetByNameDafI(ctx, user.Username)
+				retUser, retRecCtx, err := daf.UserGetByNameDaf(ctx, user.Username)
 				assert.NoError(t, err)
 				//fmt.Println("UserGetByNameDaf:", userFromDb)
 				//fmt.Println("recCtx from Read:", recCtx)

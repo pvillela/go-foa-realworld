@@ -38,14 +38,14 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	for i, _ := range comments {
-		err := daf.CommentCreateDafI(ctx, tx, &comments[i])
+		err := daf.CommentCreateDaf(ctx, tx, &comments[i])
 		errx.PanicOnError(err)
 	}
 
 	{
-		commentsFromDb, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
+		commentsFromDb, err := daf.CommentsGetBySlugDaf(ctx, tx, articles[0].Slug)
 		errx.PanicOnError(err)
-		_, _ = spew.Printf("\nCommentsGetBySlugDafI: %v\n", commentsFromDb)
+		_, _ = spew.Printf("\nCommentsGetBySlugDaf: %v\n", commentsFromDb)
 	}
 
 	{
@@ -58,7 +58,7 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 			currUser.Id,
 			comment.AuthorId,
 		)
-		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
+		err := daf.CommentDeleteDaf(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
 		errx.PanicOnError(err)
 
 		/////////////
@@ -66,9 +66,9 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 		comments = comments[1:]
 
 		{
-			commentsFromDb, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
+			commentsFromDb, err := daf.CommentsGetBySlugDaf(ctx, tx, articles[0].Slug)
 			errx.PanicOnError(err)
-			_, _ = spew.Printf("\nCommentsGetBySlugDafI: %v\n", commentsFromDb)
+			_, _ = spew.Printf("\nCommentsGetBySlugDaf: %v\n", commentsFromDb)
 
 			commentsFromDb = commentsGetAll(ctx, tx)
 			_, _ = spew.Printf("\ncommentsGetAll: %v\n", commentsFromDb)
@@ -85,13 +85,13 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 			currUser.Id,
 			comment.AuthorId,
 		)
-		err := daf.CommentDeleteDafI(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
+		err := daf.CommentDeleteDaf(ctx, tx, comment.Id, comment.ArticleId, currUser.Id)
 		fmt.Println("err:", err)
 
 		{
-			commentsFromDb, err := daf.CommentsGetBySlugDafI(ctx, tx, articles[0].Slug)
+			commentsFromDb, err := daf.CommentsGetBySlugDaf(ctx, tx, articles[0].Slug)
 			errx.PanicOnError(err)
-			_, _ = spew.Printf("\nCommentsGetBySlugDafI: %v\n", commentsFromDb)
+			_, _ = spew.Printf("\nCommentsGetBySlugDaf: %v\n", commentsFromDb)
 
 			commentsFromDb = commentsGetAll(ctx, tx)
 			_, _ = spew.Printf("\ncommentsGetAll: %v\n", commentsFromDb)

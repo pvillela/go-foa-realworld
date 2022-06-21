@@ -31,8 +31,8 @@ var ArticleAndUserGetFlI ArticleAndUserGetFlT = func(
 	slug string,
 	username string,
 ) (model.ArticlePlus, model.User, error) {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
-	articleGetBySlugDaf := daf.ArticleGetBySlugDafI
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDaf
+	articleGetBySlugDaf := daf.ArticleGetBySlugDaf
 	return ArticleAndUserGetFlC0(
 		userGetByNameDaf,
 		articleGetBySlugDaf,

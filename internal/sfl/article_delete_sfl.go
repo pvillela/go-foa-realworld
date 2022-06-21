@@ -26,7 +26,7 @@ func ArticleDeleteSflC(
 	db dbpgx.Db,
 ) ArticleDeleteSflT {
 	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFlI
-	articleDeleteDaf := daf.ArticleDeleteDafI
+	articleDeleteDaf := daf.ArticleDeleteDaf
 	return ArticleDeleteSflC0(
 		db,
 		articleGetAndCheckOwnerFl,

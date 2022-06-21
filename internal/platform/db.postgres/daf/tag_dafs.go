@@ -17,18 +17,18 @@ import (
 	"strings"
 )
 
-// TagsGetAllDafI implements a stereotype instance of type
+// TagsGetAllDaf implements a stereotype instance of type
 // TagsGetAllDafT.
-var TagsGetAllDafI TagsGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]model.Tag, error) {
+var TagsGetAllDaf TagsGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]model.Tag, error) {
 	mainSql := `
 	SELECT * FROM tags
 	`
 	return dbpgx.ReadMany[model.Tag](ctx, tx, mainSql, -1, -1)
 }
 
-// TagCreateDafI implements a stereotype instance of type
+// TagCreateDaf implements a stereotype instance of type
 // TagCreateDafT.
-var TagCreateDafI TagCreateDafT = func(
+var TagCreateDaf TagCreateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	tag *model.Tag,
@@ -50,9 +50,9 @@ var TagCreateDafI TagCreateDafT = func(
 	return nil
 }
 
-// TagsAddNewDafI implements a stereotype instance of type
+// TagsAddNewDaf implements a stereotype instance of type
 // TagsAddNewDafT.
-var TagsAddNewDafI TagsAddNewDafT = func(
+var TagsAddNewDaf TagsAddNewDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	names []string,
@@ -90,9 +90,9 @@ var TagsAddNewDafI TagsAddNewDafT = func(
 	return nil
 }
 
-// TagAddToArticleDafI implements a stereotype instance of type
+// TagAddToArticleDaf implements a stereotype instance of type
 // TagAddToArticleDafT.
-var TagAddToArticleDafI TagAddToArticleDafT = func(
+var TagAddToArticleDaf TagAddToArticleDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	tag model.Tag,
@@ -113,9 +113,9 @@ var TagAddToArticleDafI TagAddToArticleDafT = func(
 	return nil
 }
 
-// TagsAddToArticleDafI implements a stereotype instance of type
+// TagsAddToArticleDaf implements a stereotype instance of type
 // TagsAddToArticleDafT.
-var TagsAddToArticleDafI TagsAddToArticleDafT = func(
+var TagsAddToArticleDaf TagsAddToArticleDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	names []string,

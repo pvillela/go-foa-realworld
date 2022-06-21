@@ -52,7 +52,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 		tag := model.Tag{
 			Name: name,
 		}
-		err := daf.TagCreateDafI(ctx, tx, &tag)
+		err := daf.TagCreateDaf(ctx, tx, &tag)
 		assert.NoError(t, err)
 
 		mdb.TagUpsert(name, tag)
@@ -64,7 +64,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 		tag := mdb.TagGet(name)
 		article := mdb.ArticleGetBySlug(slug)
 
-		err := daf.TagAddToArticleDafI(ctx, tx, tag, article)
+		err := daf.TagAddToArticleDaf(ctx, tx, tag, article)
 		assert.NoError(t, err)
 
 		mdb.TagAssignToSlug(name, slug)
@@ -73,7 +73,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 	// Tests
 
 	{
-		msg := "TagCreateDafI - attempt to reinsert existing tag"
+		msg := "TagCreateDaf - attempt to reinsert existing tag"
 
 		tagName := tagName1
 
@@ -83,7 +83,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 		subTx, err := tx.Begin(ctx)
 		assert.NoError(t, err)
 
-		err = daf.TagCreateDafI(ctx, tx, &tag)
+		err = daf.TagCreateDaf(ctx, tx, &tag)
 
 		retErrxKind := dbpgx.ClassifyError(err)
 		expErrxKind := dbpgx.DbErrUniqueViolation
@@ -96,9 +96,9 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 	}
 
 	{
-		msg := "TagsGetAllDafI"
+		msg := "TagsGetAllDaf"
 
-		returned, err := daf.TagsGetAllDafI(ctx, tx)
+		returned, err := daf.TagsGetAllDaf(ctx, tx)
 		assert.NoError(t, err)
 		//fmt.Println("Tags from database:", returned, "\n")
 
@@ -121,7 +121,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returnedArticlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		returnedArticlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 		assert.NoError(t, err)
 
 		returnedArticleTagsMap := articlePlusesToArticleTagsMap(returnedArticlePluses)
@@ -131,7 +131,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 	}
 
 	{
-		msg := "ArticlesListDafI by tag"
+		msg := "ArticlesListDaf by tag"
 
 		currUsername := username1
 
@@ -144,7 +144,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returnedArticlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		returnedArticlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 		assert.NoError(t, err)
 
 		returnedArticleTagsMap := articlePlusesToArticleTagsMap(returnedArticlePluses)
@@ -157,16 +157,16 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 	}
 
 	{
-		msg := "TagsAddNewDafI - add some more tags to database"
+		msg := "TagsAddNewDaf - add some more tags to database"
 
 		newNames := []string{"ZZZ", "WWW"}
 		names := append(newNames, tagName1)
 
 		{
-			err := daf.TagsAddNewDafI(ctx, tx, names)
+			err := daf.TagsAddNewDaf(ctx, tx, names)
 			assert.NoError(t, err)
 
-			returned, err := daf.TagsGetAllDafI(ctx, tx)
+			returned, err := daf.TagsGetAllDaf(ctx, tx)
 			assert.NoError(t, err)
 
 			originalNames := mdb.TagGetAllNames()
@@ -190,7 +190,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 
 			article := mdb.ArticleGetBySlug(taggedSlug)
 
-			err := daf.TagsAddToArticleDafI(ctx, tx, names, article)
+			err := daf.TagsAddToArticleDaf(ctx, tx, names, article)
 			assert.NoError(t, err)
 
 			for _, name := range names {
@@ -211,7 +211,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 					Limit:       nil,
 					Offset:      nil,
 				}
-				returnedArticlePluses, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+				returnedArticlePluses, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 				assert.NoError(t, err)
 
 				returnedArticleTagsMap := articlePlusesToArticleTagsMap(returnedArticlePluses)

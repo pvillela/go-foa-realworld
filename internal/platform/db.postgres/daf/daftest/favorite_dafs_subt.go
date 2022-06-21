@@ -44,7 +44,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 		slug := fsrc.slug
 		articleId := mdb.ArticleGetBySlug(slug).Id
 		userId := mdb.UserGetByName(username).Id
-		err := daf.FavoriteCreateDafI(ctx, tx, articleId, userId)
+		err := daf.FavoriteCreateDaf(ctx, tx, articleId, userId)
 		assert.NoError(t, err)
 		mdb.FavoritePut(username, slug)
 	}
@@ -66,7 +66,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		returned, err := daf.ArticlesListDaf(ctx, tx, currUser.Id, criteria)
 		assert.NoError(t, err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 
@@ -99,7 +99,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		returned, err := daf.ArticlesListDaf(ctx, tx, currUser.Id, criteria)
 		assert.NoError(t, err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:", articlePluses, "\n")
 
@@ -109,7 +109,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 	}
 
 	{
-		msg := "FavoriteDeleteDafI - delete existing favorite"
+		msg := "FavoriteDeleteDaf - delete existing favorite"
 
 		currUsername := username1
 		favoritedBy := username3
@@ -119,7 +119,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 		userId := mdb.UserGetByName(favoritedBy).Id
 		currUserId := mdb.UserGetByName(currUsername).Id
 
-		err := daf.FavoriteDeleteDafI(ctx, tx, articleId, userId)
+		err := daf.FavoriteDeleteDaf(ctx, tx, articleId, userId)
 		assert.NoError(t, err)
 
 		mdb.FavoritedDelete(favoritedBy, slug)
@@ -131,7 +131,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returned, err := daf.ArticlesListDafI(ctx, tx, currUserId, criteria)
+		returned, err := daf.ArticlesListDaf(ctx, tx, currUserId, criteria)
 		assert.NoError(t, err)
 		//fmt.Println("\narticlesListDaf - favoritedBy:\n", returned)
 
@@ -147,7 +147,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 	}
 
 	{
-		msg := "FavoriteDeleteDafI - attempt to delete inexistent favorite"
+		msg := "FavoriteDeleteDaf - attempt to delete inexistent favorite"
 
 		favoritedBy := username3
 		slug := slug1
@@ -155,7 +155,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 		articleId := mdb.ArticleGetBySlug(slug).Id
 		userId := mdb.UserGetByName(favoritedBy).Id
 
-		err := daf.FavoriteDeleteDafI(ctx, tx, articleId, userId)
+		err := daf.FavoriteDeleteDaf(ctx, tx, articleId, userId)
 		returnedErrxKind := dbpgx.ClassifyError(err)
 		expectedErrxKind := dbpgx.DbErrRecordNotFound
 

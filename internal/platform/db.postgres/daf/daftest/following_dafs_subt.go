@@ -47,7 +47,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 
 	for _, fsrc := range followingSources {
 		followerId, followeeId := makeFollowing(fsrc)
-		followedOn, err := daf.FollowingCreateDafI(ctx, tx, followerId, followeeId)
+		followedOn, err := daf.FollowingCreateDaf(ctx, tx, followerId, followeeId)
 		assert.NoError(t, err)
 		mdb.FollowingUpsert(fsrc.followerName, fsrc.followeeName, followedOn)
 	}
@@ -61,7 +61,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 
 		currUserId := mdb.UserGetByName(currUsername).Id
 
-		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUserId, nil, nil)
+		returned, err := daf.ArticlesFeedDaf(ctx, tx, currUserId, nil, nil)
 		assert.NoError(t, err)
 
 		actual := testutil.ArticlePlusesToArticles(returned)
@@ -76,7 +76,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 	}
 
 	{
-		msg := "FollowingCreateDafI - attempt to create an existing following"
+		msg := "FollowingCreateDaf - attempt to create an existing following"
 
 		followerName := username3
 		followeeName := username2
@@ -89,7 +89,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 		subTx, err := tx.Begin(ctx)
 		assert.NoError(t, err)
 
-		_, err = daf.FollowingCreateDafI(ctx, subTx, followerId, followeeId)
+		_, err = daf.FollowingCreateDaf(ctx, subTx, followerId, followeeId)
 
 		retErrxKind := dbpgx.ClassifyError(err)
 		expErrxKind := dbpgx.DbErrUniqueViolation
@@ -102,7 +102,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 	}
 
 	{
-		msg := "FollowingDeleteDafI -- delete an existing following."
+		msg := "FollowingDeleteDaf -- delete an existing following."
 
 		followerName := username3
 		followeeName := username2
@@ -111,12 +111,12 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 		followerId := following.FollowerId
 		followeeId := following.FolloweeId
 
-		err := daf.FollowingDeleteDafI(ctx, tx, followerId, followeeId)
+		err := daf.FollowingDeleteDaf(ctx, tx, followerId, followeeId)
 		assert.NoError(t, err)
 
 		mdb.FollowingDelete(followerName, followeeName)
 
-		returned, err := daf.ArticlesFeedDafI(ctx, tx, followerId, nil, nil)
+		returned, err := daf.ArticlesFeedDaf(ctx, tx, followerId, nil, nil)
 		assert.NoError(t, err)
 
 		actual := testutil.ArticlePlusesToArticles(returned)
@@ -131,7 +131,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 	}
 
 	{
-		msg := "FollowingDeleteDafI - attempt to delete a nonexistent following"
+		msg := "FollowingDeleteDaf - attempt to delete a nonexistent following"
 
 		followerName := username3
 		followeeName := username2
@@ -140,7 +140,7 @@ var followingDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, 
 		followerId := following.FollowerId
 		followeeId := following.FolloweeId
 
-		err := daf.FollowingDeleteDafI(ctx, tx, followerId, followeeId)
+		err := daf.FollowingDeleteDaf(ctx, tx, followerId, followeeId)
 		retErrxKind := dbpgx.ClassifyError(err)
 		expErrxKind := dbpgx.DbErrRecordNotFound
 

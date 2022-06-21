@@ -18,9 +18,9 @@ import (
 	"strings"
 )
 
-// UserGetByNameDafI implements a stereotype instance of type
+// UserGetByNameDaf implements a stereotype instance of type
 // UserGetByNameDafT.
-var UserGetByNameDafI UserGetByNameDafT = func(
+var UserGetByNameDaf UserGetByNameDafT = func(
 	ctx context.Context,
 	username string,
 ) (model.User, RecCtxUser, error) {
@@ -28,12 +28,12 @@ var UserGetByNameDafI UserGetByNameDafT = func(
 	if err != nil {
 		return model.User{}, RecCtxUser{}, err
 	}
-	return UserGetByNameExplicitTxDafI(ctx, tx, username)
+	return UserGetByNameExplicitTxDaf(ctx, tx, username)
 }
 
-// UserGetByNameExplicitTxDafI implements a stereotype instance of type
+// UserGetByNameExplicitTxDaf implements a stereotype instance of type
 // UserGetByNameDafT with explicit passing of a pgx.Tx.
-var UserGetByNameExplicitTxDafI UserGetByNameExplicitTxDafT = func(
+var UserGetByNameExplicitTxDaf UserGetByNameExplicitTxDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	username string,
@@ -50,9 +50,9 @@ var UserGetByNameExplicitTxDafI UserGetByNameExplicitTxDafT = func(
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
-// UserGetByEmailDafI implements a stereotype instance of type
+// UserGetByEmailDaf implements a stereotype instance of type
 // UserGetByEmailDafT.
-var UserGetByEmailDafI UserGetByEmailDafT = func(
+var UserGetByEmailDaf UserGetByEmailDafT = func(
 	ctx context.Context,
 	email string,
 ) (model.User, RecCtxUser, error) {
@@ -72,9 +72,9 @@ var UserGetByEmailDafI UserGetByEmailDafT = func(
 	return pwUser.Entity, pwUser.RecCtx, nil
 }
 
-// UserCreateDafI implements a stereotype instance of type
+// UserCreateDaf implements a stereotype instance of type
 // UserCreateDafT.
-var UserCreateDafI UserCreateDafT = func(
+var UserCreateDaf UserCreateDafT = func(
 	ctx context.Context,
 	user *model.User,
 ) (RecCtxUser, error) {
@@ -82,12 +82,12 @@ var UserCreateDafI UserCreateDafT = func(
 	if err != nil {
 		return RecCtxUser{}, err
 	}
-	return UserCreateExplicitTxDafI(ctx, tx, user)
+	return UserCreateExplicitTxDaf(ctx, tx, user)
 }
 
-// UserCreateExplicitTxDafI implements a stereotype instance of type
+// UserCreateExplicitTxDaf implements a stereotype instance of type
 // UserCreateDafT.
-var UserCreateExplicitTxDafI UserCreateExplicitTxDafT = func(
+var UserCreateExplicitTxDaf UserCreateExplicitTxDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	user *model.User,
@@ -124,9 +124,9 @@ var UserCreateExplicitTxDafI UserCreateExplicitTxDafT = func(
 	return recCtx, nil
 }
 
-// UserUpdateDafI implements a stereotype instance of type
+// UserUpdateDaf implements a stereotype instance of type
 // UserUpdateDafT.
-var UserUpdateDafI UserUpdateDafT = func(
+var UserUpdateDaf UserUpdateDafT = func(
 	ctx context.Context,
 	user model.User,
 	recCtx RecCtxUser,

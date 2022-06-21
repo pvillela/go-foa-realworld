@@ -30,8 +30,8 @@ type UserFollowSflT = func(
 func UserFollowSflC(
 	ctxDb cdb.CtxDb,
 ) UserFollowSflT {
-	userGetByNameDaf := daf.UserGetByNameDafI
-	followingCreateDaf := daf.FollowingCreateDafI
+	userGetByNameDaf := daf.UserGetByNameDaf
+	followingCreateDaf := daf.FollowingCreateDaf
 	return UserFollowSflC0(
 		ctxDb,
 		userGetByNameDaf,

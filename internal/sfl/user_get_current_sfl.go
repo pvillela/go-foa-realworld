@@ -29,7 +29,7 @@ type UserGetCurrentSflT = func(
 func UserGetCurrentSflC(
 	ctxDb cdb.CtxDb,
 ) UserGetCurrentSflT {
-	userGetByNameDaf := daf.UserGetByNameDafI
+	userGetByNameDaf := daf.UserGetByNameDaf
 	return UserGetCurrentSflC0(
 		ctxDb,
 		userGetByNameDaf,

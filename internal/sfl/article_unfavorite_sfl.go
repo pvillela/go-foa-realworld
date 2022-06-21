@@ -31,8 +31,8 @@ func ArticleUnfavoriteSflC(
 	db dbpgx.Db,
 ) ArticleUnfavoriteSflT {
 	articleAndUserGetFl := fl.ArticleAndUserGetFlI
-	favoriteDeleteDaf := daf.FavoriteDeleteDafI
-	articleUpdateDaf := daf.ArticleUpdateDafI
+	favoriteDeleteDaf := daf.FavoriteDeleteDaf
+	articleUpdateDaf := daf.ArticleUpdateDaf
 	return ArticleUnfavoriteSflC0(
 		db,
 		articleAndUserGetFl,

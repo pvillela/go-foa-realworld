@@ -30,8 +30,8 @@ type ArticlesFeedSflT = func(
 func ArticlesFeedSflC(
 	db dbpgx.Db,
 ) ArticlesFeedSflT {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
-	articlesFeedDaf := daf.ArticlesFeedDafI
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDaf
+	articlesFeedDaf := daf.ArticlesFeedDaf
 	return ArticlesFeedSflC0(
 		db,
 		userGetByNameDaf,

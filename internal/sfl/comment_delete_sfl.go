@@ -32,7 +32,7 @@ func CommentDeleteSflC(
 	db dbpgx.Db,
 ) CommentDeleteSflT {
 	articleAndUserGetFl := fl.ArticleAndUserGetFlI
-	commentDeleteDaf := daf.CommentDeleteDafI
+	commentDeleteDaf := daf.CommentDeleteDaf
 	return CommentDeleteSflC0(
 		db,
 		articleAndUserGetFl,

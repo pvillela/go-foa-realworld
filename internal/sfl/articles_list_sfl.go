@@ -30,8 +30,8 @@ type ArticlesListSflT = func(
 func ArticlesListSflC(
 	db dbpgx.Db,
 ) ArticlesListSflT {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDafI
-	articlesListDaf := daf.ArticlesListDafI
+	userGetByNameDaf := daf.UserGetByNameExplicitTxDaf
+	articlesListDaf := daf.ArticlesListDaf
 	return ArticlesListSflC0(
 		db,
 		userGetByNameDaf,

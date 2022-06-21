@@ -16,9 +16,9 @@ import (
 	"time"
 )
 
-// ArticleCreateDafI implements a stereotype instance of type
+// ArticleCreateDaf implements a stereotype instance of type
 // ArticleCreateDafT.
-var ArticleCreateDafI ArticleCreateDafT = func(
+var ArticleCreateDaf ArticleCreateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	article *model.Article,
@@ -48,9 +48,9 @@ var ArticleCreateDafI ArticleCreateDafT = func(
 	return nil
 }
 
-// ArticleGetBySlugDafI implements a stereotype instance of type
+// ArticleGetBySlugDaf implements a stereotype instance of type
 // ArticleGetBySlugDafT.
-var ArticleGetBySlugDafI ArticleGetBySlugDafT = func(
+var ArticleGetBySlugDaf ArticleGetBySlugDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,
@@ -79,9 +79,9 @@ var ArticleGetBySlugDafI ArticleGetBySlugDafT = func(
 	return results[0], nil
 }
 
-// ArticleUpdateDafI implements a stereotype instance of type
+// ArticleUpdateDaf implements a stereotype instance of type
 // ArticleUpdateDafT.
-var ArticleUpdateDafI ArticleUpdateDafT = func(
+var ArticleUpdateDaf ArticleUpdateDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	article *model.Article,
@@ -110,9 +110,9 @@ var ArticleUpdateDafI ArticleUpdateDafT = func(
 	return nil
 }
 
-// ArticleAdjustFavoritesCountDafI implements a stereotype instance of type
+// ArticleAdjustFavoritesCountDaf implements a stereotype instance of type
 // ArticleAdjustFavoritesCountDafT.
-var ArticleAdjustFavoritesCountDafI ArticleAdjustFavoritesCountDafT = func(
+var ArticleAdjustFavoritesCountDaf ArticleAdjustFavoritesCountDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
@@ -143,9 +143,9 @@ var ArticleAdjustFavoritesCountDafI ArticleAdjustFavoritesCountDafT = func(
 	return favoritesCount, updatedAt, nil
 }
 
-// ArticleDeleteDafI implements a stereotype instance of type
+// ArticleDeleteDaf implements a stereotype instance of type
 // ArticleDeleteDafT.
-var ArticleDeleteDafI ArticleDeleteDafT = func(
+var ArticleDeleteDaf ArticleDeleteDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	slug string,
@@ -165,9 +165,9 @@ var ArticleDeleteDafI ArticleDeleteDafT = func(
 	return nil
 }
 
-// ArticlesFeedDafI implements a stereotype instance of type
+// ArticlesFeedDaf implements a stereotype instance of type
 // ArticlesFeedDafT.
-var ArticlesFeedDafI ArticlesFeedDafT = func(
+var ArticlesFeedDaf ArticlesFeedDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,
@@ -188,9 +188,9 @@ var ArticlesFeedDafI ArticlesFeedDafT = func(
 	return results, nil
 }
 
-// ArticlesListDafI implements a stereotype instance of type
+// ArticlesListDaf implements a stereotype instance of type
 // ArticlesListDafT.
-var ArticlesListDafI ArticlesListDafT = func(
+var ArticlesListDaf ArticlesListDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,

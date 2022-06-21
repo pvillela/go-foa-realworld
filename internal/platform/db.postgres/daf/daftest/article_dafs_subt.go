@@ -60,7 +60,7 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 		}
 		article := authorsAndArticles[i].Article
 		article.AuthorId = author.Id
-		err := daf.ArticleCreateDafI(ctx, tx, &article)
+		err := daf.ArticleCreateDaf(ctx, tx, &article)
 		errx.PanicOnError(err)
 		logrus.Debug("article from Create:", article)
 
@@ -78,7 +78,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	author := mdb.UserGetByName(username2)
 
 	{
-		msg := "ArticleUpdateDafI"
+		msg := "ArticleUpdateDaf"
 
 		slug := slug1
 
@@ -87,7 +87,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		newBody := util.PointerFromValue(*existingArticle.Body + " And so on and on.")
 		changedArticle.Body = newBody
 
-		err := daf.ArticleUpdateDafI(ctx, tx, &changedArticle)
+		err := daf.ArticleUpdateDaf(ctx, tx, &changedArticle)
 		assert.NoError(t, err)
 
 		assert.Equal(t, newBody, changedArticle.Body, msg+" - changedArticle.Body must equal newBody")
@@ -101,7 +101,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		assert.Equal(t, existingArticle, changedArticlePrime,
 			msg+" - changed article must equal existing article except for Body and ChangedAt")
 
-		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
+		returned, err := daf.ArticleGetBySlugDaf(ctx, tx, currUser.Id, slug)
 		assert.NoError(t, err)
 
 		//criteria := model.ArticleCriteria{
@@ -111,7 +111,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		//	Limit:       nil,
 		//	Offset:      nil,
 		//}
-		//aps, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		//aps, err := daf.ArticlesListDaf(ctx, tx, currUser.Id, criteria)
 		//assert.NoError(t, err)
 		//spew.Println("************* aps", aps)
 
@@ -128,7 +128,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	}
 
 	{
-		msg := "ArticlesListDafI - select author"
+		msg := "ArticlesListDaf - select author"
 
 		criteria := model.ArticleCriteria{
 			Tag:         nil,
@@ -137,7 +137,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		returned, err := daf.ArticlesListDaf(ctx, tx, currUser.Id, criteria)
 		assert.NoError(t, err)
 
 		expected := util.SliceFilter(mdb.ArticlePlusGetAll(author.Username), func(a model.ArticlePlus) bool {
@@ -148,7 +148,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	}
 
 	{
-		msg := "ArticlesListDafI - select tag"
+		msg := "ArticlesListDaf - select tag"
 
 		criteria := model.ArticleCriteria{
 			Tag:         util.PointerFromValue("FOOTAG"),
@@ -157,7 +157,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 			Limit:       nil,
 			Offset:      nil,
 		}
-		returned, err := daf.ArticlesListDafI(ctx, tx, currUser.Id, criteria)
+		returned, err := daf.ArticlesListDaf(ctx, tx, currUser.Id, criteria)
 		assert.NoError(t, err)
 
 		var expected []model.ArticlePlus
@@ -169,11 +169,11 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	}
 
 	{
-		msg := "ArticleGetBySlugDafI"
+		msg := "ArticleGetBySlugDaf"
 
 		slug := slug2
 
-		returned, err := daf.ArticleGetBySlugDafI(ctx, tx, currUser.Id, slug)
+		returned, err := daf.ArticleGetBySlugDaf(ctx, tx, currUser.Id, slug)
 		assert.NoError(t, err)
 
 		expected := mdb.ArticlePlusGet(currUser.Username, slug)
@@ -182,9 +182,9 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	}
 
 	{
-		msg := "ArticlesFeedDafI"
+		msg := "ArticlesFeedDaf"
 
-		returned, err := daf.ArticlesFeedDafI(ctx, tx, currUser.Id, nil, nil)
+		returned, err := daf.ArticlesFeedDaf(ctx, tx, currUser.Id, nil, nil)
 		assert.NoError(t, err)
 
 		var expected []model.ArticlePlus

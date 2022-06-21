@@ -31,8 +31,8 @@ func ArticleFavoriteSflC(
 	db dbpgx.Db,
 ) ArticleFavoriteSflT {
 	articleAndUserGetFl := fl.ArticleAndUserGetFlI
-	favoriteCreateDaf := daf.FavoriteCreateDafI
-	articleUpdateDaf := daf.ArticleUpdateDafI
+	favoriteCreateDaf := daf.FavoriteCreateDaf
+	articleUpdateDaf := daf.ArticleUpdateDaf
 	return ArticleFavoriteSflC0(
 		db,
 		articleAndUserGetFl,
@@ -41,7 +41,7 @@ func ArticleFavoriteSflC(
 	)
 }
 
-// TODO: consider reimplementing with daf.ArticleAdjustFavoritesCountDafI.
+// TODO: consider reimplementing with daf.ArticleAdjustFavoritesCountDaf.
 // ArticleFavoriteSflC0 is the function that constructs a stereotype instance of type
 // ArticleFavoriteSflT without hard-wired stereotype dependencies.
 func ArticleFavoriteSflC0(
