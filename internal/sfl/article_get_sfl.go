@@ -26,21 +26,21 @@ type ArticleGetSflT = func(
 // ArticleGetSflC is the function that constructs a stereotype instance of type
 // ArticleGetSflT with hard-wired stereotype dependencies.
 func ArticleGetSflC(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 ) ArticleGetSflT {
-	articleAndUserGetFl := fl.ArticleAndUserGetFl
 	return ArticleGetSflC0(
-		db,
-		articleAndUserGetFl,
+		cfgPvdr,
+		fl.ArticleAndUserGetFl,
 	)
 }
 
 // ArticleGetSflC0 is the function that constructs a stereotype instance of type
 // ArticleGetSflT without hard-wired stereotype dependencies.
 func ArticleGetSflC0(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 ) ArticleGetSflT {
+	db := cfgPvdr()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

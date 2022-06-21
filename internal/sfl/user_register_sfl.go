@@ -26,13 +26,12 @@ type UserRegisterSflT = func(
 // UserRegisterSflC is the function that constructs a stereotype instance of type
 // UserRegisterSflT with hard-wired stereotype dependencies.
 func UserRegisterSflC(
-	ctxDb cdb.CtxDb,
+	cfgPvdr UserSflCfgPvdr,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
-	userCreateDaf := daf.UserCreateDaf
 	return UserRegisterSflC0(
-		ctxDb,
-		userCreateDaf,
+		cfgPvdr,
+		daf.UserCreateDaf,
 		userGenTokenBf,
 	)
 }
@@ -40,10 +39,11 @@ func UserRegisterSflC(
 // UserRegisterSflC0 is the function that constructs a stereotype instance of type
 // UserRegisterSflT without hard-wired stereotype dependencies.
 func UserRegisterSflC0(
-	ctxDb cdb.CtxDb,
+	cfgPvdr UserSflCfgPvdr,
 	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserRegisterSflT {
+	ctxDb := cfgPvdr()
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,

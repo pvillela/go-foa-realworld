@@ -25,19 +25,10 @@ type ArticleAndUserGetFlT = func(
 
 // ArticleAndUserGetFl implements a stereotype instance of type
 // ArticleAndUserGetFlT.
-var ArticleAndUserGetFl ArticleAndUserGetFlT = func(
-	ctx context.Context,
-	tx pgx.Tx,
-	slug string,
-	username string,
-) (model.ArticlePlus, model.User, error) {
-	userGetByNameDaf := daf.UserGetByNameExplicitTxDaf
-	articleGetBySlugDaf := daf.ArticleGetBySlugDaf
-	return ArticleAndUserGetFlC0(
-		userGetByNameDaf,
-		articleGetBySlugDaf,
-	)(ctx, tx, slug, username)
-}
+var ArticleAndUserGetFl ArticleAndUserGetFlT = ArticleAndUserGetFlC0(
+	daf.UserGetByNameExplicitTxDaf,
+	daf.ArticleGetBySlugDaf,
+)
 
 // ArticleAndUserGetFlC0 is the function that constructs a stereotype instance of type
 // ArticleAndUserGetFlT without hard-wired BF dependencies.

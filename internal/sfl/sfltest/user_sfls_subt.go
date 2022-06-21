@@ -9,6 +9,7 @@ package sfltest
 import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
@@ -67,6 +68,21 @@ var userSources = map[string]rpc.UserRegisterIn0{
 }
 
 ///////////////////
+// Helpers
+
+func makeUserGenTokenHmacBfCfgPvdr(key []byte, tokenTtl time.Duration) bf.UserGenTokenHmacBfCfgPvdr {
+	return func() ([]byte, time.Duration) {
+		return key, tokenTtl
+	}
+}
+
+func makeUserSflCfgPvdr(ctxDb cdb.CtxDb) sfl.UserSflCfgPvdr {
+	return func() cdb.CtxDb {
+		return ctxDb
+	}
+}
+
+///////////////////
 // Tests
 
 func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
@@ -74,8 +90,8 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
-	userRegisterSfl := sfl.UserRegisterSflC(ctxDb, userGenTokenBf)
+	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgPvdr(secretKey, tokenTimeToLive))
+	userRegisterSfl := sfl.UserRegisterSflC(makeUserSflCfgPvdr(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_register_sfl - valid registration"
@@ -125,8 +141,8 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGenTokenBf := bf.UserGenTokenHmacBfC(secretKey, tokenTimeToLive)
-	userAuthenticateSfl := sfl.UserAuthenticateSflC(ctxDb, userGenTokenBf)
+	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgPvdr(secretKey, tokenTimeToLive))
+	userAuthenticateSfl := sfl.UserAuthenticateSflC(makeUserSflCfgPvdr(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_authenticate_sfl - valid authentication"
@@ -170,7 +186,7 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserFollowSflC(ctxDb)
+	userFollowSfl := sfl.UserFollowSflC(makeUserSflCfgPvdr(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -223,7 +239,7 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGetCurrentSfl := sfl.UserGetCurrentSflC(ctxDb)
+	userGetCurrentSfl := sfl.UserGetCurrentSflC(makeUserSflCfgPvdr(ctxDb))
 
 	{
 		msg := "user_get_current_sfl - valid username"
@@ -264,7 +280,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserUnfollowSflC(ctxDb)
+	userFollowSfl := sfl.UserUnfollowSflC(makeUserSflCfgPvdr(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -317,7 +333,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userUpdateSfl := sfl.UserUpdateSflC(ctxDb)
+	userUpdateSfl := sfl.UserUpdateSflC(makeUserSflCfgPvdr(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username4,

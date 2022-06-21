@@ -58,7 +58,7 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleCreateSfl := sfl.ArticleCreateSflC(db)
+	articleCreateSfl := sfl.ArticleCreateSflC(makeDefaultSflCfgPvdr(db))
 
 	ctxDb := dbpgx.CtxPgx{db.Pool}
 	ctx, err := ctxDb.SetPool(ctx)

@@ -23,24 +23,23 @@ type ArticleDeleteSflT = func(ctx context.Context, reqCtx web.RequestContext, sl
 // ArticleDeleteSflC is the function that constructs a stereotype instance of type
 // ArticleDeleteSflT with hard-wired stereotype dependencies.
 func ArticleDeleteSflC(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 ) ArticleDeleteSflT {
-	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFl
-	articleDeleteDaf := daf.ArticleDeleteDaf
 	return ArticleDeleteSflC0(
-		db,
-		articleGetAndCheckOwnerFl,
-		articleDeleteDaf,
+		cfgPvdr,
+		fl.ArticleGetAndCheckOwnerFl,
+		daf.ArticleDeleteDaf,
 	)
 }
 
 // ArticleDeleteSflC0 is the function that constructs a stereotype instance of type
 // ArticleDeleteSflT without hard-wired stereotype dependencies.
 func ArticleDeleteSflC0(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
+	db := cfgPvdr()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

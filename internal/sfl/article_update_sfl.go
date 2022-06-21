@@ -30,24 +30,23 @@ type ArticleUpdateSflT = func(
 // ArticleUpdateSflC is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT with hard-wired stereotype dependencies.
 func ArticleUpdateSflC(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 ) ArticleUpdateSflT {
-	articleGetAndCheckOwnerFl := fl.ArticleGetAndCheckOwnerFl
-	articleUpdateDaf := daf.ArticleUpdateDaf
 	return ArticleUpdateSflC0(
-		db,
-		articleGetAndCheckOwnerFl,
-		articleUpdateDaf,
+		cfgPvdr,
+		fl.ArticleGetAndCheckOwnerFl,
+		daf.ArticleUpdateDaf,
 	)
 }
 
 // ArticleUpdateSflC0 is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT without hard-wired stereotype dependencies.
 func ArticleUpdateSflC0(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleUpdateSflT {
+	db := cfgPvdr()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

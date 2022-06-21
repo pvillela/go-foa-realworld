@@ -27,21 +27,21 @@ type UserGetCurrentSflT = func(
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT with hard-wired stereotype dependencies.
 func UserGetCurrentSflC(
-	ctxDb cdb.CtxDb,
+	cfgPvdr UserSflCfgPvdr,
 ) UserGetCurrentSflT {
-	userGetByNameDaf := daf.UserGetByNameDaf
 	return UserGetCurrentSflC0(
-		ctxDb,
-		userGetByNameDaf,
+		cfgPvdr,
+		daf.UserGetByNameDaf,
 	)
 }
 
 // UserGetCurrentSflC0 is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT without hard-wired stereotype dependencies.
 func UserGetCurrentSflC0(
-	ctxDb cdb.CtxDb,
+	cfgPvdr UserSflCfgPvdr,
 	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {
+	ctxDb := cfgPvdr()
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,

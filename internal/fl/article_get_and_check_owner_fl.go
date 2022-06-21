@@ -30,11 +30,9 @@ var ArticleGetAndCheckOwnerFl ArticleGetAndCheckOwnerFlT = func(
 	slug string,
 	username string,
 ) (model.ArticlePlus, model.User, error) {
-	articleAndUserGetFl := ArticleAndUserGetFl
-	articleCheckOwnerBf := bf.ArticleCheckOwnerBf
 	return ArticleGetAndCheckOwnerFlC0(
-		articleAndUserGetFl,
-		articleCheckOwnerBf,
+		ArticleAndUserGetFl,
+		bf.ArticleCheckOwnerBf,
 	)(ctx, tx, slug, username)
 }
 

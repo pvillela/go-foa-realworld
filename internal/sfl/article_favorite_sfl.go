@@ -28,16 +28,13 @@ type ArticleFavoriteSflT = func(
 // ArticleFavoriteSflC is the function that constructs a stereotype instance of type
 // ArticleFavoriteSflT with hard-wired stereotype dependencies.
 func ArticleFavoriteSflC(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 ) ArticleFavoriteSflT {
-	articleAndUserGetFl := fl.ArticleAndUserGetFl
-	favoriteCreateDaf := daf.FavoriteCreateDaf
-	articleUpdateDaf := daf.ArticleUpdateDaf
 	return ArticleFavoriteSflC0(
-		db,
-		articleAndUserGetFl,
-		favoriteCreateDaf,
-		articleUpdateDaf,
+		cfgPvdr,
+		fl.ArticleAndUserGetFl,
+		daf.FavoriteCreateDaf,
+		daf.ArticleUpdateDaf,
 	)
 }
 
@@ -45,11 +42,12 @@ func ArticleFavoriteSflC(
 // ArticleFavoriteSflC0 is the function that constructs a stereotype instance of type
 // ArticleFavoriteSflT without hard-wired stereotype dependencies.
 func ArticleFavoriteSflC0(
-	db dbpgx.Db,
+	cfgPvdr DefaultSflCfgPvdr,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 	favoriteCreateDaf daf.FavoriteCreateDafT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleFavoriteSflT {
+	db := cfgPvdr()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
