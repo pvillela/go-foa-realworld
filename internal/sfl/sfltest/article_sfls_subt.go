@@ -236,4 +236,48 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		assert.Equal(t, article.Body, out.Article.Body, msg+" - Body attribute must not change")
 		assert.Equal(t, article.FavoritesCount+1, out.Article.FavoritesCount, msg+" - FavoritesCount attribute must be incremented")
 	}
+
+	{
+		msg := "article_favorite_sfl - article already favorited"
+
+		currUsername := username1
+		aa := authorsAndArticles[0]
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		_, err := articleFavoriteSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrUniqueViolation
+		expectedErrMsgPrefix := "DbErrUniqueViolation[article with ID"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when favoriting an already favorited article")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when favoriting an already favorited article")
+	}
+
+	{
+		msg := "article_favorite_sfl - inexistent article"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		slug := "dkdkddkd"
+
+		_, err := articleFavoriteSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when favoriting an inexistent article")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when favoriting an inexistent article")
+	}
 }
