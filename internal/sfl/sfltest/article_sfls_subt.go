@@ -8,25 +8,22 @@ package sfltest
 
 import (
 	"context"
+	"testing"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 ///////////////////
 // Shared constants and data
-
-const (
-	slug1 = "anintsubj"
-	slug2 = "adullsubj"
-)
 
 type AuthorAndArticle struct {
 	Authorname string
@@ -38,7 +35,6 @@ var authorsAndArticles = []AuthorAndArticle{
 		Authorname: username2,
 		Article: model.Article{
 			Title:       "An interesting subject",
-			Slug:        slug1,
 			Description: "Story about an interesting subject.",
 			Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
 		},
@@ -47,9 +43,16 @@ var authorsAndArticles = []AuthorAndArticle{
 		Authorname: username2,
 		Article: model.Article{
 			Title:       "A dull story",
-			Slug:        slug2,
 			Description: "Narrative about something dull.",
 			Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
+		},
+	},
+	{
+		Authorname: username2,
+		Article: model.Article{
+			Title:       "An article to be deleted",
+			Description: "Stuff about an article to be deleted.",
+			Body:        util.PointerFromValue("This is an article to be deleted, bla, bla, bla."),
 		},
 	},
 }
@@ -59,10 +62,6 @@ var authorsAndArticles = []AuthorAndArticle{
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	articleCreateSfl := sfl.ArticleCreateSflC(makeDefaultSflCfgPvdr(db))
-
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
 
 	{
 		msg := "article_create_sfl - valid article"
@@ -104,5 +103,137 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 			assert.Equal(t, expected, articleOut, msg+" - output must align with input")
 		}
+	}
+
+	{
+		msg := "article_create_sfl - existing title which implies existing slug"
+
+		// Try to recreate articles with existing slugs
+		for _, aa := range authorsAndArticles {
+			authorname := aa.Authorname
+			reqCtx := web.RequestContext{
+				Username: authorname,
+				Token:    &jwt.Token{},
+			}
+			article := aa.Article
+
+			in := rpc.ArticleCreateIn{Article: rpc.ArticleCreateIn0{
+				Title:       article.Title,
+				Description: "dummy description",
+				Body:        util.PointerFromValue("dummy body"),
+				TagList:     nil,
+			}}
+
+			_, err := articleCreateSfl(ctx, reqCtx, in)
+			returnedErrxKind := dbpgx.ClassifyError(err)
+			expectedErrxKind := dbpgx.DbErrUniqueViolation
+			expectedErrMsgPrefix := "DbErrUniqueViolation[duplicate article slug"
+
+			assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
+			assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
+		}
+	}
+}
+
+func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	articleDeleteSfl := sfl.ArticleDeleteSflC(makeDefaultSflCfgPvdr(db))
+
+	{
+		msg := "article_delete_sfl - existing article authored by current user"
+
+		aa := authorsAndArticles[2]
+
+		authorname := aa.Authorname
+		reqCtx := web.RequestContext{
+			Username: authorname,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		_, err := articleDeleteSfl(ctx, reqCtx, slug)
+		assert.NoError(t, err, msg)
+
+		_, err = testutil.ArticleGetBySlug(db, ctx, authorname, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - retrieval of deleted article must fail with appropriate error kind when username or email is not unique")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - retrieval of deleted article must fail with appropriate error message when username or email is not unique")
+	}
+
+	{
+		msg := "article_delete_sfl - inexistenet article"
+
+		aa := authorsAndArticles[2]
+
+		authorname := aa.Authorname
+		reqCtx := web.RequestContext{
+			Username: authorname,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		_, err := articleDeleteSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
+	}
+
+	{
+		msg := "article_delete_sfl - attempted by non-author"
+
+		aa := authorsAndArticles[0]
+
+		authorname := username1
+		reqCtx := web.RequestContext{
+			Username: authorname,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		_, err := articleDeleteSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := bf.ErrUnauthorizedUser
+		expectedErrMsgPrefix := "ErrUnauthorizedUser[user"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
+	}
+}
+
+func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	articleFavoriteSfl := sfl.ArticleFavoriteSflC(makeDefaultSflCfgPvdr(db))
+
+	{
+		msg := "article_favorite_sfl - existing article, not yet favorited"
+
+		currUsername := username1
+		aa := authorsAndArticles[0]
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		out, err := articleFavoriteSfl(ctx, reqCtx, slug)
+		assert.NoError(t, err, msg)
+
+		assert.True(t, out.Article.Favorited, msg+" - Favorited attribute of output must be true")
+		assert.Equal(t, article.Description, out.Article.Description, msg+" - Description attribute must not change")
+		assert.Equal(t, article.Body, out.Article.Body, msg+" - Body attribute must not change")
+		assert.Equal(t, article.FavoritesCount+1, out.Article.FavoritesCount, msg+" - FavoritesCount attribute must be incremented")
 	}
 }

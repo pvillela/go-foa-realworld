@@ -8,11 +8,12 @@ package sfltest
 
 import (
 	"context"
+	"testing"
+
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"github.com/sirupsen/logrus"
-	"testing"
 )
 
 var connStr = "postgres://testuser:testpassword@localhost:9999/testdb?sslmode=disable"
@@ -34,6 +35,8 @@ func TestSflSuite(t *testing.T) {
 			{Name: "userUnfollowSflSubt", Func: userUnfollowSflSubt},
 			{Name: "userUpdateSflSubt", Func: userUpdateSflSubt},
 			{Name: "articleCreateSflSubt", Func: articleCreateSflSubt},
+			{Name: "articleDeleteSflSubt", Func: articleDeleteSflSubt},
+			{Name: "articleFavoriteSflSubt", Func: articleFavoriteSflSubt},
 			//{Name: "commentSflsSubt", Func: commentSflsSubt},
 			//{Name: "profileSflsSubt", Func: profileSflsSubt},
 			//{Name: "tagSflsSubt", Func: tagSflsSubt},

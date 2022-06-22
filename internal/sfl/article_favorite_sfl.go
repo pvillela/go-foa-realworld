@@ -67,13 +67,19 @@ func ArticleFavoriteSflC0(
 			return zero, err
 		}
 
+		// Sync in-memory copy
+		articlePlus.Favorited = true
+
 		article := articlePlus.ToArticle()
-		article.AdjustFavoriteCount(1)
+		article = article.WithAdjustedFavoriteCount(1)
 
 		err = articleUpdateDaf(ctx, tx, &article)
 		if err != nil {
 			return rpc.ArticleOut{}, err
 		}
+
+		// Sync in-memory copy
+		articlePlus.FavoritesCount = article.FavoritesCount
 
 		articleOut := rpc.ArticleOut_FromModel(articlePlus)
 		return articleOut, err

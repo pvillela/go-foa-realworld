@@ -8,6 +8,7 @@ package testutil
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
@@ -24,7 +25,7 @@ func ArticlePlusesToArticles(aps []model.ArticlePlus) []model.Article {
 }
 
 func CleanupAllTables(db dbpgx.Db, ctx context.Context) {
-	ctx, err := dbpgx.WithTransaction(db, ctx, func(ctx context.Context, tx pgx.Tx) (context.Context, error) {
+	_, err := dbpgx.WithTransaction(db, ctx, func(ctx context.Context, tx pgx.Tx) (context.Context, error) {
 		dbpgxtest.CleanupTables(ctx, tx, "users", "articles", "tags", "followings", "favorites",
 			"article_tags", "comments")
 		return ctx, nil
@@ -36,6 +37,23 @@ func UserGetByName(db dbpgx.Db, ctx context.Context, username string) (model.Use
 	f := func(ctx context.Context, tx pgx.Tx) (model.User, error) {
 		user, _, err := daf.UserGetByNameExplicitTxDaf(ctx, tx, username)
 		return user, err
+	}
+	return dbpgx.WithTransaction(db, ctx, f)
+}
+
+func ArticleGetBySlug(db dbpgx.Db, ctx context.Context, currUsername string, slug string) (model.Article, error) {
+	user, err := UserGetByName(db, ctx, currUsername)
+	if err != nil {
+		return model.Article{}, err
+	}
+
+	f := func(ctx context.Context, tx pgx.Tx) (model.Article, error) {
+		articlePlus, err := daf.ArticleGetBySlugDaf(ctx, tx, user.Id, slug)
+		if err != nil {
+			return model.Article{}, err
+		}
+		article := articlePlus.ToArticle()
+		return article, err
 	}
 	return dbpgx.WithTransaction(db, ctx, f)
 }
