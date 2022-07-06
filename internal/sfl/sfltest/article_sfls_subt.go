@@ -281,3 +281,122 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when favoriting an inexistent article")
 	}
 }
+
+func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	articleGetSfl := sfl.ArticleGetSflC(makeDefaultSflCfgPvdr(db))
+
+	{
+		msg := "article_get_sfl - existing article"
+
+		currUsername := username1
+		aa := authorsAndArticles[0]
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		out, err := articleGetSfl(ctx, reqCtx, slug)
+		assert.NoError(t, err, msg)
+
+		assert.True(t, out.Article.Favorited, msg+" - Favorited attribute of output must be true because it already was before")
+		assert.Equal(t, article.Title, out.Article.Title, msg+" - Title attribute must not change")
+		assert.Equal(t, article.Description, out.Article.Description, msg+" - Description attribute must not change")
+		assert.Equal(t, article.Body, out.Article.Body, msg+" - Body attribute must not change")
+	}
+
+	{
+		msg := "article_get_sfl - inexistent article"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		slug := "dkdkddkd"
+
+		_, err := articleGetSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when favoriting an inexistent article")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when favoriting an inexistent article")
+	}
+}
+
+func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	articleUnfavoriteSfl := sfl.ArticleUnfavoriteSflC(makeDefaultSflCfgPvdr(db))
+
+	{
+		msg := "article_unfavorite_sfl - existing article, previously favorited"
+
+		currUsername := username1
+		aa := authorsAndArticles[0]
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		out, err := articleUnfavoriteSfl(ctx, reqCtx, slug)
+		assert.NoError(t, err, msg)
+
+		assert.False(t, out.Article.Favorited, msg+" - Favorited attribute of output must be false")
+		assert.Equal(t, article.Description, out.Article.Description, msg+" - Description attribute must not change")
+		assert.Equal(t, article.Body, out.Article.Body, msg+" - Body attribute must not change")
+		assert.Equal(t, article.FavoritesCount, out.Article.FavoritesCount, msg+" - FavoritesCount attribute must go back to what it was initially")
+	}
+
+	{
+		msg := "article_unfavorite_sfl - existing article, not previously favorited"
+
+		currUsername := username1
+		aa := authorsAndArticles[0]
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		_, err := articleUnfavoriteSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article with ID"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when unfavoriting an article not previously favorited")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when unfavoriting an article not previously favorited")
+	}
+
+	{
+		msg := "article_unfavorite_sfl - inexistent article"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		slug := "dkdkddkd"
+
+		_, err := articleUnfavoriteSfl(ctx, reqCtx, slug)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when unfavoriting an inexistent article")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when unfavoriting an inexistent article")
+	}
+}

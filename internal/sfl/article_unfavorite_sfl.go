@@ -66,6 +66,9 @@ func ArticleUnfavoriteSflC0(
 			return zero, err
 		}
 
+		// Sync in-memory copy
+		articlePlus.Favorited = false
+
 		article := articlePlus.ToArticle()
 		article.WithAdjustedFavoriteCount(-1)
 
@@ -73,6 +76,9 @@ func ArticleUnfavoriteSflC0(
 		if err != nil {
 			return rpc.ArticleOut{}, err
 		}
+
+		// Sync in-memory copy
+		articlePlus.FavoritesCount = article.FavoritesCount
 
 		articleOut := rpc.ArticleOut_FromModel(articlePlus)
 		return articleOut, err
