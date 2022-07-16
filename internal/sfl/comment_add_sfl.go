@@ -13,8 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
+	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 )
 
 // CommentAddSflT is the type of the stereotype instance for the service flow that
@@ -22,8 +21,8 @@ import (
 type CommentAddSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc.CommentAddIn,
-) (rpc.CommentOut, error)
+	in rpc2.CommentAddIn,
+) (rpc2.CommentOut, error)
 
 // CommentAddSflC is the function that constructs a stereotype instance of type
 // CommentAddSflT with hard-wired stereotype dependencies.
@@ -49,28 +48,28 @@ func CommentAddSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc.CommentAddIn,
-	) (rpc.CommentOut, error) {
+		in rpc2.CommentAddIn,
+	) (rpc2.CommentOut, error) {
 		err := in.Validate()
 		if err != nil {
-			return rpc.CommentOut{}, err
+			return rpc2.CommentOut{}, err
 		}
 
 		username := reqCtx.Username
 
 		articlePlus, user, err := articleAndUserGetFl(ctx, tx, in.Slug, username)
 		if err != nil {
-			return rpc.CommentOut{}, err
+			return rpc2.CommentOut{}, err
 		}
 
 		comment := in.ToComment(articlePlus.Id, user.Id)
 
 		err = commentCreateDaf(ctx, tx, &comment)
 		if err != nil {
-			return rpc.CommentOut{}, err
+			return rpc2.CommentOut{}, err
 		}
 
-		commentOut := rpc.CommentOut_FromModel(comment)
+		commentOut := rpc2.CommentOut_FromModel(comment)
 		return commentOut, nil
 	})
 }

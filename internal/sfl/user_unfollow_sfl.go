@@ -8,13 +8,12 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/rpc"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // UserUnfollowSflT is the type of the stereotype instance for the service flow that

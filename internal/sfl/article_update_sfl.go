@@ -12,11 +12,11 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleUpdateSflT is the type of the stereotype instance for the service flow that
@@ -24,8 +24,8 @@ import (
 type ArticleUpdateSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc.ArticleUpdateIn,
-) (rpc.ArticleOut, error)
+	in rpc2.ArticleUpdateIn,
+) (rpc2.ArticleOut, error)
 
 // ArticleUpdateSflC is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT with hard-wired stereotype dependencies.
@@ -51,16 +51,16 @@ func ArticleUpdateSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc.ArticleUpdateIn,
-	) (rpc.ArticleOut, error) {
+		in rpc2.ArticleUpdateIn,
+	) (rpc2.ArticleOut, error) {
 		err := in.Validate()
 		if err != nil {
-			return rpc.ArticleOut{}, err
+			return rpc2.ArticleOut{}, err
 		}
 
 		username := reqCtx.Username
 		slug := in.Article.Slug
-		var zero rpc.ArticleOut
+		var zero rpc2.ArticleOut
 
 		articlePlus, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
 		if err != nil {
@@ -76,11 +76,11 @@ func ArticleUpdateSflC0(
 		article = article.Update(updateSrc)
 
 		if err := articleUpdateDaf(ctx, tx, &article); err != nil {
-			return rpc.ArticleOut{}, err
+			return rpc2.ArticleOut{}, err
 		}
 
 		articlePlus = model.ArticlePlus_FromArticle(article, articlePlus.Favorited, articlePlus.Author)
-		articleOut := rpc.ArticleOut_FromModel(articlePlus)
+		articleOut := rpc2.ArticleOut_FromModel(articlePlus)
 
 		return articleOut, err
 	})

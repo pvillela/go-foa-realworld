@@ -12,8 +12,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
+	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 )
 
 // ArticlesFeedSflT is the type of the stereotype instance for the service flow that
@@ -22,8 +21,8 @@ import (
 type ArticlesFeedSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc.ArticlesFeedIn,
-) (rpc.ArticlesOut, error)
+	in rpc2.ArticlesFeedIn,
+) (rpc2.ArticlesOut, error)
 
 // ArticlesFeedSflC is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT with hard-wired stereotype dependencies.
@@ -49,10 +48,10 @@ func ArticlesFeedSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc.ArticlesFeedIn,
-	) (rpc.ArticlesOut, error) {
+		in rpc2.ArticlesFeedIn,
+	) (rpc2.ArticlesOut, error) {
 		username := reqCtx.Username
-		zero := rpc.ArticlesOut{}
+		zero := rpc2.ArticlesOut{}
 
 		user, _, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
@@ -64,7 +63,7 @@ func ArticlesFeedSflC0(
 			return zero, err
 		}
 
-		articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
+		articlesOut := rpc2.ArticlesOut_FromModel(articlesPlus)
 
 		return articlesOut, err
 	})

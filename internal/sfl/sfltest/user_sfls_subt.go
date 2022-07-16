@@ -16,8 +16,8 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
+	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 	"testing"
 	"time"
 
@@ -44,7 +44,7 @@ var tokenTimeToLive = func() time.Duration {
 	return dur
 }()
 
-var userSources = map[string]rpc.UserRegisterIn0{
+var userSources = map[string]rpc2.UserRegisterIn0{
 	username1: {
 		Username: username1,
 		Email:    "foo@bar.com",
@@ -97,7 +97,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "user_register_sfl - valid registration"
 		for k, _ := range userSources {
 			userSrc := userSources[k]
-			in := rpc.UserRegisterIn{userSrc}
+			in := rpc2.UserRegisterIn{userSrc}
 			out, err := userRegisterSfl(ctx, web.RequestContext{}, in)
 			assert.NoError(t, err)
 
@@ -109,7 +109,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	{
 		msg := "user_register_sfl - invalid registration"
 
-		badUserSources := []rpc.UserRegisterIn0{
+		badUserSources := []rpc2.UserRegisterIn0{
 			{ // Existing username
 				Username: username1,
 				Email:    "foo@bar.com",
@@ -124,7 +124,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		for i, _ := range badUserSources {
 			userSrc := badUserSources[i]
-			in := rpc.UserRegisterIn{userSrc}
+			in := rpc2.UserRegisterIn{userSrc}
 			_, err := userRegisterSfl(ctx, web.RequestContext{}, in)
 			returnedErrxKind := dbpgx.ClassifyError(err)
 			expectedErrxKind := dbpgx.DbErrUniqueViolation
@@ -148,7 +148,7 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "user_authenticate_sfl - valid authentication"
 		for k, _ := range userSources {
 			userSrc := userSources[k]
-			in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
+			in := rpc2.UserAuthenticateIn{User: rpc2.UserAuthenticateIn0{
 				Email:    userSrc.Email,
 				Password: userSrc.Password,
 			}}
@@ -166,7 +166,7 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		email := "foo@bar.com"
 		password := "abcdefg"
 
-		in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
+		in := rpc2.UserAuthenticateIn{User: rpc2.UserAuthenticateIn0{
 			Email:    email,
 			Password: password,
 		}}
@@ -346,7 +346,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		updatedUsername := username4
 		updatedEmail := userSources[updatedUsername].Email
 
-		in := rpc.UserUpdateIn{User: model.UserPatch{
+		in := rpc2.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     &updatedEmail,
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -357,7 +357,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		out, err := userUpdateSfl(ctx, reqCtx, in)
 		assert.NoError(t, err)
 
-		expected := rpc.UserOut{User: rpc.UserOut0{
+		expected := rpc2.UserOut{User: rpc2.UserOut0{
 			Email:    *in.User.Email,
 			Token:    reqCtx.Token.Raw,
 			Username: *in.User.Username,
@@ -373,7 +373,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		updatedUsername := username1
 
-		in := rpc.UserUpdateIn{User: model.UserPatch{
+		in := rpc2.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     util.PointerFromValue(updatedUsername + "@foo.com"),
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -395,7 +395,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		updatedUsername := username4
 
-		in := rpc.UserUpdateIn{User: model.UserPatch{
+		in := rpc2.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     util.PointerFromValue(userSources[username1].Email),
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -417,7 +417,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		updatedUsername := "updated_username4"
 
-		in := rpc.UserUpdateIn{User: model.UserPatch{
+		in := rpc2.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     util.PointerFromValue(updatedUsername + "@foo.com"),
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -428,7 +428,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		out, err := userUpdateSfl(ctx, reqCtx, in)
 		assert.NoError(t, err)
 
-		expected := rpc.UserOut{User: rpc.UserOut0{
+		expected := rpc2.UserOut{User: rpc2.UserOut0{
 			Email:    *in.User.Email,
 			Token:    reqCtx.Token.Raw,
 			Username: *in.User.Username,

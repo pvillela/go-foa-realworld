@@ -8,6 +8,7 @@ package sfl
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/rpc"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
@@ -15,7 +16,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ProfileGetSflT is the type of the stereotype instance for the service flow that
