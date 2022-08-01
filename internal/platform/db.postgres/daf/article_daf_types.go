@@ -10,6 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"time"
 )
 
@@ -51,4 +52,4 @@ type ArticlesFeedDafT = func(ctx context.Context, tx pgx.Tx, currUserId uint, op
 
 // ArticlesListDafT is the type of the stereotype instance for the DAF that
 // retrieve recent articles based on a set of query parameters.
-type ArticlesListDafT = func(ctx context.Context, tx pgx.Tx, currUserId uint, criteria model.ArticleCriteria) ([]model.ArticlePlus, error)
+type ArticlesListDafT = func(ctx context.Context, tx pgx.Tx, currUserId uint, criteria rpc.ArticleCriteria) ([]model.ArticlePlus, error)

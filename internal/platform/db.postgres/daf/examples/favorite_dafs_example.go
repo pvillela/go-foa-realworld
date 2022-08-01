@@ -14,6 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/rpc"
 )
 
 func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
@@ -41,7 +42,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 	{
 		currUserId := users[0].Id
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: util.PointerFromValue(users[2].Username),
@@ -56,7 +57,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 	{
 		currUserId := users[2].Id
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: util.PointerFromValue(users[0].Username),
@@ -74,7 +75,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 
 		currUserId := users[0].Id
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: util.PointerFromValue(users[2].Username),

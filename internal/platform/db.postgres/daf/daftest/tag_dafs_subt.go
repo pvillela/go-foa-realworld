@@ -14,6 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -114,7 +115,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 
 		currUserId := mdb.UserGetByName(currUsername).Id
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: nil,
@@ -137,7 +138,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 
 		currUserId := mdb.UserGetByName(currUsername).Id
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         util.PointerFromValue(tagName1),
 			Author:      nil,
 			FavoritedBy: nil,
@@ -204,7 +205,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 
 				currUserId := mdb.UserGetByName(currUsername).Id
 
-				criteria := model.ArticleCriteria{
+				criteria := rpc.ArticleCriteria{
 					Tag:         nil,
 					Author:      nil,
 					FavoritedBy: nil,

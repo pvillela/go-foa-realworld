@@ -13,8 +13,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/rpc"
-
-	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // ArticlesListSflT is the type of the stereotype instance for the service flow that
@@ -22,7 +20,7 @@ import (
 type ArticlesListSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in model.ArticleCriteria,
+	in rpc.ArticleCriteria,
 ) (rpc.ArticlesOut, error)
 
 // ArticlesListSflC is the function that constructs a stereotype instance of type
@@ -49,7 +47,7 @@ func ArticlesListSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in model.ArticleCriteria,
+		in rpc.ArticleCriteria,
 	) (rpc.ArticlesOut, error) {
 		username := reqCtx.Username
 		zero := rpc.ArticlesOut{}

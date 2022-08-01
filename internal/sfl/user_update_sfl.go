@@ -11,7 +11,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
+	"github.com/pvillela/go-foa-realworld/rpc"
 )
 
 // UserUpdateSflT is the type of the stereotype instance for the service flow that
@@ -19,8 +19,8 @@ import (
 type UserUpdateSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc2.UserUpdateIn,
-) (rpc2.UserOut, error)
+	in rpc.UserUpdateIn,
+) (rpc.UserOut, error)
 
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT with hard-wired stereotype dependencies.
@@ -45,25 +45,25 @@ func UserUpdateSflC0(
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
-		in rpc2.UserUpdateIn,
-	) (rpc2.UserOut, error) {
+		in rpc.UserUpdateIn,
+	) (rpc.UserOut, error) {
 		username := reqCtx.Username
 
 		user, rc, err := userGetByNameDaf(ctx, username)
 		if err != nil {
-			return rpc2.UserOut{}, err
+			return rpc.UserOut{}, err
 		}
 
 		user = user.Update(in.User)
 
 		_, err = userUpdateDaf(ctx, user, rc)
 		if err != nil {
-			return rpc2.UserOut{}, err
+			return rpc.UserOut{}, err
 		}
 
 		token := reqCtx.Token
 
-		userOut := rpc2.UserOut_FromModel(user, token.Raw)
+		userOut := rpc.UserOut_FromModel(user, token.Raw)
 		return userOut, nil
 	})
 }

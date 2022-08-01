@@ -15,6 +15,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -59,7 +60,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 
 		currUser := mdb.UserGetByName(currUsername)
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: &favoritedBy,
@@ -92,7 +93,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 
 		currUser := mdb.UserGetByName(currUsername)
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: &favoritedBy,
@@ -124,7 +125,7 @@ var favoriteDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, t
 
 		mdb.FavoritedDelete(favoritedBy, slug)
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
 			FavoritedBy: &favoritedBy,

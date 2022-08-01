@@ -13,6 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"time"
 )
 
@@ -194,7 +195,7 @@ var ArticlesListDaf ArticlesListDafT = func(
 	ctx context.Context,
 	tx pgx.Tx,
 	currUserId uint,
-	criteria model.ArticleCriteria,
+	criteria rpc.ArticleCriteria,
 ) ([]model.ArticlePlus, error) {
 	// See mainArticlePlusQuery
 	var join string

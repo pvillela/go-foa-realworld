@@ -12,7 +12,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 )
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
@@ -20,8 +19,8 @@ import (
 type UserAuthenticateSflT = func(
 	ctx context.Context,
 	_ web.RequestContext,
-	in rpc2.UserAuthenticateIn,
-) (rpc2.UserOut, error)
+	in rpc.UserAuthenticateIn,
+) (rpc.UserOut, error)
 
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT with hard-wired stereotype dependencies.
@@ -49,9 +48,9 @@ func UserAuthenticateSflC0(
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
-		in rpc2.UserAuthenticateIn,
-	) (rpc2.UserOut, error) {
-		var zero rpc2.UserOut
+		in rpc.UserAuthenticateIn,
+	) (rpc.UserOut, error) {
+		var zero rpc.UserOut
 		email := in.User.Email
 		password := in.User.Password
 
@@ -71,7 +70,7 @@ func UserAuthenticateSflC0(
 			return zero, err
 		}
 
-		userOut := rpc2.UserOut_FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token)
 		return userOut, err
 	})
 }

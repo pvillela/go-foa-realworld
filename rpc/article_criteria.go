@@ -4,7 +4,7 @@
  * that can be found in the LICENSE file.
  */
 
-package model
+package rpc
 
 // ArticleCriteria defines criteria for selection of articles
 type ArticleCriteria struct {

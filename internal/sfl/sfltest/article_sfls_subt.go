@@ -8,7 +8,6 @@ package sfltest
 
 import (
 	"context"
-	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -74,7 +73,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			}
 			article := aa.Article
 
-			in := rpc2.ArticleCreateIn{Article: rpc2.ArticleCreateIn0{
+			in := rpc.ArticleCreateIn{Article: rpc.ArticleCreateIn0{
 				Title:       article.Title,
 				Description: article.Description,
 				Body:        article.Body,
@@ -87,7 +86,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			user, err := testutil.UserGetByName(db, ctx, authorname)
 			assert.NoError(t, err)
 
-			expected := rpc2.ArticleOut{Article: model.ArticlePlus{
+			expected := rpc.ArticleOut{Article: model.ArticlePlus{
 				Id:             articleOut.Article.Id, // not independently checked
 				Slug:           util.Slug(article.Title),
 				Author:         model.Profile_FromUser(user, false),
@@ -117,7 +116,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			}
 			article := aa.Article
 
-			in := rpc2.ArticleCreateIn{Article: rpc2.ArticleCreateIn0{
+			in := rpc.ArticleCreateIn{Article: rpc.ArticleCreateIn0{
 				Title:       article.Title,
 				Description: "dummy description",
 				Body:        util.PointerFromValue("dummy body"),

@@ -15,6 +15,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -130,7 +131,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	{
 		msg := "ArticlesListDaf - select author"
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      &author.Username,
 			FavoritedBy: nil,
@@ -150,7 +151,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 	{
 		msg := "ArticlesListDaf - select tag"
 
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         util.PointerFromValue("FOOTAG"),
 			Author:      nil,
 			FavoritedBy: nil,

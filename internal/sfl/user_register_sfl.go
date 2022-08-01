@@ -12,7 +12,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/rpc"
 )
 
 // UserRegisterSflT is the type of the stereotype instance for the service flow that
@@ -20,8 +19,8 @@ import (
 type UserRegisterSflT = func(
 	ctx context.Context,
 	_ web.RequestContext,
-	in rpc2.UserRegisterIn,
-) (rpc2.UserOut, error)
+	in rpc.UserRegisterIn,
+) (rpc.UserOut, error)
 
 // UserRegisterSflC is the function that constructs a stereotype instance of type
 // UserRegisterSflT with hard-wired stereotype dependencies.
@@ -47,21 +46,21 @@ func UserRegisterSflC0(
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,
-		in rpc2.UserRegisterIn,
-	) (rpc2.UserOut, error) {
+		in rpc.UserRegisterIn,
+	) (rpc.UserOut, error) {
 		user := in.ToUser()
 
 		_, err := userCreateDaf(ctx, &user)
 		if err != nil {
-			return rpc2.UserOut{}, err
+			return rpc.UserOut{}, err
 		}
 
 		token, err := userGenTokenBf(user)
 		if err != nil {
-			return rpc2.UserOut{}, err
+			return rpc.UserOut{}, err
 		}
 
-		userOut := rpc2.UserOut_FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token)
 		return userOut, nil
 	})
 }

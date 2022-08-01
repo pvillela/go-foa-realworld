@@ -16,6 +16,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -67,7 +68,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 	currUserId := users[0].Id
 
 	{
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      &users[1].Username,
 			FavoritedBy: nil,
@@ -93,7 +94,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	{
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      &users[1].Username,
 			FavoritedBy: nil,
@@ -106,7 +107,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 	}
 
 	{
-		criteria := model.ArticleCriteria{
+		criteria := rpc.ArticleCriteria{
 			Tag:         util.PointerFromValue("FOOTAG"),
 			Author:      nil,
 			FavoritedBy: nil,
