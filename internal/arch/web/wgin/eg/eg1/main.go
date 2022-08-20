@@ -9,6 +9,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
+	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin/eg"
 )
 
 // Binding from JSON
@@ -22,8 +23,8 @@ type Out struct {
 	Out string
 }
 
-func svc(ctx context.Context, in In) (Out, error) {
-	username := web.ContextToRequestContext(ctx).Username
+func svc(ctx context.Context, reqCtx web.RequestContext, in In) (Out, error) {
+	username := reqCtx.Username
 	fmt.Println("username = ", username)
 	if in.User != "manu" || in.Password != "123" {
 		return Out{}, fmt.Errorf("Invalid user='%v' or password='%v'", in.User, in.Password)
@@ -31,21 +32,16 @@ func svc(ctx context.Context, in In) (Out, error) {
 	return Out{in.User + in.Password}, nil
 }
 
-var secretKey = []byte("1234567890")
-
 func dummyAuthenticator(pReq *http.Request) (bool, *jwt.Token, error) {
-	token, err := web.VerifiedJwtToken(pReq, secretKey)
-	if err != nil {
-		return false, token, err
-	}
-	fmt.Println("authenticator ran\n", "claims:", token)
-	return true, token, nil
+	tokenDetails, _ := web.CreateToken("me", eg.SecretKey, 100_000_000, 2_000_000)
+	fmt.Println("authenticator ran\n", "tokenDetails:", tokenDetails)
+	return true, tokenDetails.AccessToken, nil
 }
 
 var defaultReqCtxExtractor = web.DefaultReqCtxExtractor
 
 var svcH = wgin.MakeStdFullBodySflHandler[In, Out](
-	dummyAuthenticator, defaultReqCtxExtractor, web.DefaultErrorHandler,
+	nil, false, defaultReqCtxExtractor, web.DefaultErrorHandler,
 )(svc)
 
 func main() {
