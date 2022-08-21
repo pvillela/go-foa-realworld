@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -45,13 +48,40 @@ var svcH = wgin.MakeStdFullBodySflHandler[In, Out](
 )(svc)
 
 func main() {
-	router := gin.Default()
+	out := os.Stdout
+	r, w := io.Pipe()
+	mw := io.MultiWriter(out, w)
+	bytes := []byte{99, 88}
+	go func() {
+		r.Read(bytes)
+	}()
+	mw.Write([]byte{1, 2})
+	fmt.Println("bytes =", bytes)
+	out.Write([]byte{3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
 
-	// Example for binding JSON ({"user": "manu", "password": "123"})
+	go func() {
+		fmt.Println("11111111111111")
+		router := gin.Default()
+		fmt.Println("22222222222222")
 
-	router.POST("/loginJSON", svcH)
-	router.POST("/loginJSON/:password", svcH)
+		// Example for binding JSON ({"user": "manu", "password": "123"})
 
-	// Listen and serve on 0.0.0.0:8080
-	router.Run(":8080")
+		router.POST("/loginJSON", svcH)
+		router.POST("/loginJSON/:password", svcH)
+		fmt.Println("333333333333333")
+
+		// Listen and serve on 0.0.0.0:8080
+		err := router.Run(":8080")
+		fmt.Println("Server terminated:", err) // this never prints
+	}()
+
+	n := 5
+	delta := 5 * time.Second
+	for i := 1; i <= n; i++ {
+		time.Sleep(delta)
+		fmt.Println("Running server:", (time.Duration(i) * delta).Seconds(),
+			"seconds of", (time.Duration(n) * delta).Seconds(), "seconds")
+	}
+	fmt.Println("read bytes =", bytes)
+	fmt.Println("Exiting")
 }
