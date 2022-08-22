@@ -8,6 +8,7 @@ package sfltest
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v4"

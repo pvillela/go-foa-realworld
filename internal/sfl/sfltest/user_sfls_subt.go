@@ -17,6 +17,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
+	"github.com/pvillela/go-foa-realworld/rpc"
 	"testing"
 	"time"
 
