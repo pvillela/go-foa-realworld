@@ -30,14 +30,16 @@ func logOutput() func() {
 
 	go func() {
 		newline := true
-		bytes := []byte{99}
+		bytes := make([]byte, 1000)
 		for {
-			pr.Read(bytes)
+			n, _ := pr.Read(bytes)
 			if newline {
 				out.Write([]byte("pr="))
 				newline = false
 			}
-			out.Write(bytes)
+			out.Write([]byte("begin****************************\n"))
+			out.Write(bytes[:n])
+			out.Write([]byte("end****************************\n"))
 			if bytes[0] == '\n' {
 				newline = true
 			}

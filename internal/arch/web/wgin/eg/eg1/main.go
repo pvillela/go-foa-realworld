@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
-	"net/http"
-	"os"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin/eg"
+	"io"
+	"net/http"
+	"os"
+	"strings"
+	"time"
 )
 
 // Binding from JSON
@@ -48,33 +48,68 @@ var svcH = wgin.MakeStdFullBodySflHandler[In, Out](
 )(svc)
 
 func main() {
+	// save existing stdout | MultiWriter writes to saved stdout and pipe
 	out := os.Stdout
-	r, w := io.Pipe()
-	mw := io.MultiWriter(out, w)
-	bytes := []byte{99, 88}
-	go func() {
-		r.Read(bytes)
-	}()
-	mw.Write([]byte{1, 2})
-	fmt.Println("bytes =", bytes)
-	out.Write([]byte{3, 3, 3, 3, 3, 3, 3, 3, 3, 3})
+
+	pr, pw := io.Pipe()
+
+	serverReadyStr := "Listening and serving HTTP on"
+	serverReady := make(chan bool)
 
 	go func() {
-		fmt.Println("11111111111111")
+		const bufSize = 100
+		bytes := make([]byte, bufSize)
+		sb := strings.Builder{}
+		found := false
+		for {
+			n, _ := pr.Read(bytes)
+			if !found {
+				sb.Write(bytes[:n])
+				if strings.Contains(sb.String(), serverReadyStr) {
+					found = true
+					serverReady <- true
+				}
+			}
+		}
+	}()
+
+	mw := io.MultiWriter(out, pw)
+
+	// get pipe reader and writer | writes to pipe writer come out pipe reader
+	r, w, _ := os.Pipe()
+
+	// replace stdout,stderr with pipe writer | all writes to stdout, stderr will go through pipe instead (fmt.print, log)
+	os.Stdout = w
+	os.Stderr = w
+
+	//create channel to control exit | will block until all copies are finished
+	exit := make(chan bool)
+
+	go func() {
+		// copy all reads from pipe to multiwriter, which writes to stdout and file
+		_, _ = io.Copy(mw, r)
+		// when r or w is closed copy will finish and true will be sent to channel
+		exit <- true
+	}()
+
+	go func() {
+		gin.DefaultWriter = w
+
 		router := gin.Default()
-		fmt.Println("22222222222222")
 
 		// Example for binding JSON ({"user": "manu", "password": "123"})
 
 		router.POST("/loginJSON", svcH)
 		router.POST("/loginJSON/:password", svcH)
-		fmt.Println("333333333333333")
 
 		// Listen and serve on 0.0.0.0:8080
 		err := router.Run(":8080")
-		fmt.Println("Server terminated:", err) // this never prints
+		fmt.Println("Server terminated:", err) // this never prints unless there is an error
 	}()
 
+	<-serverReady
+	//out.Write([]byte("***** Server is ready\n"))
+	fmt.Println("***** Server is ready")
 	n := 5
 	delta := 5 * time.Second
 	for i := 1; i <= n; i++ {
@@ -82,6 +117,7 @@ func main() {
 		fmt.Println("Running server:", (time.Duration(i) * delta).Seconds(),
 			"seconds of", (time.Duration(n) * delta).Seconds(), "seconds")
 	}
-	fmt.Println("read bytes =", bytes)
 	fmt.Println("Exiting")
+	w.Close()
+	<-exit
 }
