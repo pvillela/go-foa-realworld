@@ -47,15 +47,23 @@ var svcH = wgin.MakeStdFullBodySflHandler[In, Out](
 	nil, false, defaultReqCtxExtractor, web.DefaultErrorHandler,
 )(svc)
 
-func main() {
-	// save existing stdout | MultiWriter writes to saved stdout and pipe
-	out := os.Stdout
-
+// GinLaunchAndSignal launches Gin on a given port in a separate goroutine and returns
+// a channel that signals when the server is ready and a function to be deferred to
+// close the pipe used in the implementation.
+func GinLaunchAndSignal(engine *gin.Engine, port int) (serverReady chan bool, closePipe func()) {
+	// Create memory pipe for tee with stdout
 	pr, pw := io.Pipe()
 
-	serverReadyStr := "Listening and serving HTTP on"
-	serverReady := make(chan bool)
+	// Define tee
+	mw := io.MultiWriter(os.Stdout, pw)
 
+	// String in stdout that signals when server is ready
+	serverReadyStr := "Listening and serving HTTP on"
+
+	// Channel to signal when server is ready
+	serverReady = make(chan bool)
+
+	// Look for string in stdout and send server ready signal
 	go func() {
 		const bufSize = 100
 		bytes := make([]byte, bufSize)
@@ -73,43 +81,54 @@ func main() {
 		}
 	}()
 
-	mw := io.MultiWriter(out, pw)
-
-	// get pipe reader and writer | writes to pipe writer come out pipe reader
+	// Get os pipe reader and writer; writes to pipe writer come out pipe reader
 	r, w, _ := os.Pipe()
 
-	// replace stdout,stderr with pipe writer | all writes to stdout, stderr will go through pipe instead (fmt.print, log)
-	os.Stdout = w
-	os.Stderr = w
-
-	//create channel to control exit | will block until all copies are finished
+	// Create channel to control exit; will block until all copies are finished
 	exit := make(chan bool)
 
 	go func() {
-		// copy all reads from pipe to multiwriter, which writes to stdout and file
+		// copy all reads from os pipe to multiwriter, which writes to stdout and memory pipe
 		_, _ = io.Copy(mw, r)
 		// when r or w is closed copy will finish and true will be sent to channel
 		exit <- true
 	}()
 
+	// Redefine Gin writer to use tee
+	gin.DefaultWriter = w
+
 	go func() {
-		gin.DefaultWriter = w
-
-		router := gin.Default()
-
-		// Example for binding JSON ({"user": "manu", "password": "123"})
-
-		router.POST("/loginJSON", svcH)
-		router.POST("/loginJSON/:password", svcH)
-
-		// Listen and serve on 0.0.0.0:8080
-		err := router.Run(":8080")
+		// Listen and serve on 0.0.0.0:port
+		err := engine.Run(fmt.Sprintf(":%v", port))
 		fmt.Println("Server terminated:", err) // this never prints unless there is an error
 	}()
 
+	closePipe = func() {
+		_ = w.Close()
+		<-exit
+	}
+
+	return serverReady, closePipe
+}
+
+func main() {
+	// Create Gin engine
+	router := gin.Default()
+
+	// Define routes
+	// Example for binding JSON ({"user": "manu", "password": "123"})
+	router.POST("/loginJSON", svcH)
+	router.POST("/loginJSON/:password", svcH)
+
+	serverReady, closePipe := GinLaunchAndSignal(router, 8080)
+	defer closePipe()
+
+	// Wait until server is ready
 	<-serverReady
-	//out.Write([]byte("***** Server is ready\n"))
 	fmt.Println("***** Server is ready")
+
+	// Keep server running for n * delta seconds
+
 	n := 5
 	delta := 5 * time.Second
 	for i := 1; i <= n; i++ {
@@ -118,6 +137,4 @@ func main() {
 			"seconds of", (time.Duration(n) * delta).Seconds(), "seconds")
 	}
 	fmt.Println("Exiting")
-	w.Close()
-	<-exit
 }
