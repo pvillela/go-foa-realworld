@@ -10,8 +10,9 @@ import (
 
 // GinLaunchAndSignal launches Gin on a given port in a separate goroutine and returns
 // a channel that signals when the server is ready and a function to be deferred to
-// close the pipe used in the implementation.
-func GinLaunchAndSignal(engine *gin.Engine, port int) (serverReady chan bool, closePipe func()) {
+// close the pipe used in the implementation. The router parameter is a Gin Engine with
+// configured routes.
+func GinLaunchAndSignal(router *gin.Engine, port int) (serverReady chan bool, closePipe func()) {
 	// Create memory pipe for tee with stdout
 	pr, pw := io.Pipe()
 
@@ -60,7 +61,7 @@ func GinLaunchAndSignal(engine *gin.Engine, port int) (serverReady chan bool, cl
 
 	go func() {
 		// Listen and serve on 0.0.0.0:port
-		err := engine.Run(fmt.Sprintf(":%v", port))
+		err := router.Run(fmt.Sprintf(":%v", port))
 		fmt.Println("Server terminated:", err) // this never prints unless there is an error
 	}()
 
