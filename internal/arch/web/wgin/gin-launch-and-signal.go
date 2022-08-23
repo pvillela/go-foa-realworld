@@ -12,7 +12,10 @@ import (
 // a channel that signals when the server is ready and a function to be deferred to
 // close the pipe used in the implementation. The router parameter is a Gin Engine with
 // configured routes.
-func GinLaunchAndSignal(router *gin.Engine, port int) (serverReady chan bool, closePipe func()) {
+func GinLaunchAndSignal(
+	router *gin.Engine,
+	port int,
+) (serverReady chan bool, closePipe func(), err error) {
 	// Create memory pipe for tee with stdout
 	pr, pw := io.Pipe()
 
@@ -44,7 +47,10 @@ func GinLaunchAndSignal(router *gin.Engine, port int) (serverReady chan bool, cl
 	}()
 
 	// Get os pipe reader and writer; writes to pipe writer come out pipe reader
-	r, w, _ := os.Pipe()
+	r, w, err := os.Pipe()
+	if err != nil {
+		return nil, nil, err
+	}
 
 	// Create channel to control exit; will block until all copies are finished
 	exit := make(chan bool)
@@ -62,7 +68,10 @@ func GinLaunchAndSignal(router *gin.Engine, port int) (serverReady chan bool, cl
 	go func() {
 		// Listen and serve on 0.0.0.0:port
 		err := router.Run(fmt.Sprintf(":%v", port))
-		fmt.Println("Server terminated:", err) // this never prints unless there is an error
+
+		// Lines below don't execute unless there is an error
+		fmt.Println("Server terminated:", err)
+		os.Exit(1)
 	}()
 
 	closePipe = func() {
@@ -70,5 +79,5 @@ func GinLaunchAndSignal(router *gin.Engine, port int) (serverReady chan bool, cl
 		<-exit
 	}
 
-	return serverReady, closePipe
+	return serverReady, closePipe, nil
 }

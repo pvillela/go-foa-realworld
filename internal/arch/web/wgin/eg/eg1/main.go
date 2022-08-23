@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin/eg"
@@ -53,12 +54,12 @@ func main() {
 	router.POST("/loginJSON", svcH)
 	router.POST("/loginJSON/:password", svcH)
 
-	serverReady, closePipe := wgin.GinLaunchAndSignal(router, 8080)
+	serverReady, closePipe, err := wgin.GinLaunchAndSignal(router, 8080)
+	errx.PanicOnError(err)
 	defer closePipe()
 
 	// Wait until server is ready
 	<-serverReady
-	fmt.Println("***** Server is ready")
 
 	// Keep server running for n * delta seconds
 
