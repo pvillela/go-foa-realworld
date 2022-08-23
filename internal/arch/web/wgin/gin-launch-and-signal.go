@@ -3,9 +3,12 @@ package wgin
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"io"
+	"net/http"
 	"os"
-	"strings"
+	//"strings"
+	"time"
 )
 
 // GinLaunchAndSignal launches Gin on a given port in a separate goroutine and returns
@@ -18,32 +21,47 @@ func GinLaunchAndSignal(
 ) (serverReady chan bool, closePipe func(), err error) {
 	// Create memory pipe for tee with stdout
 	pr, pw := io.Pipe()
-
+	util.Ignore(pr)
 	// Define tee
 	mw := io.MultiWriter(os.Stdout, pw)
 
 	// String in stdout that signals when server is ready
-	serverReadyStr := "Listening and serving HTTP on"
+	//serverReadyStr := "Listening and serving HTTP on"
 
 	// Channel to signal when server is ready
 	serverReady = make(chan bool)
 
 	// Look for string in stdout and send server ready signal
+	//go func() {
+	//	const bufSize = 100
+	//	bytes := make([]byte, bufSize)
+	//	sb := strings.Builder{}
+	//	found := false
+	//	for {
+	//		n, _ := pr.Read(bytes)
+	//		if !found {
+	//			sb.Write(bytes[:n])
+	//			if strings.Contains(sb.String(), serverReadyStr) {
+	//				found = true
+	//				//// wait because Gin outputs serverReadyStr before it is really ready
+	//				//time.Sleep(100 * time.Millisecond)
+	//				serverReady <- true
+	//			}
+	//		}
+	//	}
+	//}()
+
 	go func() {
-		const bufSize = 100
-		bytes := make([]byte, bufSize)
-		sb := strings.Builder{}
-		found := false
 		for {
-			n, _ := pr.Read(bytes)
-			if !found {
-				sb.Write(bytes[:n])
-				if strings.Contains(sb.String(), serverReadyStr) {
-					found = true
-					serverReady <- true
-				}
+			resp, err := http.Get("http://localhost:8080/")
+			fmt.Println("resp:", resp)
+			fmt.Println("err:", err)
+			if err == nil {
+				break
 			}
+			time.Sleep(100 * time.Millisecond)
 		}
+		serverReady <- true
 	}()
 
 	// Get os pipe reader and writer; writes to pipe writer come out pipe reader
@@ -66,6 +84,8 @@ func GinLaunchAndSignal(
 	gin.DefaultWriter = w
 
 	go func() {
+		time.Sleep(300 * time.Millisecond)
+
 		// Listen and serve on 0.0.0.0:port
 		err := router.Run(fmt.Sprintf(":%v", port))
 

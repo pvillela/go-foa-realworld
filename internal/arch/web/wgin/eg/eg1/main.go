@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -10,7 +12,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin/eg"
 	"net/http"
-	"time"
 )
 
 // Binding from JSON
@@ -25,8 +26,6 @@ type Out struct {
 }
 
 func svc(ctx context.Context, reqCtx web.RequestContext, in In) (Out, error) {
-	username := reqCtx.Username
-	fmt.Println("username = ", username)
 	if in.User != "manu" || in.Password != "123" {
 		return Out{}, fmt.Errorf("Invalid user='%v' or password='%v'", in.User, in.Password)
 	}
@@ -45,6 +44,46 @@ var svcH = wgin.MakeStdFullBodySflHandler[In, Out](
 	nil, false, defaultReqCtxExtractor, web.DefaultErrorHandler,
 )(svc)
 
+func processRequests() {
+	callServer := func(path string, payload []byte) {
+		fmt.Println()
+		fmt.Println("payload:", string(payload))
+		resp, err := http.Post("http://localhost:8080"+path, "application/json",
+			bytes.NewBuffer(payload))
+		errx.PanicOnError(err)
+
+		var res map[string]any
+		err = json.NewDecoder(resp.Body).Decode(&res)
+		errx.PanicOnError(err)
+		fmt.Println((resp.Status))
+		fmt.Println("response:", res)
+	}
+
+	{
+		path := "/loginJSON"
+		payload := []byte(`{ "user": "manu", "password": "123" }`)
+		callServer(path, payload)
+	}
+
+	{
+		path := "/loginJSON?password=123"
+		payload := []byte(`{ "user": "manu" }`)
+		callServer(path, payload)
+	}
+
+	{
+		path := "/loginJSON/123"
+		payload := []byte(`{ "user": "manu" }`)
+		callServer(path, payload)
+	}
+
+	{
+		path := "/loginJSON"
+		payload := []byte(`{ "user": "manu" }`)
+		callServer(path, payload)
+	}
+}
+
 func main() {
 	// Create Gin engine
 	router := gin.Default()
@@ -61,14 +100,16 @@ func main() {
 	// Wait until server is ready
 	<-serverReady
 
-	// Keep server running for n * delta seconds
+	processRequests()
 
-	n := 5
-	delta := 5 * time.Second
-	for i := 1; i <= n; i++ {
-		time.Sleep(delta)
-		fmt.Println("Running server:", (time.Duration(i) * delta).Seconds(),
-			"seconds of", (time.Duration(n) * delta).Seconds(), "seconds")
-	}
+	//// Keep server running for n * delta seconds
+	//n := 5
+	//delta := 5 * time.Second
+	//for i := 1; i <= n; i++ {
+	//	time.Sleep(delta)
+	//	fmt.Println("Running server:", (time.Duration(i) * delta).Seconds(),
+	//		"seconds of", (time.Duration(n) * delta).Seconds(), "seconds")
+	//}
+
 	fmt.Println("Exiting")
 }
