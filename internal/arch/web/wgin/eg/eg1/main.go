@@ -11,7 +11,9 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web/wgin/eg"
+	log "github.com/sirupsen/logrus"
 	"net/http"
+	"time"
 )
 
 // Binding from JSON
@@ -93,23 +95,23 @@ func main() {
 	router.POST("/loginJSON", svcH)
 	router.POST("/loginJSON/:password", svcH)
 
-	serverReady, closePipe, err := wgin.GinLaunchAndSignal(router, 8080)
-	errx.PanicOnError(err)
-	defer closePipe()
+	// Launch Gin server
+	go func() {
+		// Listen and serve on 0.0.0.0:8080
+		err := router.Run(":8080")
 
-	// Wait until server is ready
-	<-serverReady
+		// Lines below don't execute unless there is an error
+		log.Fatal("Server terminated:", err)
+	}()
+
+	// Wait for server to be ready
+	err := web.WaitForHttpServer("http://localhost:8080/", 100*time.Millisecond)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("***** Server ready")
 
 	processRequests()
-
-	//// Keep server running for n * delta seconds
-	//n := 5
-	//delta := 5 * time.Second
-	//for i := 1; i <= n; i++ {
-	//	time.Sleep(delta)
-	//	fmt.Println("Running server:", (time.Duration(i) * delta).Seconds(),
-	//		"seconds of", (time.Duration(n) * delta).Seconds(), "seconds")
-	//}
 
 	fmt.Println("Exiting")
 }
