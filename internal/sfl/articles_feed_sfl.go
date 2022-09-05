@@ -27,10 +27,10 @@ type ArticlesFeedSflT = func(
 // ArticlesFeedSflC is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT with hard-wired stereotype dependencies.
 func ArticlesFeedSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) ArticlesFeedSflT {
 	return ArticlesFeedSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameExplicitTxDaf,
 		daf.ArticlesFeedDaf,
 	)
@@ -39,11 +39,11 @@ func ArticlesFeedSflC(
 // ArticlesFeedSflC0 is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT without hard-wired stereotype dependencies.
 func ArticlesFeedSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesFeedDaf daf.ArticlesFeedDafT,
 ) ArticlesFeedSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

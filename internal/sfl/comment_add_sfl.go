@@ -27,10 +27,10 @@ type CommentAddSflT = func(
 // CommentAddSflC is the function that constructs a stereotype instance of type
 // CommentAddSflT with hard-wired stereotype dependencies.
 func CommentAddSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) CommentAddSflT {
 	return CommentAddSflC0(
-		cfgPvdr,
+		cfgSrc,
 		fl.ArticleAndUserGetFl,
 		daf.CommentCreateDaf,
 	)
@@ -39,11 +39,11 @@ func CommentAddSflC(
 // CommentAddSflC0 is the function that constructs a stereotype instance of type
 // CommentAddSflT without hard-wired stereotype dependencies.
 func CommentAddSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 	commentCreateDaf daf.CommentCreateDafT,
 ) CommentAddSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

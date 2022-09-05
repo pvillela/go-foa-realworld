@@ -26,10 +26,10 @@ type CommentsGetSflT = func(
 // CommentsGetSflC is the function that constructs a stereotype instance of type
 // CommentsGetSflT with hard-wired stereotype dependencies.
 func CommentsGetSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) CommentsGetSflT {
 	return CommentsGetSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.CommentsGetBySlugDaf,
 	)
 }
@@ -37,10 +37,10 @@ func CommentsGetSflC(
 // CommentsGetSflC0 is the function that constructs a stereotype instance of type
 // CommentsGetSflT without hard-wired stereotype dependencies.
 func CommentsGetSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	commentsGetBySlugDaf daf.CommentsGetBySlugDafT,
 ) CommentsGetSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

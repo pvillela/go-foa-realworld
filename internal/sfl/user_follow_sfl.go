@@ -27,10 +27,10 @@ type UserFollowSflT = func(
 // UserFollowSflC is the function that constructs a stereotype instance of type
 // UserFollowSflT with hard-wired stereotype dependencies.
 func UserFollowSflC(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 ) UserFollowSflT {
 	return UserFollowSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameDaf,
 		daf.FollowingCreateDaf,
 	)
@@ -39,11 +39,11 @@ func UserFollowSflC(
 // UserFollowSflC0 is the function that constructs a stereotype instance of type
 // UserFollowSflT without hard-wired stereotype dependencies.
 func UserFollowSflC0(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingCreateDaf daf.FollowingCreateDafT,
 ) UserFollowSflT {
-	ctxDb := cfgPvdr()
+	ctxDb := cfgSrc()
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,

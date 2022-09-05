@@ -10,6 +10,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 )
 
-// UserSflCfgPvdr is the the type of functions that provide
+// UserSflCfgSrc is the the type of functions that provide
 // the required config data for User service flow types.
-type UserSflCfgPvdr = func() (ctxDb cdb.CtxDb)
+type UserSflCfgSrc = func() (ctxDb cdb.CtxDb)

@@ -61,7 +61,7 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleCreateSfl := sfl.ArticleCreateSflC(makeDefaultSflCfgPvdr(db))
+	articleCreateSfl := sfl.ArticleCreateSflC(makeDefaultSflCfgSrc(db))
 
 	{
 		msg := "article_create_sfl - valid article"
@@ -136,7 +136,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleDeleteSfl := sfl.ArticleDeleteSflC(makeDefaultSflCfgPvdr(db))
+	articleDeleteSfl := sfl.ArticleDeleteSflC(makeDefaultSflCfgSrc(db))
 
 	{
 		msg := "article_delete_sfl - existing article authored by current user"
@@ -212,7 +212,7 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleFavoriteSfl := sfl.ArticleFavoriteSflC(makeDefaultSflCfgPvdr(db))
+	articleFavoriteSfl := sfl.ArticleFavoriteSflC(makeDefaultSflCfgSrc(db))
 
 	{
 		msg := "article_favorite_sfl - existing article, not yet favorited"
@@ -283,7 +283,7 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleGetSfl := sfl.ArticleGetSflC(makeDefaultSflCfgPvdr(db))
+	articleGetSfl := sfl.ArticleGetSflC(makeDefaultSflCfgSrc(db))
 
 	{
 		msg := "article_get_sfl - existing article"
@@ -331,7 +331,7 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleUnfavoriteSfl := sfl.ArticleUnfavoriteSflC(makeDefaultSflCfgPvdr(db))
+	articleUnfavoriteSfl := sfl.ArticleUnfavoriteSflC(makeDefaultSflCfgSrc(db))
 
 	{
 		msg := "article_unfavorite_sfl - existing article, previously favorited"
@@ -402,7 +402,7 @@ func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 //func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-//	articleUpdateSfl := sfl.ArticleUpdateSflC(makeDefaultSflCfgPvdr(db))
+//	articleUpdateSfl := sfl.ArticleUpdateSflC(makeDefaultSflCfgSrc(db))
 //
 //	{
 //		msg := "article_update_sfl - existing article authored by current user"

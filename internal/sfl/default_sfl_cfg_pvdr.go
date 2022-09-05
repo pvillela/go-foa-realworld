@@ -8,6 +8,6 @@ package sfl
 
 import "github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 
-// DefaultSflCfgPvdr is the the type of functions that provide
+// DefaultSflCfgSrc is the the type of functions that provide
 // the required config data for service flow types.
-type DefaultSflCfgPvdr = func() (db dbpgx.Db)
+type DefaultSflCfgSrc = func() (db dbpgx.Db)

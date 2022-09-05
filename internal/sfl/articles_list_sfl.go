@@ -26,10 +26,10 @@ type ArticlesListSflT = func(
 // ArticlesListSflC is the function that constructs a stereotype instance of type
 // ArticlesListSflT with hard-wired stereotype dependencies.
 func ArticlesListSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) ArticlesListSflT {
 	return ArticlesListSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameExplicitTxDaf,
 		daf.ArticlesListDaf,
 	)
@@ -38,11 +38,11 @@ func ArticlesListSflC(
 // ArticlesListSflC0 is the function that constructs a stereotype instance of type
 // ArticlesListSflT without hard-wired stereotype dependencies.
 func ArticlesListSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesListDaf daf.ArticlesListDafT,
 ) ArticlesListSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

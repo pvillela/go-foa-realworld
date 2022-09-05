@@ -70,13 +70,13 @@ var userSources = map[string]rpc.UserRegisterIn0{
 ///////////////////
 // Helpers
 
-func makeUserGenTokenHmacBfCfgPvdr(key []byte, tokenTtl time.Duration) bf.UserGenTokenHmacBfCfgPvdr {
+func makeUserGenTokenHmacBfCfgSrc(key []byte, tokenTtl time.Duration) bf.UserGenTokenHmacBfCfgSrc {
 	return func() ([]byte, time.Duration) {
 		return key, tokenTtl
 	}
 }
 
-func makeUserSflCfgPvdr(ctxDb cdb.CtxDb) sfl.UserSflCfgPvdr {
+func makeUserSflCfgSrc(ctxDb cdb.CtxDb) sfl.UserSflCfgSrc {
 	return func() cdb.CtxDb {
 		return ctxDb
 	}
@@ -90,8 +90,8 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgPvdr(secretKey, tokenTimeToLive))
-	userRegisterSfl := sfl.UserRegisterSflC(makeUserSflCfgPvdr(ctxDb), userGenTokenBf)
+	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
+	userRegisterSfl := sfl.UserRegisterSflC(makeUserSflCfgSrc(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_register_sfl - valid registration"
@@ -141,8 +141,8 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgPvdr(secretKey, tokenTimeToLive))
-	userAuthenticateSfl := sfl.UserAuthenticateSflC(makeUserSflCfgPvdr(ctxDb), userGenTokenBf)
+	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
+	userAuthenticateSfl := sfl.UserAuthenticateSflC(makeUserSflCfgSrc(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_authenticate_sfl - valid authentication"
@@ -186,7 +186,7 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserFollowSflC(makeUserSflCfgPvdr(ctxDb))
+	userFollowSfl := sfl.UserFollowSflC(makeUserSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -239,7 +239,7 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGetCurrentSfl := sfl.UserGetCurrentSflC(makeUserSflCfgPvdr(ctxDb))
+	userGetCurrentSfl := sfl.UserGetCurrentSflC(makeUserSflCfgSrc(ctxDb))
 
 	{
 		msg := "user_get_current_sfl - valid username"
@@ -280,7 +280,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserUnfollowSflC(makeUserSflCfgPvdr(ctxDb))
+	userFollowSfl := sfl.UserUnfollowSflC(makeUserSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -333,7 +333,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userUpdateSfl := sfl.UserUpdateSflC(makeUserSflCfgPvdr(ctxDb))
+	userUpdateSfl := sfl.UserUpdateSflC(makeUserSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username4,

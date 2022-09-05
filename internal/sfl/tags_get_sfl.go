@@ -23,10 +23,10 @@ type TagsGetSflT = func(ctx context.Context, reqCtx web.RequestContext, _ types.
 // TagsGetSflC is the function that constructs a stereotype instance of type
 // TagsGetSflT with hard-wired stereotype dependencies.
 func TagsGetSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) TagsGetSflT {
 	return TagsGetSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.TagsGetAllDaf,
 	)
 }
@@ -34,10 +34,10 @@ func TagsGetSflC(
 // TagsGetSflC0 is the function that constructs a stereotype instance of type
 // TagsGetSflT without hard-wired stereotype dependencies.
 func TagsGetSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	tagsGetAllDaf daf.TagsGetAllDafT,
 ) TagsGetSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

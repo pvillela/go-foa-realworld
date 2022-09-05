@@ -29,10 +29,10 @@ type ProfileGetSflT = func(
 // ProfileGetSflC is the function that constructs a stereotype instance of type
 // ProfileGetSflT with hard-wired stereotype dependencies.
 func ProfileGetSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) ProfileGetSflT {
 	return ProfileGetSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameExplicitTxDaf,
 		daf.FollowingGetDaf,
 	)
@@ -41,11 +41,11 @@ func ProfileGetSflC(
 // ProfileGetSflC0 is the function that constructs a stereotype instance of type
 // ProfileGetSflT without hard-wired stereotype dependencies.
 func ProfileGetSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	followingGetDaf daf.FollowingGetDafT,
 ) ProfileGetSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

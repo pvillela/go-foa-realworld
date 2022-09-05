@@ -11,7 +11,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 )
 
-func makeDefaultSflCfgPvdr(db dbpgx.Db) sfl.DefaultSflCfgPvdr {
+func makeDefaultSflCfgSrc(db dbpgx.Db) sfl.DefaultSflCfgSrc {
 	return func() dbpgx.Db {
 		return db
 	}

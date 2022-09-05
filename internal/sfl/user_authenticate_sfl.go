@@ -26,11 +26,11 @@ type UserAuthenticateSflT = func(
 // UserAuthenticateSflC is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT with hard-wired stereotype dependencies.
 func UserAuthenticateSflC(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 	userGenTokenBf bf.UserGenTokenBfT,
 ) UserAuthenticateSflT {
 	return UserAuthenticateSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByEmailDaf,
 		userGenTokenBf,
 		bf.UserAuthenticateBf,
@@ -40,12 +40,12 @@ func UserAuthenticateSflC(
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT without hard-wired stereotype dependencies.
 func UserAuthenticateSflC0(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 	userGetByEmailDaf daf.UserGetByEmailDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
-	ctxDb := cfgPvdr()
+	ctxDb := cfgSrc()
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,

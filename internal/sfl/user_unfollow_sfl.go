@@ -27,10 +27,10 @@ type UserUnfollowSflT = func(
 // UserUnfollowSflC is the function that constructs a stereotype instance of type
 // UserUnfollowSflT with hard-wired stereotype dependencies.
 func UserUnfollowSflC(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 ) UserFollowSflT {
 	return UserUnfollowSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameDaf,
 		daf.FollowingDeleteDaf,
 	)
@@ -39,11 +39,11 @@ func UserUnfollowSflC(
 // UserUnfollowSflC0 is the function that constructs a stereotype instance of type
 // UserUnfollowSflT without hard-wired stereotype dependencies.
 func UserUnfollowSflC0(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingDeleteDaf daf.FollowingDeleteDafT,
 ) UserFollowSflT {
-	ctxDb := cfgPvdr()
+	ctxDb := cfgSrc()
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,

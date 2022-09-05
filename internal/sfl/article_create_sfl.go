@@ -27,10 +27,10 @@ type ArticleCreateSflT = func(
 // ArticleCreateSflC is the function that constructs a stereotype instance of type
 // ArticleCreateSflT with hard-wired stereotype dependencies.
 func ArticleCreateSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) ArticleCreateSflT {
 	return ArticleCreateSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameExplicitTxDaf,
 		daf.ArticleCreateDaf,
 		daf.TagsAddNewDaf,
@@ -41,13 +41,13 @@ func ArticleCreateSflC(
 // ArticleCreateSflC0 is the function that constructs a stereotype instance of type
 // ArticleCreateSflT without hard-wired stereotype dependencies.
 func ArticleCreateSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articleCreateDaf daf.ArticleCreateDafT,
 	tagsAddNewDaf daf.TagsAddNewDafT,
 	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
 ) ArticleCreateSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

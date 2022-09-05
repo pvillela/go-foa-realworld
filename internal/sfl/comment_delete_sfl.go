@@ -28,10 +28,10 @@ type CommentDeleteSflT = func(
 // CommentDeleteSflC is the function that constructs a stereotype instance of type
 // CommentDeleteSflT with hard-wired stereotype dependencies.
 func CommentDeleteSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) CommentDeleteSflT {
 	return CommentDeleteSflC0(
-		cfgPvdr,
+		cfgSrc,
 		fl.ArticleAndUserGetFl,
 		daf.CommentDeleteDaf,
 	)
@@ -40,11 +40,11 @@ func CommentDeleteSflC(
 // CommentDeleteSflC0 is the function that constructs a stereotype instance of type
 // CommentDeleteSflT without hard-wired stereotype dependencies.
 func CommentDeleteSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	commentDeleteDaf daf.CommentDeleteDafT,
 ) CommentDeleteSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

@@ -25,10 +25,10 @@ type UserUpdateSflT = func(
 // UserUpdateSflC is the function that constructs a stereotype instance of type
 // UserUpdateSflT with hard-wired stereotype dependencies.
 func UserUpdateSflC(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 ) UserUpdateSflT {
 	return UserUpdateSflC0(
-		cfgPvdr,
+		cfgSrc,
 		daf.UserGetByNameDaf,
 		daf.UserUpdateDaf,
 	)
@@ -37,11 +37,11 @@ func UserUpdateSflC(
 // UserUpdateSflC0 is the function that constructs a stereotype instance of type
 // UserUpdateSflT without hard-wired stereotype dependencies.
 func UserUpdateSflC0(
-	cfgPvdr UserSflCfgPvdr,
+	cfgSrc UserSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	userUpdateDaf daf.UserUpdateDafT,
 ) UserUpdateSflT {
-	ctxDb := cfgPvdr()
+	ctxDb := cfgSrc()
 	return cdb.SflWithTransaction(ctxDb, func(
 		ctx context.Context,
 		reqCtx web.RequestContext,

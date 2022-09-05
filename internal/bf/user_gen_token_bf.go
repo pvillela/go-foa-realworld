@@ -16,27 +16,27 @@ import (
 
 type UserGenTokenBfT = func(user model.User) (string, error)
 
-type UserGenTokenEcdsaBfCfgPvdr = func() (
+type UserGenTokenEcdsaBfCfgSrc = func() (
 	privateKey ecdsa.PrivateKey,
 	tokenTimeToLive time.Duration,
 )
 
 func UserGenTokenEcdsaBfC(
-	cfgPvdr UserGenTokenEcdsaBfCfgPvdr,
+	cfgSrc UserGenTokenEcdsaBfCfgSrc,
 ) UserGenTokenBfT {
-	privateKey, tokenTimeToLive := cfgPvdr()
+	privateKey, tokenTimeToLive := cfgSrc()
 	return userGenTokenBfC[ecdsa.PrivateKey](privateKey, tokenTimeToLive, jwt.SigningMethodES256)
 }
 
-type UserGenTokenHmacBfCfgPvdr = func() (
+type UserGenTokenHmacBfCfgSrc = func() (
 	key []byte,
 	tokenTimeToLive time.Duration,
 )
 
 func UserGenTokenHmacBfC(
-	cfgPvdr UserGenTokenHmacBfCfgPvdr,
+	cfgSrc UserGenTokenHmacBfCfgSrc,
 ) UserGenTokenBfT {
-	key, tokenTimeToLive := cfgPvdr()
+	key, tokenTimeToLive := cfgSrc()
 	return userGenTokenBfC[[]byte](key, tokenTimeToLive, jwt.SigningMethodHS256)
 }
 

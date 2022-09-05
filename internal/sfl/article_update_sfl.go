@@ -29,10 +29,10 @@ type ArticleUpdateSflT = func(
 // ArticleUpdateSflC is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT with hard-wired stereotype dependencies.
 func ArticleUpdateSflC(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 ) ArticleUpdateSflT {
 	return ArticleUpdateSflC0(
-		cfgPvdr,
+		cfgSrc,
 		fl.ArticleGetAndCheckOwnerFl,
 		daf.ArticleUpdateDaf,
 	)
@@ -41,11 +41,11 @@ func ArticleUpdateSflC(
 // ArticleUpdateSflC0 is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT without hard-wired stereotype dependencies.
 func ArticleUpdateSflC0(
-	cfgPvdr DefaultSflCfgPvdr,
+	cfgSrc DefaultSflCfgSrc,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleUpdateSflT {
-	db := cfgPvdr()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
