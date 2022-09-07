@@ -8,12 +8,11 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/rpc"
-
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 )

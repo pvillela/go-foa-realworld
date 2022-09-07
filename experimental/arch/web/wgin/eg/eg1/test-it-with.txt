@@ -1,0 +1,23 @@
+# good request
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -d '{ "user": "manu", "password": "123" }'
+
+# good request
+curl -v -X POST \
+  http://localhost:8080/loginJSON?password=123 \
+  -H 'content-type: application/json' \
+  -d '{ "user": "manu" }'
+
+# good request
+curl -v -X POST \
+  http://localhost:8080/loginJSON/123 \
+  -H 'content-type: application/json' \
+  -d '{ "user": "manu" }'
+
+# bad request
+curl -v -X POST \
+  http://localhost:8080/loginJSON \
+  -H 'content-type: application/json' \
+  -d '{ "user": "manu" }'

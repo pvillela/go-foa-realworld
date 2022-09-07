@@ -12,10 +12,10 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
-	"github.com/pvillela/go-foa-realworld/rpc"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

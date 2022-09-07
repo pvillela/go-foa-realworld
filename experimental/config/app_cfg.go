@@ -1,0 +1,13 @@
+package config
+
+import "github.com/pvillela/go-foa-realworld/experimental/arch/util"
+
+type AppCfgInfo struct {
+}
+
+type AppCfgSrc func() AppCfgInfo
+
+func GetAppConfiguration() AppCfgInfo {
+	util.Todo[any]()
+	return AppCfgInfo{}
+}

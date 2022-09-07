@@ -13,7 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/rpc"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"time"
 )
 
