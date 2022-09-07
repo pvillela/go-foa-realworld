@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/internal/daf"
 	"github.com/pvillela/go-foa-realworld/rpc"
 )
 

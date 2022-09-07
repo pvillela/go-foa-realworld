@@ -3,7 +3,7 @@ package boot
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/config"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/internal/daf"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 )
 

@@ -10,7 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
+	"github.com/pvillela/go-foa-realworld/internal/daf"
 )
 
 // ArticleAndUserGetFlT is the type of the stereotype instance for the flow that

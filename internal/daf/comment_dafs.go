@@ -14,6 +14,30 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
+/////////////////////
+// Types
+
+// CommentsGetBySlugDafT is the type of the stereotype instance for the DAF that
+// retrieves all comments for the article with a given slug.
+type CommentsGetBySlugDafT = func(ctx context.Context, tx pgx.Tx, slug string) ([]model.Comment, error)
+
+// CommentCreateDafT is the type of the stereotype instance for the DAF that
+// creates a comment for an article.
+type CommentCreateDafT = func(ctx context.Context, tx pgx.Tx, comment *model.Comment) error
+
+// CommentDeleteDafT is the type of the stereotype instance for the DAF that
+// deletes a comment.
+type CommentDeleteDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	commentId uint,
+	articleId uint,
+	authorId uint,
+) error
+
+/////////////////////
+// DAFS
+
 // CommentCreateDaf implements a stereotype instance of type
 // CommentCreateDafT.
 var CommentCreateDaf CommentCreateDafT = func(

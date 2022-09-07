@@ -115,7 +115,9 @@ func ClassifyError(err error) *errx.Kind {
 		return DbErrUniqueViolation
 	}
 
-	if ok := errors.As(err, &pgx.ErrNoRows); ok || pgxscan.NotFound(err) {
+	// Kludge to remove warning "second argument to errors.As should not be *error"
+	var foo any = pgx.ErrNoRows
+	if ok := errors.As(err, &foo); ok || pgxscan.NotFound(err) {
 		return DbErrRecordNotFound
 	}
 

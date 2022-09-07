@@ -17,6 +17,32 @@ import (
 	"strings"
 )
 
+/////////////////////
+// Types
+
+// TagsGetAllDafT is the type of the stereotype instance for the DAF that
+// retrieves all tags.
+type TagsGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]model.Tag, error)
+
+// TagCreateDafT is the type of the stereotype instance for the DAF that
+// creates a new tag.
+type TagCreateDafT = func(ctx context.Context, tx pgx.Tx, tag *model.Tag) error
+
+// TagsAddNewDafT is the type of the stereotype instance for the DAF that
+// adds a list of tags, skipping those that already exist.
+type TagsAddNewDafT = func(ctx context.Context, tx pgx.Tx, names []string) error
+
+// TagAddToArticleDafT is the type of the stereotype instance for the DAF that
+// associates a tag with an article.
+type TagAddToArticleDafT = func(ctx context.Context, tx pgx.Tx, tag model.Tag, article model.Article) error
+
+// TagsAddToArticleDafT is the type of the stereotype instance for the DAF that
+// associates a list of tags with an article, skipping those that are already associated.
+type TagsAddToArticleDafT = func(ctx context.Context, tx pgx.Tx, names []string, article model.Article) error
+
+/////////////////////
+// DAFS
+
 // TagsGetAllDaf implements a stereotype instance of type
 // TagsGetAllDafT.
 var TagsGetAllDaf TagsGetAllDafT = func(ctx context.Context, tx pgx.Tx) ([]model.Tag, error) {

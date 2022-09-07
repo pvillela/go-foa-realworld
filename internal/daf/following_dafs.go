@@ -16,6 +16,39 @@ import (
 	"time"
 )
 
+/////////////////////
+// Types
+
+// FollowingCreateDafT is the type of the stereotype instance for the DAF that
+// associates a follower with a followee.
+type FollowingCreateDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	followerId uint,
+	followeeId uint,
+) (time.Time, error)
+
+// FollowingGetDafT is the type of the stereotype instance for the DAF that
+// retrieves an association between a follower and a followee.
+type FollowingGetDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	followerId uint,
+	followeeId uint,
+) (model.Following, error)
+
+// FollowingDeleteDafT is the type of the stereotype instance for the DAF that
+// disaassociates a follower from a followee.
+type FollowingDeleteDafT = func(
+	ctx context.Context,
+	tx pgx.Tx,
+	followerId uint,
+	followeeId uint,
+) error
+
+/////////////////////
+// DAFS
+
 // FollowingCreateDaf is the instance of the DAF stereotype that
 // associates a follower with a followee.
 var FollowingCreateDaf FollowingCreateDafT = func(

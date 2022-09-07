@@ -13,6 +13,21 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 )
 
+/////////////////////
+// Types
+
+// FavoriteCreateDafT is the instance of the DAF stereotype that
+// associates an article with a user that favors it.
+type FavoriteCreateDafT = func(ctx context.Context, tx pgx.Tx, articleId uint, userId uint) error
+
+// FavoriteDeleteDafT is the instance of the DAF stereotype that
+// disaassociates an article from a user that favors it.
+// Returns the number of rows affected, which can be 0 or 1.
+type FavoriteDeleteDafT = func(ctx context.Context, tx pgx.Tx, articleId uint, userId uint) error
+
+/////////////////////
+// DAFS
+
 // FavoriteCreateDaf is the instance of the DAF stereotype that
 // associates an article with a user that favors it.
 var FavoriteCreateDaf FavoriteCreateDafT = func(
