@@ -9,7 +9,6 @@ package daf
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
@@ -22,39 +21,21 @@ import (
 /////////////////////
 // Types
 
-// RecCtxUser is a type alias
-type RecCtxUser = dbpgx.RecCtx[model.User]
-
-// PwUser is a type alias
-type PwUser = db.Pw[model.User, RecCtxUser]
-
 // UserGetByNameDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by username.
-type UserGetByNameDafT = func(ctx context.Context, userName string) (model.User, RecCtxUser, error)
-
-// UserGetByNameExplicitTxDafT is the type of the stereotype instance for the DAF that
-// retrieves a user by username taking an explicit pgx.Tx.
-type UserGetByNameExplicitTxDafT = func(
-	ctx context.Context,
-	tx pgx.Tx,
-	username string,
-) (model.User, RecCtxUser, error)
+type UserGetByNameDafT = func(ctx context.Context, tx pgx.Tx, userName string) (model.User, error)
 
 // UserGetByEmailDafT is the type of the stereotype instance for the DAF that
 // retrieves a user by email address.
-type UserGetByEmailDafT = func(ctx context.Context, email string) (model.User, RecCtxUser, error)
+type UserGetByEmailDafT = func(ctx context.Context, tx pgx.Tx, email string) (model.User, error)
 
 // UserCreateDafT is the type of the stereotype instance for the DAF that
 // creates a user.
-type UserCreateDafT = func(ctx context.Context, user *model.User) (RecCtxUser, error)
-
-// UserCreateExplicitTxDafT is the type of the stereotype instance for the DAF that
-// creates a user taking an explicit pgx.Tx.
-type UserCreateExplicitTxDafT = func(ctx context.Context, tx pgx.Tx, user *model.User) (RecCtxUser, error)
+type UserCreateDafT = func(ctx context.Context, tx pgx.Tx, user *model.User) error
 
 // UserUpdateDafT is the type of the stereotype instance for the DAF that
 // updates a user.
-type UserUpdateDafT = func(ctx context.Context, user model.User, recCtx RecCtxUser) (RecCtxUser, error)
+type UserUpdateDafT = func(ctx context.Context, tx pgx.Tx, user *model.User) error
 
 /////////////////////
 // DAFS
@@ -63,54 +44,42 @@ type UserUpdateDafT = func(ctx context.Context, user model.User, recCtx RecCtxUs
 // UserGetByNameDafT.
 var UserGetByNameDaf UserGetByNameDafT = func(
 	ctx context.Context,
-	username string,
-) (model.User, RecCtxUser, error) {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return model.User{}, RecCtxUser{}, err
-	}
-	return UserGetByNameExplicitTxDaf(ctx, tx, username)
-}
-
-// UserGetByNameExplicitTxDaf implements a stereotype instance of type
-// UserGetByNameDafT with explicit passing of a pgx.Tx.
-var UserGetByNameExplicitTxDaf UserGetByNameExplicitTxDafT = func(
-	ctx context.Context,
 	tx pgx.Tx,
 	username string,
-) (model.User, RecCtxUser, error) {
-	pwUser := PwUser{}
-	err := dbpgx.ReadSingle(ctx, tx, "users", "username", username, &pwUser)
+) (model.User, error) {
+	user := model.User{}
+	err := dbpgx.ReadSingle(ctx, tx, "users", "username", username, &user)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrRecordNotFound {
 			errX := util.SafeCast[errx.Errx](err)
-			return model.User{}, RecCtxUser{}, errX.Customize(bf.ErrMsgUsernameNotFound, username)
+			return model.User{}, errX.Customize(bf.ErrMsgUsernameNotFound, username)
 		}
-		return model.User{}, RecCtxUser{}, err
+		return model.User{}, err
 	}
-	return pwUser.Entity, pwUser.RecCtx, nil
+	return user, nil
 }
 
 // UserGetByEmailDaf implements a stereotype instance of type
 // UserGetByEmailDafT.
 var UserGetByEmailDaf UserGetByEmailDafT = func(
 	ctx context.Context,
+	tx pgx.Tx,
 	email string,
-) (model.User, RecCtxUser, error) {
+) (model.User, error) {
 	tx, err := dbpgx.GetCtxTx(ctx)
 	if err != nil {
-		return model.User{}, RecCtxUser{}, err
+		return model.User{}, err
 	}
-	pwUser := PwUser{}
-	err = dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &pwUser)
+	user := model.User{}
+	err = dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &user)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrRecordNotFound {
-			return model.User{}, RecCtxUser{},
+			return model.User{},
 				kind.Decorate(util.SafeCast[errx.Errx](err), bf.ErrMsgUserEmailNotFound, email)
 		}
-		return model.User{}, RecCtxUser{}, err
+		return model.User{}, err
 	}
-	return pwUser.Entity, pwUser.RecCtx, nil
+	return user, nil
 }
 
 // UserCreateDaf implements a stereotype instance of type
