@@ -10,9 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/rpc"
@@ -80,23 +78,4 @@ func ArticleCreateSflC0(
 
 		return articleOut, nil
 	})
-}
-
-///////////////////
-// Config logic
-
-var ArticleCreateSflCfgAdapter = func(appCfgSrc config.AppCfgSrc) DefaultSflCfgSrc {
-	return util.Todo[func() DefaultSflCfgInfo]()
-}
-
-// ArticleCreateSflBoot is the function that constructs a stereotype instance of type
-// ArticleCreateSflT with configuration information and hard-wired stereotype dependencies.
-func ArticleCreateSflBoot(appCfgSrc config.AppCfgSrc) ArticleCreateSflT {
-	return ArticleCreateSflC0(
-		ArticleCreateSflCfgAdapter(appCfgSrc),
-		daf.UserGetByNameExplicitTxDaf,
-		daf.ArticleCreateDaf,
-		daf.TagsAddNewDaf,
-		daf.TagsAddToArticleDaf,
-	)
 }

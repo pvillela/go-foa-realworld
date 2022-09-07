@@ -10,9 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/rpc"
@@ -35,7 +33,7 @@ func ArticleFavoriteSflC0(
 	favoriteCreateDaf daf.FavoriteCreateDafT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleFavoriteSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
@@ -72,24 +70,4 @@ func ArticleFavoriteSflC0(
 		articleOut := rpc.ArticleOut_FromModel(articlePlus)
 		return articleOut, err
 	})
-}
-
-///////////////////
-// Config logic
-
-var ArticleFavoriteSflCfgSrc = config.MakeConfigSource[DefaultSflCfgInfo](nil)
-
-func articleFavoriteSflCfgAdapter(appCfg config.AppCfgInfo) DefaultSflCfgSrc {
-	return util.Todo[DefaultSflCfgSrc]()
-}
-
-// ArticleFavoriteSflC is the function that constructs a stereotype instance of type
-// ArticleFavoriteSflT with hard-wired stereotype dependencies.
-func ArticleFavoriteSflC() ArticleFavoriteSflT {
-	return ArticleFavoriteSflC0(
-		ArticleFavoriteSflCfgSrc,
-		fl.ArticleAndUserGetFl,
-		daf.FavoriteCreateDaf,
-		daf.ArticleUpdateDaf,
-	)
 }

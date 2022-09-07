@@ -45,7 +45,7 @@ func ProfileGetSflC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	followingGetDaf daf.FollowingGetDafT,
 ) ProfileGetSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

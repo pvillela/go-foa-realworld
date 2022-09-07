@@ -44,7 +44,7 @@ func CommentDeleteSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	commentDeleteDaf daf.CommentDeleteDafT,
 ) CommentDeleteSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

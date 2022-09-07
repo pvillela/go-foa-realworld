@@ -9,6 +9,7 @@ package sfltest
 import (
 	"context"
 	"github.com/pvillela/go-foa-realworld/internal/config"
+	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
 	"github.com/pvillela/go-foa-realworld/rpc"
 	"testing"
 
@@ -62,9 +63,9 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	sfl.ArticleCreateSflCfgAdapter =
+	boot.ArticleCreateSflCfgAdapter =
 		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
-	articleCreateSfl := sfl.ArticleCreateSflBoot(nil)
+	articleCreateSfl := boot.ArticleCreateSflBoot(nil)
 
 	{
 		msg := "article_create_sfl - valid article"
@@ -139,8 +140,9 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	sfl.ArticleDeleteSflCfgSrc.Set(util.ThunkOf(db))
-	articleDeleteSfl := sfl.ArticleDeleteSflC()
+	boot.ArticleDeleteSflCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	articleDeleteSfl := boot.ArticleDeleteSflC(nil)
 
 	{
 		msg := "article_delete_sfl - existing article authored by current user"
@@ -216,8 +218,9 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	sfl.ArticleFavoriteSflCfgSrc.Set(util.ThunkOf(db))
-	articleFavoriteSfl := sfl.ArticleFavoriteSflC()
+	boot.ArticleFavoriteSflCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	articleFavoriteSfl := boot.ArticleFavoriteSflC(nil)
 
 	{
 		msg := "article_favorite_sfl - existing article, not yet favorited"
@@ -288,8 +291,9 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	sfl.ArticleGetSflCfgSrc.Set(util.ThunkOf(db))
-	articleGetSfl := sfl.ArticleGetSflC()
+	boot.ArticleGetSflCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	articleGetSfl := boot.ArticleGetSflC(nil)
 
 	{
 		msg := "article_get_sfl - existing article"
@@ -337,8 +341,9 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	sfl.ArticleUnfavoriteSflCfgSrc.Set(util.ThunkOf(db))
-	articleUnfavoriteSfl := sfl.ArticleUnfavoriteSflC()
+	boot.ArticleUnfavoriteSflCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	articleUnfavoriteSfl := boot.ArticleUnfavoriteSflC(nil)
 
 	{
 		msg := "article_unfavorite_sfl - existing article, previously favorited"

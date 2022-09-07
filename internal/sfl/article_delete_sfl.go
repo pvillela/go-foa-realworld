@@ -11,9 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 )
@@ -29,7 +27,7 @@ func ArticleDeleteSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,
 ) ArticleDeleteSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
@@ -47,23 +45,4 @@ func ArticleDeleteSflC0(
 		err = articleDeleteDaf(ctx, tx, slug)
 		return types.UnitV, err
 	})
-}
-
-///////////////////
-// Config logic
-
-var ArticleDeleteSflCfgSrc = config.MakeConfigSource[DefaultSflCfgInfo](nil)
-
-func articleDeleteSflCfgAdapter(appCfg config.AppCfgInfo) DefaultSflCfgSrc {
-	return util.Todo[DefaultSflCfgSrc]()
-}
-
-// ArticleDeleteSflC is the function that constructs a stereotype instance of type
-// ArticleDeleteSflT with hard-wired stereotype dependencies.
-func ArticleDeleteSflC() ArticleDeleteSflT {
-	return ArticleDeleteSflC0(
-		ArticleDeleteSflCfgSrc,
-		fl.ArticleGetAndCheckOwnerFl,
-		daf.ArticleDeleteDaf,
-	)
 }

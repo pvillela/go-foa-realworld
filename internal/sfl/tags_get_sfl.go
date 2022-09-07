@@ -37,7 +37,7 @@ func TagsGetSflC0(
 	cfgSrc DefaultSflCfgSrc,
 	tagsGetAllDaf daf.TagsGetAllDafT,
 ) TagsGetSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

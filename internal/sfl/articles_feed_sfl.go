@@ -43,7 +43,7 @@ func ArticlesFeedSflC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesFeedDaf daf.ArticlesFeedDafT,
 ) ArticlesFeedSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

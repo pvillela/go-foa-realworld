@@ -10,9 +10,7 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/rpc"
 )
@@ -31,7 +29,7 @@ func ArticleGetSflC0(
 	cfgSrc DefaultSflCfgSrc,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 ) ArticleGetSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
@@ -49,22 +47,4 @@ func ArticleGetSflC0(
 
 		return articleOut, nil
 	})
-}
-
-///////////////////
-// Config logic
-
-var ArticleGetSflCfgSrc = config.MakeConfigSource[DefaultSflCfgInfo](nil)
-
-func articleGetSflCfgAdapter(appCfg config.AppCfgInfo) DefaultSflCfgSrc {
-	return util.Todo[DefaultSflCfgSrc]()
-}
-
-// ArticleGetSflC is the function that constructs a stereotype instance of type
-// ArticleGetSflT with hard-wired stereotype dependencies.
-func ArticleGetSflC() ArticleGetSflT {
-	return ArticleGetSflC0(
-		ArticleGetSflCfgSrc,
-		fl.ArticleAndUserGetFl,
-	)
 }
