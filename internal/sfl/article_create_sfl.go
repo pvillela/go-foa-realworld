@@ -35,7 +35,7 @@ func ArticleCreateSflC0(
 	tagsAddNewDaf daf.TagsAddNewDafT,
 	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
 ) ArticleCreateSflT {
-	db := cfgSrc.Get()
+	db := cfgSrc()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
@@ -85,17 +85,15 @@ func ArticleCreateSflC0(
 ///////////////////
 // Config logic
 
-var ArticleCreateSflCfgSrc = config.MakeConfigSource[DefaultSflCfgInfo](nil)
-
-func articleCreateSflCfgAdapter(appCfg config.AppCfgInfo) DefaultSflCfgSrc {
-	return util.Todo[DefaultSflCfgSrc]()
+var ArticleCreateSflCfgAdapter = func(appCfgSrc config.AppCfgSrc) DefaultSflCfgSrc {
+	return util.Todo[func() DefaultSflCfgInfo]()
 }
 
-// ArticleCreateSflC is the function that constructs a stereotype instance of type
-// ArticleCreateSflT with hard-wired stereotype dependencies.
-func ArticleCreateSflC() ArticleCreateSflT {
+// ArticleCreateSflBoot is the function that constructs a stereotype instance of type
+// ArticleCreateSflT with configuration information and hard-wired stereotype dependencies.
+func ArticleCreateSflBoot(appCfgSrc config.AppCfgSrc) ArticleCreateSflT {
 	return ArticleCreateSflC0(
-		ArticleCreateSflCfgSrc,
+		ArticleCreateSflCfgAdapter(appCfgSrc),
 		daf.UserGetByNameExplicitTxDaf,
 		daf.ArticleCreateDaf,
 		daf.TagsAddNewDaf,

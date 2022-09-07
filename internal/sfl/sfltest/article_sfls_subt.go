@@ -8,6 +8,7 @@ package sfltest
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/rpc"
 	"testing"
 
@@ -61,8 +62,9 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	sfl.ArticleCreateSflCfgSrc.Set(util.ThunkOf(db))
-	articleCreateSfl := sfl.ArticleCreateSflC()
+	sfl.ArticleCreateSflCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	articleCreateSfl := sfl.ArticleCreateSflBoot(nil)
 
 	{
 		msg := "article_create_sfl - valid article"

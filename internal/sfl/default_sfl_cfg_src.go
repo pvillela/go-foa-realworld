@@ -8,7 +8,6 @@ package sfl
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 )
 
 // DefaultSflCfgInfo is the type of config data for service flow types.
@@ -16,4 +15,4 @@ type DefaultSflCfgInfo = dbpgx.Db
 
 // DefaultSflCfgSrc is the type of functions that provide
 // the required config data for service flow types.
-type DefaultSflCfgSrc = config.CfgSrc[DefaultSflCfgInfo]
+type DefaultSflCfgSrc func() DefaultSflCfgInfo
