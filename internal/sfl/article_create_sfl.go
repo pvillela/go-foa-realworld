@@ -10,7 +10,9 @@ import (
 	"context"
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
+	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
+	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/platform/db.postgres/daf"
 	"github.com/pvillela/go-foa-realworld/rpc"
@@ -24,20 +26,6 @@ type ArticleCreateSflT = func(
 	in rpc.ArticleCreateIn,
 ) (rpc.ArticleOut, error)
 
-// ArticleCreateSflC is the function that constructs a stereotype instance of type
-// ArticleCreateSflT with hard-wired stereotype dependencies.
-func ArticleCreateSflC(
-	cfgSrc DefaultSflCfgSrc,
-) ArticleCreateSflT {
-	return ArticleCreateSflC0(
-		cfgSrc,
-		daf.UserGetByNameExplicitTxDaf,
-		daf.ArticleCreateDaf,
-		daf.TagsAddNewDaf,
-		daf.TagsAddToArticleDaf,
-	)
-}
-
 // ArticleCreateSflC0 is the function that constructs a stereotype instance of type
 // ArticleCreateSflT without hard-wired stereotype dependencies.
 func ArticleCreateSflC0(
@@ -47,7 +35,7 @@ func ArticleCreateSflC0(
 	tagsAddNewDaf daf.TagsAddNewDafT,
 	tagsAddToArticleDaf daf.TagsAddToArticleDafT,
 ) ArticleCreateSflT {
-	db := cfgSrc()
+	db := cfgSrc.Get()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,
@@ -92,4 +80,25 @@ func ArticleCreateSflC0(
 
 		return articleOut, nil
 	})
+}
+
+///////////////////
+// Config logic
+
+var ArticleCreateSflCfgSrc = config.MakeConfigSource[DefaultSflCfgInfo](nil)
+
+func articleCreateSflCfgAdapter(appCfg config.AppCfgInfo) DefaultSflCfgSrc {
+	return util.Todo[DefaultSflCfgSrc]()
+}
+
+// ArticleCreateSflC is the function that constructs a stereotype instance of type
+// ArticleCreateSflT with hard-wired stereotype dependencies.
+func ArticleCreateSflC() ArticleCreateSflT {
+	return ArticleCreateSflC0(
+		ArticleCreateSflCfgSrc,
+		daf.UserGetByNameExplicitTxDaf,
+		daf.ArticleCreateDaf,
+		daf.TagsAddNewDaf,
+		daf.TagsAddToArticleDaf,
+	)
 }

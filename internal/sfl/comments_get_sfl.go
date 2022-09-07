@@ -40,7 +40,7 @@ func CommentsGetSflC0(
 	cfgSrc DefaultSflCfgSrc,
 	commentsGetBySlugDaf daf.CommentsGetBySlugDafT,
 ) CommentsGetSflT {
-	db := cfgSrc()
+	db := cfgSrc.Get()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

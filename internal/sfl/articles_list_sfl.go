@@ -42,7 +42,7 @@ func ArticlesListSflC0(
 	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
 	articlesListDaf daf.ArticlesListDafT,
 ) ArticlesListSflT {
-	db := cfgSrc()
+	db := cfgSrc.Get()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

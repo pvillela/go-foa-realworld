@@ -45,7 +45,7 @@ func ArticleUpdateSflC0(
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleUpdateDaf daf.ArticleUpdateDafT,
 ) ArticleUpdateSflT {
-	db := cfgSrc()
+	db := cfgSrc.Get()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

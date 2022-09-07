@@ -43,7 +43,7 @@ func CommentAddSflC0(
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 	commentCreateDaf daf.CommentCreateDafT,
 ) CommentAddSflT {
-	db := cfgSrc()
+	db := cfgSrc.Get()
 	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
 		tx pgx.Tx,

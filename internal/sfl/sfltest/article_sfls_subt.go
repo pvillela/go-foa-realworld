@@ -61,7 +61,8 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleCreateSfl := sfl.ArticleCreateSflC(makeDefaultSflCfgSrc(db))
+	sfl.ArticleCreateSflCfgSrc.Set(util.ThunkOf(db))
+	articleCreateSfl := sfl.ArticleCreateSflC()
 
 	{
 		msg := "article_create_sfl - valid article"
@@ -136,7 +137,8 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleDeleteSfl := sfl.ArticleDeleteSflC(makeDefaultSflCfgSrc(db))
+	sfl.ArticleDeleteSflCfgSrc.Set(util.ThunkOf(db))
+	articleDeleteSfl := sfl.ArticleDeleteSflC()
 
 	{
 		msg := "article_delete_sfl - existing article authored by current user"
@@ -212,7 +214,8 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleFavoriteSfl := sfl.ArticleFavoriteSflC(makeDefaultSflCfgSrc(db))
+	sfl.ArticleFavoriteSflCfgSrc.Set(util.ThunkOf(db))
+	articleFavoriteSfl := sfl.ArticleFavoriteSflC()
 
 	{
 		msg := "article_favorite_sfl - existing article, not yet favorited"
@@ -283,7 +286,8 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleGetSfl := sfl.ArticleGetSflC(makeDefaultSflCfgSrc(db))
+	sfl.ArticleGetSflCfgSrc.Set(util.ThunkOf(db))
+	articleGetSfl := sfl.ArticleGetSflC()
 
 	{
 		msg := "article_get_sfl - existing article"
@@ -331,7 +335,8 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	articleUnfavoriteSfl := sfl.ArticleUnfavoriteSflC(makeDefaultSflCfgSrc(db))
+	sfl.ArticleUnfavoriteSflCfgSrc.Set(util.ThunkOf(db))
+	articleUnfavoriteSfl := sfl.ArticleUnfavoriteSflC()
 
 	{
 		msg := "article_unfavorite_sfl - existing article, previously favorited"
