@@ -12,7 +12,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/internal/rpc"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticlesListSflT is the type of the stereotype instance for the service flow that
@@ -20,26 +20,14 @@ import (
 type ArticlesListSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc2.ArticleCriteria,
-) (rpc2.ArticlesOut, error)
+	in rpc.ArticleCriteria,
+) (rpc.ArticlesOut, error)
 
 // ArticlesListSflC is the function that constructs a stereotype instance of type
-// ArticlesListSflT with hard-wired stereotype dependencies.
+// ArticlesListSflT without hard-wired stereotype dependencies.
 func ArticlesListSflC(
 	cfgSrc DefaultSflCfgSrc,
-) ArticlesListSflT {
-	return ArticlesListSflC0(
-		cfgSrc,
-		daf.UserGetByNameExplicitTxDaf,
-		daf.ArticlesListDaf,
-	)
-}
-
-// ArticlesListSflC0 is the function that constructs a stereotype instance of type
-// ArticlesListSflT without hard-wired stereotype dependencies.
-func ArticlesListSflC0(
-	cfgSrc DefaultSflCfgSrc,
-	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
 	articlesListDaf daf.ArticlesListDafT,
 ) ArticlesListSflT {
 	db := cfgSrc()
@@ -47,12 +35,12 @@ func ArticlesListSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc2.ArticleCriteria,
-	) (rpc2.ArticlesOut, error) {
+		in rpc.ArticleCriteria,
+	) (rpc.ArticlesOut, error) {
 		username := reqCtx.Username
-		zero := rpc2.ArticlesOut{}
+		zero := rpc.ArticlesOut{}
 
-		user, _, err := userGetByNameDaf(ctx, tx, username)
+		user, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
 			return zero, err
 		}
@@ -62,7 +50,7 @@ func ArticlesListSflC0(
 			return zero, err
 		}
 
-		articlesOut := rpc2.ArticlesOut_FromModel(articlesPlus)
+		articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
 
 		return articlesOut, err
 	})

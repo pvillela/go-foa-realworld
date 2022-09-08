@@ -8,7 +8,7 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
+	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
@@ -24,9 +24,9 @@ type UserUnfollowSflT = func(
 ) (rpc.ProfileOut, error)
 
 // UserUnfollowSflC is the function that constructs a stereotype instance of type
-// UserUnfollowSflT with hard-wired stereotype dependencies.
+// UserUnfollowSflT with configuration information and hard-wired stereotype dependencies.
 func UserUnfollowSflC(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 ) UserFollowSflT {
 	return UserUnfollowSflC0(
 		cfgSrc,
@@ -38,30 +38,26 @@ func UserUnfollowSflC(
 // UserUnfollowSflC0 is the function that constructs a stereotype instance of type
 // UserUnfollowSflT without hard-wired stereotype dependencies.
 func UserUnfollowSflC0(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingDeleteDaf daf.FollowingDeleteDafT,
 ) UserFollowSflT {
-	ctxDb := cfgSrc()
-	return cdb.SflWithTransaction(ctxDb, func(
+	db := cfgSrc()
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		followeeUsername string,
 	) (rpc.ProfileOut, error) {
 		username := reqCtx.Username
 		var zero rpc.ProfileOut
 
-		follower, _, err := userGetByNameDaf(ctx, username)
+		follower, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
 			return zero, err
 		}
 
-		followee, _, err := userGetByNameDaf(ctx, followeeUsername)
-		if err != nil {
-			return zero, err
-		}
-
-		tx, err := dbpgx.GetCtxTx(ctx)
+		followee, err := userGetByNameDaf(ctx, tx, followeeUsername)
 		if err != nil {
 			return zero, err
 		}

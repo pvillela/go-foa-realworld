@@ -9,8 +9,8 @@ package boot
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/config"
-	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 )
 
@@ -22,9 +22,9 @@ var ArticleDeleteSflCfgAdapter = func(appCfgSrc config.AppCfgSrc) sfl.DefaultSfl
 }
 
 // ArticleDeleteSflC is the function that constructs a stereotype instance of type
-// ArticleDeleteSflT with hard-wired stereotype dependencies.
+// ArticleDeleteSflT with configuration information and hard-wired stereotype dependencies.
 func ArticleDeleteSflC(appCfgSrc config.AppCfgSrc) sfl.ArticleDeleteSflT {
-	return sfl.ArticleDeleteSflC0(
+	return sfl.ArticleDeleteSflC(
 		ArticleDeleteSflCfgAdapter(appCfgSrc),
 		fl.ArticleGetAndCheckOwnerFl,
 		daf.ArticleDeleteDaf,

@@ -12,7 +12,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/internal/rpc"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticlesFeedSflT is the type of the stereotype instance for the service flow that
@@ -21,26 +21,14 @@ import (
 type ArticlesFeedSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc2.ArticlesFeedIn,
-) (rpc2.ArticlesOut, error)
+	in rpc.ArticlesFeedIn,
+) (rpc.ArticlesOut, error)
 
 // ArticlesFeedSflC is the function that constructs a stereotype instance of type
-// ArticlesFeedSflT with hard-wired stereotype dependencies.
+// ArticlesFeedSflT without hard-wired stereotype dependencies.
 func ArticlesFeedSflC(
 	cfgSrc DefaultSflCfgSrc,
-) ArticlesFeedSflT {
-	return ArticlesFeedSflC0(
-		cfgSrc,
-		daf.UserGetByNameExplicitTxDaf,
-		daf.ArticlesFeedDaf,
-	)
-}
-
-// ArticlesFeedSflC0 is the function that constructs a stereotype instance of type
-// ArticlesFeedSflT without hard-wired stereotype dependencies.
-func ArticlesFeedSflC0(
-	cfgSrc DefaultSflCfgSrc,
-	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
 	articlesFeedDaf daf.ArticlesFeedDafT,
 ) ArticlesFeedSflT {
 	db := cfgSrc()
@@ -48,12 +36,12 @@ func ArticlesFeedSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc2.ArticlesFeedIn,
-	) (rpc2.ArticlesOut, error) {
+		in rpc.ArticlesFeedIn,
+	) (rpc.ArticlesOut, error) {
 		username := reqCtx.Username
-		zero := rpc2.ArticlesOut{}
+		zero := rpc.ArticlesOut{}
 
-		user, _, err := userGetByNameDaf(ctx, tx, username)
+		user, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
 			return zero, err
 		}
@@ -63,7 +51,7 @@ func ArticlesFeedSflC0(
 			return zero, err
 		}
 
-		articlesOut := rpc2.ArticlesOut_FromModel(articlesPlus)
+		articlesOut := rpc.ArticlesOut_FromModel(articlesPlus)
 
 		return articlesOut, err
 	})

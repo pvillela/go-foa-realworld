@@ -23,9 +23,9 @@ type ArticleGetSflT = func(
 	slug string,
 ) (rpc.ArticleOut, error)
 
-// ArticleGetSflC0 is the function that constructs a stereotype instance of type
+// ArticleGetSflC is the function that constructs a stereotype instance of type
 // ArticleGetSflT without hard-wired stereotype dependencies.
-func ArticleGetSflC0(
+func ArticleGetSflC(
 	cfgSrc DefaultSflCfgSrc,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 ) ArticleGetSflT {

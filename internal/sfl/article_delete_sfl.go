@@ -12,17 +12,17 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
-	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 )
 
 // ArticleDeleteSflT is the type of the stereotype instance for the service flow that
 // deletes an article.
 type ArticleDeleteSflT = func(ctx context.Context, reqCtx web.RequestContext, slug string) (types.Unit, error)
 
-// ArticleDeleteSflC0 is the function that constructs a stereotype instance of type
+// ArticleDeleteSflC is the function that constructs a stereotype instance of type
 // ArticleDeleteSflT without hard-wired stereotype dependencies.
-func ArticleDeleteSflC0(
+func ArticleDeleteSflC(
 	cfgSrc DefaultSflCfgSrc,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleDeleteDaf daf.ArticleDeleteDafT,

@@ -26,13 +26,13 @@ type ProfileGetSflT = func(
 ) (rpc.ProfileOut, error)
 
 // ProfileGetSflC is the function that constructs a stereotype instance of type
-// ProfileGetSflT with hard-wired stereotype dependencies.
+// ProfileGetSflT with configuration information and hard-wired stereotype dependencies.
 func ProfileGetSflC(
 	cfgSrc DefaultSflCfgSrc,
 ) ProfileGetSflT {
 	return ProfileGetSflC0(
 		cfgSrc,
-		daf.UserGetByNameExplicitTxDaf,
+		daf.UserGetByNameDaf,
 		daf.FollowingGetDaf,
 	)
 }
@@ -41,7 +41,7 @@ func ProfileGetSflC(
 // ProfileGetSflT without hard-wired stereotype dependencies.
 func ProfileGetSflC0(
 	cfgSrc DefaultSflCfgSrc,
-	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
 	followingGetDaf daf.FollowingGetDafT,
 ) ProfileGetSflT {
 	db := cfgSrc()

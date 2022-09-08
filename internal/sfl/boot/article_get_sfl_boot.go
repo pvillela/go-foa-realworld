@@ -21,9 +21,9 @@ var ArticleGetSflCfgAdapter = func(appCfg config.AppCfgSrc) sfl.DefaultSflCfgSrc
 }
 
 // ArticleGetSflC is the function that constructs a stereotype instance of type
-// ArticleGetSflT with hard-wired stereotype dependencies.
+// ArticleGetSflT with configuration information and hard-wired stereotype dependencies.
 func ArticleGetSflC(src config.AppCfgSrc) sfl.ArticleGetSflT {
-	return sfl.ArticleGetSflC0(
+	return sfl.ArticleGetSflC(
 		ArticleGetSflCfgAdapter(src),
 		fl.ArticleAndUserGetFl,
 	)

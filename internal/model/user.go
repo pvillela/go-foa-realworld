@@ -9,6 +9,7 @@ package model
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/crypto"
 	"strings"
+	"time"
 )
 
 const password_salt_size = 16
@@ -21,10 +22,9 @@ type User struct {
 	PasswordHash string
 	PasswordSalt string // TODO: remove this field from code and databse
 	Bio          *string
-	ImageLink    string `db:"image"`
-	// Below added to daf.RecCtx
-	//CreatedAt time.Time `json:"-"`
-	//UpdatedAt time.Time `json:"-"`
+	ImageLink    string    `db:"image"`
+	CreatedAt    time.Time `json:"-"`
+	UpdatedAt    time.Time `json:"-"`
 }
 
 type Profile struct {

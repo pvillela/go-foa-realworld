@@ -9,8 +9,8 @@ package fl
 import (
 	"context"
 	"github.com/jackc/pgx/v4"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 // ArticleAndUserGetFlT is the type of the stereotype instance for the flow that
@@ -26,14 +26,14 @@ type ArticleAndUserGetFlT = func(
 // ArticleAndUserGetFl implements a stereotype instance of type
 // ArticleAndUserGetFlT.
 var ArticleAndUserGetFl ArticleAndUserGetFlT = ArticleAndUserGetFlC0(
-	daf.UserGetByNameExplicitTxDaf,
+	daf.UserGetByNameDaf,
 	daf.ArticleGetBySlugDaf,
 )
 
 // ArticleAndUserGetFlC0 is the function that constructs a stereotype instance of type
 // ArticleAndUserGetFlT without hard-wired BF dependencies.
 func ArticleAndUserGetFlC0(
-	userGetByNameDaf daf.UserGetByNameExplicitTxDafT,
+	userGetByNameDaf daf.UserGetByNameDafT,
 	articleGetBySlugDaf daf.ArticleGetBySlugDafT,
 ) ArticleAndUserGetFlT {
 	return func(

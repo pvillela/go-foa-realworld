@@ -24,9 +24,9 @@ type ArticleUnfavoriteSflT = func(
 	slug string,
 ) (rpc.ArticleOut, error)
 
-// ArticleUnfavoriteSflC0 is the function that constructs a stereotype instance of type
+// ArticleUnfavoriteSflC is the function that constructs a stereotype instance of type
 // ArticleUnfavoriteSflT without hard-wired stereotype dependencies.
-func ArticleUnfavoriteSflC0(
+func ArticleUnfavoriteSflC(
 	cfgSrc DefaultSflCfgSrc,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 	favoriteDeleteDaf daf.FavoriteDeleteDafT,

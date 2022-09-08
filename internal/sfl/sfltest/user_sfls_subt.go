@@ -9,14 +9,13 @@ package sfltest
 import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
+	"github.com/pvillela/go-foa-realworld/experimental/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	rpc2 "github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 	"testing"
 	"time"
@@ -44,7 +43,7 @@ var tokenTimeToLive = func() time.Duration {
 	return dur
 }()
 
-var userSources = map[string]rpc2.UserRegisterIn0{
+var userSources = map[string]rpc.UserRegisterIn0{
 	username1: {
 		Username: username1,
 		Email:    "foo@bar.com",
@@ -76,12 +75,6 @@ func makeUserGenTokenHmacBfCfgSrc(key []byte, tokenTtl time.Duration) bf.UserGen
 	}
 }
 
-func makeUserSflCfgSrc(ctxDb cdb.CtxDb) sfl.UserSflCfgSrc {
-	return func() cdb.CtxDb {
-		return ctxDb
-	}
-}
-
 ///////////////////
 // Tests
 
@@ -91,13 +84,13 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	assert.NoError(t, err)
 
 	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
-	userRegisterSfl := sfl.UserRegisterSflC(makeUserSflCfgSrc(ctxDb), userGenTokenBf)
+	userRegisterSfl := sfl.UserRegisterSflC(makeDefaultSflCfgSrc(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_register_sfl - valid registration"
 		for k, _ := range userSources {
 			userSrc := userSources[k]
-			in := rpc2.UserRegisterIn{userSrc}
+			in := rpc.UserRegisterIn{userSrc}
 			out, err := userRegisterSfl(ctx, web.RequestContext{}, in)
 			assert.NoError(t, err)
 
@@ -109,7 +102,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	{
 		msg := "user_register_sfl - invalid registration"
 
-		badUserSources := []rpc2.UserRegisterIn0{
+		badUserSources := []rpc.UserRegisterIn0{
 			{ // Existing username
 				Username: username1,
 				Email:    "foo@bar.com",
@@ -124,7 +117,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		for i, _ := range badUserSources {
 			userSrc := badUserSources[i]
-			in := rpc2.UserRegisterIn{userSrc}
+			in := rpc.UserRegisterIn{userSrc}
 			_, err := userRegisterSfl(ctx, web.RequestContext{}, in)
 			returnedErrxKind := dbpgx.ClassifyError(err)
 			expectedErrxKind := dbpgx.DbErrUniqueViolation
@@ -142,13 +135,13 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	assert.NoError(t, err)
 
 	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
-	userAuthenticateSfl := sfl.UserAuthenticateSflC(makeUserSflCfgSrc(ctxDb), userGenTokenBf)
+	userAuthenticateSfl := sfl.UserAuthenticateSflBoot(makeDefaultSflCfgSrc(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_authenticate_sfl - valid authentication"
 		for k, _ := range userSources {
 			userSrc := userSources[k]
-			in := rpc2.UserAuthenticateIn{User: rpc2.UserAuthenticateIn0{
+			in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
 				Email:    userSrc.Email,
 				Password: userSrc.Password,
 			}}
@@ -166,7 +159,7 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		email := "foo@bar.com"
 		password := "abcdefg"
 
-		in := rpc2.UserAuthenticateIn{User: rpc2.UserAuthenticateIn0{
+		in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
 			Email:    email,
 			Password: password,
 		}}
@@ -186,7 +179,7 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserFollowSflC(makeUserSflCfgSrc(ctxDb))
+	userFollowSfl := sfl.UserFollowSflC(makeDefaultSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -239,7 +232,7 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGetCurrentSfl := sfl.UserGetCurrentSflC(makeUserSflCfgSrc(ctxDb))
+	userGetCurrentSfl := sfl.UserGetCurrentSflC(makeDefaultSflCfgSrc(ctxDb))
 
 	{
 		msg := "user_get_current_sfl - valid username"
@@ -280,7 +273,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserUnfollowSflC(makeUserSflCfgSrc(ctxDb))
+	userFollowSfl := sfl.UserUnfollowSflC(makeDefaultSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -333,7 +326,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userUpdateSfl := sfl.UserUpdateSflC(makeUserSflCfgSrc(ctxDb))
+	userUpdateSfl := sfl.UserUpdateSflC(makeDefaultSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username4,
@@ -346,7 +339,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		updatedUsername := username4
 		updatedEmail := userSources[updatedUsername].Email
 
-		in := rpc2.UserUpdateIn{User: model.UserPatch{
+		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     &updatedEmail,
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -357,7 +350,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		out, err := userUpdateSfl(ctx, reqCtx, in)
 		assert.NoError(t, err)
 
-		expected := rpc2.UserOut{User: rpc2.UserOut0{
+		expected := rpc.UserOut{User: rpc.UserOut0{
 			Email:    *in.User.Email,
 			Token:    reqCtx.Token.Raw,
 			Username: *in.User.Username,
@@ -373,7 +366,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		updatedUsername := username1
 
-		in := rpc2.UserUpdateIn{User: model.UserPatch{
+		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     util.PointerFromValue(updatedUsername + "@foo.com"),
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -395,7 +388,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		updatedUsername := username4
 
-		in := rpc2.UserUpdateIn{User: model.UserPatch{
+		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     util.PointerFromValue(userSources[username1].Email),
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -417,7 +410,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		updatedUsername := "updated_username4"
 
-		in := rpc2.UserUpdateIn{User: model.UserPatch{
+		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     util.PointerFromValue(updatedUsername + "@foo.com"),
 			Password:  util.PointerFromValue("password_" + updatedUsername),
@@ -428,7 +421,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		out, err := userUpdateSfl(ctx, reqCtx, in)
 		assert.NoError(t, err)
 
-		expected := rpc2.UserOut{User: rpc2.UserOut0{
+		expected := rpc.UserOut{User: rpc.UserOut0{
 			Email:    *in.User.Email,
 			Token:    reqCtx.Token.Raw,
 			Username: *in.User.Username,

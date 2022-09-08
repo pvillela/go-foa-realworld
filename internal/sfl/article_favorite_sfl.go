@@ -25,9 +25,9 @@ type ArticleFavoriteSflT = func(
 ) (rpc.ArticleOut, error)
 
 // TODO: consider reimplementing with daf.ArticleAdjustFavoritesCountDaf.
-// ArticleFavoriteSflC0 is the function that constructs a stereotype instance of type
+// ArticleFavoriteSflC is the function that constructs a stereotype instance of type
 // ArticleFavoriteSflT without hard-wired stereotype dependencies.
-func ArticleFavoriteSflC0(
+func ArticleFavoriteSflC(
 	cfgSrc DefaultSflCfgSrc,
 	articleAndUserGetFl fl.ArticleAndUserGetFlT,
 	favoriteCreateDaf daf.FavoriteCreateDafT,

@@ -17,9 +17,9 @@ var ArticleCreateSflCfgAdapter = func(appCfgSrc config.AppCfgSrc) sfl.DefaultSfl
 // ArticleCreateSflBoot is the function that constructs a stereotype instance of type
 // ArticleCreateSflT with configuration information and hard-wired stereotype dependencies.
 func ArticleCreateSflBoot(appCfgSrc config.AppCfgSrc) sfl.ArticleCreateSflT {
-	return sfl.ArticleCreateSflC0(
+	return sfl.ArticleCreateSflC(
 		ArticleCreateSflCfgAdapter(appCfgSrc),
-		daf.UserGetByNameExplicitTxDaf,
+		daf.UserGetByNameDaf,
 		daf.ArticleCreateDaf,
 		daf.TagsAddNewDaf,
 		daf.TagsAddToArticleDaf,

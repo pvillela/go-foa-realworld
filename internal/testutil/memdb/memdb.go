@@ -9,7 +9,6 @@ package memdb
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/daf"
 	"time"
 )
 
@@ -17,7 +16,6 @@ import (
 type MDb struct {
 	usersByName mUsersByNameT
 	usersById   mUsersByIdT
-	recCtxUsers mRecCtxUsersT
 	articles    mArticlesT
 	favorites   mFavoritesT
 	followings  mFollowingsT
@@ -32,7 +30,6 @@ func New() MDb {
 	return MDb{
 		usersByName: mUsersByNameT{},
 		usersById:   mUsersByIdT{},
-		recCtxUsers: mRecCtxUsersT{},
 		articles:    mArticlesT{},
 		favorites:   mFavoritesT{},
 		followings:  mFollowingsT{},
@@ -52,20 +49,15 @@ func (mdb MDb) userGetById(id uint) model.User {
 	return *mdb.usersById[id]
 }
 
-func (mdb MDb) UserGet2(username string) (model.User, daf.RecCtxUser) {
-	return *mdb.usersByName[username], mdb.recCtxUsers[username]
-}
-
-func (mdb MDb) UserGet2All() ([]model.User, []daf.RecCtxUser) {
+func (mdb MDb) UserGetAll() []model.User {
 	userPs := util.MapToSlice(mdb.usersByName)
 	users := util.SliceMap(userPs, func(puser *model.User) model.User {
 		return *puser
 	})
-	recCtxs := util.MapToSlice(mdb.recCtxUsers)
-	return users, recCtxs
+	return users
 }
 
-func (mdb *MDb) userUpsert(user model.User) {
+func (mdb *MDb) UserUpsert(user model.User) {
 	existingUserByName := mdb.usersByName[user.Username]
 	if existingUserByName != nil && existingUserByName.Id != user.Id {
 		panic("attempt to clobber existing username in mdb")
@@ -81,11 +73,6 @@ func (mdb *MDb) userUpsert(user model.User) {
 	}
 	*userById = user
 	mdb.usersByName[user.Username] = userById
-}
-
-func (mdb *MDb) UserUpsert2(user model.User, recCtx daf.RecCtxUser) {
-	mdb.userUpsert(user)
-	mdb.recCtxUsers.upsert(user.Username, recCtx)
 }
 
 func (mdb MDb) ArticleGetBySlug(slug string) model.Article {
@@ -260,13 +247,6 @@ type mUsersByNameT map[string]*model.User
 
 // key is user ID
 type mUsersByIdT map[uint]*model.User
-
-// key is Username
-type mRecCtxUsersT map[string]daf.RecCtxUser
-
-func (m *mRecCtxUsersT) upsert(username string, recCtx daf.RecCtxUser) {
-	(*m)[username] = recCtx
-}
 
 // key is Slug
 type mArticlesT map[string]*model.Article

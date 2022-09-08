@@ -26,7 +26,7 @@ type CommentDeleteSflT = func(
 ) (types.Unit, error)
 
 // CommentDeleteSflC is the function that constructs a stereotype instance of type
-// CommentDeleteSflT with hard-wired stereotype dependencies.
+// CommentDeleteSflT with configuration information and hard-wired stereotype dependencies.
 func CommentDeleteSflC(
 	cfgSrc DefaultSflCfgSrc,
 ) CommentDeleteSflT {

@@ -8,11 +8,12 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/internal/rpc"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // UserAuthenticateSflT is the type of the stereotype instance for the service flow that
@@ -20,42 +21,29 @@ import (
 type UserAuthenticateSflT = func(
 	ctx context.Context,
 	_ web.RequestContext,
-	in rpc2.UserAuthenticateIn,
-) (rpc2.UserOut, error)
-
-// UserAuthenticateSflC is the function that constructs a stereotype instance of type
-// UserAuthenticateSflT with hard-wired stereotype dependencies.
-func UserAuthenticateSflC(
-	cfgSrc UserSflCfgSrc,
-	userGenTokenBf bf.UserGenTokenBfT,
-) UserAuthenticateSflT {
-	return UserAuthenticateSflC0(
-		cfgSrc,
-		daf.UserGetByEmailDaf,
-		userGenTokenBf,
-		bf.UserAuthenticateBf,
-	)
-}
+	in rpc.UserAuthenticateIn,
+) (rpc.UserOut, error)
 
 // UserAuthenticateSflC0 is the function that constructs a stereotype instance of type
 // UserAuthenticateSflT without hard-wired stereotype dependencies.
 func UserAuthenticateSflC0(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByEmailDaf daf.UserGetByEmailDafT,
 	userGenTokenBf bf.UserGenTokenBfT,
 	userAuthenticateBf bf.UserAuthenticateBfT,
 ) UserAuthenticateSflT {
-	ctxDb := cfgSrc()
-	return cdb.SflWithTransaction(ctxDb, func(
+	db := cfgSrc()
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc2.UserAuthenticateIn,
-	) (rpc2.UserOut, error) {
-		var zero rpc2.UserOut
+		in rpc.UserAuthenticateIn,
+	) (rpc.UserOut, error) {
+		var zero rpc.UserOut
 		email := in.User.Email
 		password := in.User.Password
 
-		user, _, err := userGetByEmailDaf(ctx, email)
+		user, err := userGetByEmailDaf(ctx, tx, email)
 		if err != nil {
 			return zero, err
 		}
@@ -71,7 +59,7 @@ func UserAuthenticateSflC0(
 			return zero, err
 		}
 
-		userOut := rpc2.UserOut_FromModel(user, token)
+		userOut := rpc.UserOut_FromModel(user, token)
 		return userOut, err
 	})
 }

@@ -8,7 +8,8 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
@@ -24,9 +25,9 @@ type UserGetCurrentSflT = func(
 ) (rpc.UserOut, error)
 
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
-// UserGetCurrentSflT with hard-wired stereotype dependencies.
+// UserGetCurrentSflT with configuration information and hard-wired stereotype dependencies.
 func UserGetCurrentSflC(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 ) UserGetCurrentSflT {
 	return UserGetCurrentSflC0(
 		cfgSrc,
@@ -37,18 +38,19 @@ func UserGetCurrentSflC(
 // UserGetCurrentSflC0 is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT without hard-wired stereotype dependencies.
 func UserGetCurrentSflC0(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {
-	ctxDb := cfgSrc()
-	return cdb.SflWithTransaction(ctxDb, func(
+	db := cfgSrc()
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
 		_ types.Unit,
 	) (rpc.UserOut, error) {
 		username := reqCtx.Username
 
-		user, _, err := userGetByNameDaf(ctx, username)
+		user, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
 			return rpc.UserOut{}, err
 		}

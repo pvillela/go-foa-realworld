@@ -9,8 +9,8 @@ package boot
 import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/config"
-	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
 )
 
@@ -22,9 +22,9 @@ var ArticleFavoriteSflCfgAdapter = func(appCfg config.AppCfgSrc) sfl.DefaultSflC
 }
 
 // ArticleFavoriteSflC is the function that constructs a stereotype instance of type
-// ArticleFavoriteSflT with hard-wired stereotype dependencies.
+// ArticleFavoriteSflT with configuration information and hard-wired stereotype dependencies.
 func ArticleFavoriteSflC(src config.AppCfgSrc) sfl.ArticleFavoriteSflT {
-	return sfl.ArticleFavoriteSflC0(
+	return sfl.ArticleFavoriteSflC(
 		ArticleFavoriteSflCfgAdapter(src),
 		fl.ArticleAndUserGetFl,
 		daf.FavoriteCreateDaf,

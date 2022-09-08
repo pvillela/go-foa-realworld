@@ -21,7 +21,7 @@ import (
 type TagsGetSflT = func(ctx context.Context, reqCtx web.RequestContext, _ types.Unit) (rpc.TagsOut, error)
 
 // TagsGetSflC is the function that constructs a stereotype instance of type
-// TagsGetSflT with hard-wired stereotype dependencies.
+// TagsGetSflT with configuration information and hard-wired stereotype dependencies.
 func TagsGetSflC(
 	cfgSrc DefaultSflCfgSrc,
 ) TagsGetSflT {

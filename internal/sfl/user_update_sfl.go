@@ -8,10 +8,11 @@ package sfl
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/arch/db/cdb"
+	"github.com/jackc/pgx/v4"
+	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
-	rpc2 "github.com/pvillela/go-foa-realworld/internal/rpc"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // UserUpdateSflT is the type of the stereotype instance for the service flow that
@@ -19,13 +20,13 @@ import (
 type UserUpdateSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc2.UserUpdateIn,
-) (rpc2.UserOut, error)
+	in rpc.UserUpdateIn,
+) (rpc.UserOut, error)
 
 // UserUpdateSflC is the function that constructs a stereotype instance of type
-// UserUpdateSflT with hard-wired stereotype dependencies.
+// UserUpdateSflT with configuration information and hard-wired stereotype dependencies.
 func UserUpdateSflC(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 ) UserUpdateSflT {
 	return UserUpdateSflC0(
 		cfgSrc,
@@ -37,33 +38,34 @@ func UserUpdateSflC(
 // UserUpdateSflC0 is the function that constructs a stereotype instance of type
 // UserUpdateSflT without hard-wired stereotype dependencies.
 func UserUpdateSflC0(
-	cfgSrc UserSflCfgSrc,
+	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	userUpdateDaf daf.UserUpdateDafT,
 ) UserUpdateSflT {
-	ctxDb := cfgSrc()
-	return cdb.SflWithTransaction(ctxDb, func(
+	db := cfgSrc()
+	return dbpgx.SflWithTransaction(db, func(
 		ctx context.Context,
+		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc2.UserUpdateIn,
-	) (rpc2.UserOut, error) {
+		in rpc.UserUpdateIn,
+	) (rpc.UserOut, error) {
 		username := reqCtx.Username
 
-		user, rc, err := userGetByNameDaf(ctx, username)
+		user, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
-			return rpc2.UserOut{}, err
+			return rpc.UserOut{}, err
 		}
 
 		user = user.Update(in.User)
 
-		_, err = userUpdateDaf(ctx, user, rc)
+		err = userUpdateDaf(ctx, tx, &user)
 		if err != nil {
-			return rpc2.UserOut{}, err
+			return rpc.UserOut{}, err
 		}
 
 		token := reqCtx.Token
 
-		userOut := rpc2.UserOut_FromModel(user, token.Raw)
+		userOut := rpc.UserOut_FromModel(user, token.Raw)
 		return userOut, nil
 	})
 }

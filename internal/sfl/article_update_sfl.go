@@ -14,7 +14,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/daf"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	rpc2 "github.com/pvillela/go-foa-realworld/internal/rpc"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // ArticleUpdateSflT is the type of the stereotype instance for the service flow that
@@ -22,20 +22,8 @@ import (
 type ArticleUpdateSflT = func(
 	ctx context.Context,
 	reqCtx web.RequestContext,
-	in rpc2.ArticleUpdateIn,
-) (rpc2.ArticleOut, error)
-
-// ArticleUpdateSflC is the function that constructs a stereotype instance of type
-// ArticleUpdateSflT with hard-wired stereotype dependencies.
-func ArticleUpdateSflC(
-	cfgSrc DefaultSflCfgSrc,
-) ArticleUpdateSflT {
-	return ArticleUpdateSflC0(
-		cfgSrc,
-		fl.ArticleGetAndCheckOwnerFl,
-		daf.ArticleUpdateDaf,
-	)
-}
+	in rpc.ArticleUpdateIn,
+) (rpc.ArticleOut, error)
 
 // ArticleUpdateSflC0 is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT without hard-wired stereotype dependencies.
@@ -49,16 +37,16 @@ func ArticleUpdateSflC0(
 		ctx context.Context,
 		tx pgx.Tx,
 		reqCtx web.RequestContext,
-		in rpc2.ArticleUpdateIn,
-	) (rpc2.ArticleOut, error) {
+		in rpc.ArticleUpdateIn,
+	) (rpc.ArticleOut, error) {
 		err := in.Validate()
 		if err != nil {
-			return rpc2.ArticleOut{}, err
+			return rpc.ArticleOut{}, err
 		}
 
 		username := reqCtx.Username
 		slug := in.Article.Slug
-		var zero rpc2.ArticleOut
+		var zero rpc.ArticleOut
 
 		articlePlus, _, err := articleGetAndCheckOwnerFl(ctx, tx, slug, username)
 		if err != nil {
@@ -74,11 +62,11 @@ func ArticleUpdateSflC0(
 		article = article.Update(updateSrc)
 
 		if err := articleUpdateDaf(ctx, tx, &article); err != nil {
-			return rpc2.ArticleOut{}, err
+			return rpc.ArticleOut{}, err
 		}
 
 		articlePlus = model.ArticlePlus_FromArticle(article, articlePlus.Favorited, articlePlus.Author)
-		articleOut := rpc2.ArticleOut_FromModel(articlePlus)
+		articleOut := rpc.ArticleOut_FromModel(articlePlus)
 
 		return articleOut, err
 	})

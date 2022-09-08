@@ -24,7 +24,7 @@ type CommentsGetSflT = func(
 ) (rpc.CommentsOut, error)
 
 // CommentsGetSflC is the function that constructs a stereotype instance of type
-// CommentsGetSflT with hard-wired stereotype dependencies.
+// CommentsGetSflT with configuration information and hard-wired stereotype dependencies.
 func CommentsGetSflC(
 	cfgSrc DefaultSflCfgSrc,
 ) CommentsGetSflT {

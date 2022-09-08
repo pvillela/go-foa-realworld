@@ -66,12 +66,8 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 	tx pgx.Tx,
 	email string,
 ) (model.User, error) {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return model.User{}, err
-	}
 	user := model.User{}
-	err = dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &user)
+	err := dbpgx.ReadSingle(ctx, tx, "users", "email", strings.ToLower(email), &user)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrRecordNotFound {
 			return model.User{},
@@ -86,22 +82,9 @@ var UserGetByEmailDaf UserGetByEmailDafT = func(
 // UserCreateDafT.
 var UserCreateDaf UserCreateDafT = func(
 	ctx context.Context,
-	user *model.User,
-) (RecCtxUser, error) {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return RecCtxUser{}, err
-	}
-	return UserCreateExplicitTxDaf(ctx, tx, user)
-}
-
-// UserCreateExplicitTxDaf implements a stereotype instance of type
-// UserCreateDafT.
-var UserCreateExplicitTxDaf UserCreateExplicitTxDafT = func(
-	ctx context.Context,
 	tx pgx.Tx,
 	user *model.User,
-) (RecCtxUser, error) {
+) error {
 	sql := `
 	INSERT INTO users (username, email, password_hash, password_salt, bio, image)
 	VALUES ($1, $2, $3, $4, $5, $6)
@@ -117,34 +100,29 @@ var UserCreateExplicitTxDaf UserCreateExplicitTxDafT = func(
 		user.ImageLink,
 	}
 	row := tx.QueryRow(ctx, sql, args...)
-	var recCtx RecCtxUser
-	err := row.Scan(&user.Id, &recCtx.CreatedAt, &recCtx.UpdatedAt)
+	err := row.Scan(&user.Id, &user.CreatedAt, &user.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrUniqueViolation {
-			return RecCtxUser{}, kind.Make(
+			return kind.Make(
 				err,
 				bf.ErrMsgUsernameOrEmailDuplicate,
 				user.Username,
 				user.Email,
 			)
 		}
-		return RecCtxUser{}, kind.Make(err, "")
+		return kind.Make(err, "")
 	}
 
-	return recCtx, nil
+	return nil
 }
 
 // UserUpdateDaf implements a stereotype instance of type
 // UserUpdateDafT.
 var UserUpdateDaf UserUpdateDafT = func(
 	ctx context.Context,
-	user model.User,
-	recCtx RecCtxUser,
-) (RecCtxUser, error) {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return RecCtxUser{}, errx.ErrxOf(err)
-	}
+	tx pgx.Tx,
+	user *model.User,
+) error {
 	sql := `
 	UPDATE users 
 	SET username = $1, email = $2, bio = $3, image = $4, password_hash = $5, password_salt = $6, 
@@ -161,42 +139,38 @@ var UserUpdateDaf UserUpdateDafT = func(
 		user.PasswordHash,
 		user.PasswordSalt,
 		user.Id,
-		recCtx.UpdatedAt,
+		user.UpdatedAt,
 	}
 	log.Debug("UserUpdateDaf sql: ", sql)
 	log.Debug("UserUpdateDaf args: ", args)
 
-	newRecCtx := recCtx
 	row := tx.QueryRow(ctx, sql, args...)
-	err = row.Scan(&newRecCtx.UpdatedAt)
+	err := row.Scan(&user.UpdatedAt)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrUniqueViolation {
-			return RecCtxUser{}, kind.Make(
+			return kind.Make(
 				err,
 				bf.ErrMsgUsernameOrEmailDuplicate,
 				user.Username,
 				user.Email,
 			)
 		}
-		return RecCtxUser{}, kind.Make(err, "")
+		return kind.Make(err, "")
 	}
 
-	return newRecCtx, nil
+	return nil
 }
 
 func userDeleteByUsernameDaf(
 	ctx context.Context,
+	tx pgx.Tx,
 	username string,
 ) error {
-	tx, err := dbpgx.GetCtxTx(ctx)
-	if err != nil {
-		return errx.ErrxOf(err)
-	}
 	sql := `
 	DELETE FROM users
 	WHERE username = $1
 	`
-	_, err = tx.Exec(ctx, sql, username)
+	_, err := tx.Exec(ctx, sql, username)
 	if kind := dbpgx.ClassifyError(err); kind != nil {
 		if kind == dbpgx.DbErrRecordNotFound {
 			return kind.Make(err, bf.ErrMsgUsernameNotFound, username)
