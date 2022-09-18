@@ -24,20 +24,8 @@ type UserUnfollowSflT = func(
 ) (rpc.ProfileOut, error)
 
 // UserUnfollowSflC is the function that constructs a stereotype instance of type
-// UserUnfollowSflT with configuration information and hard-wired stereotype dependencies.
-func UserUnfollowSflC(
-	cfgSrc DefaultSflCfgSrc,
-) UserFollowSflT {
-	return UserUnfollowSflC0(
-		cfgSrc,
-		daf.UserGetByNameDaf,
-		daf.FollowingDeleteDaf,
-	)
-}
-
-// UserUnfollowSflC0 is the function that constructs a stereotype instance of type
 // UserUnfollowSflT without hard-wired stereotype dependencies.
-func UserUnfollowSflC0(
+func UserUnfollowSflC(
 	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingDeleteDaf daf.FollowingDeleteDafT,

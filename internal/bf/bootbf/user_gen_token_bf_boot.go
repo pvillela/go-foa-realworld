@@ -9,9 +9,11 @@ import (
 ///////////////////
 // Config logic
 
-var UserGenTokenBfCfgAdapter = func(appCfgSrc config.AppCfgSrc) bf.UserGenTokenHmacBfCfgSrc {
-	return util.Todo[bf.UserGenTokenHmacBfCfgSrc]()
+var userGenTokenBfCfgAdapter = func(appCfgSrc config.AppCfgInfo) bf.UserGenTokenHmacBfCfgInfo {
+	return util.Todo[bf.UserGenTokenHmacBfCfgInfo]()
 }
+
+var UserGenTokenBfCfgAdapter = util.LiftToNullary(userGenTokenBfCfgAdapter)
 
 func UserGenTokenHmacBfBoot(appCfgSrc config.AppCfgSrc) bf.UserGenTokenBfT {
 	src := UserGenTokenBfCfgAdapter(appCfgSrc)

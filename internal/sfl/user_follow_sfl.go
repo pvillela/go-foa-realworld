@@ -24,20 +24,8 @@ type UserFollowSflT = func(
 ) (rpc.ProfileOut, error)
 
 // UserFollowSflC is the function that constructs a stereotype instance of type
-// UserFollowSflT with configuration information and hard-wired stereotype dependencies.
-func UserFollowSflC(
-	cfgSrc DefaultSflCfgSrc,
-) UserFollowSflT {
-	return UserFollowSflC0(
-		cfgSrc,
-		daf.UserGetByNameDaf,
-		daf.FollowingCreateDaf,
-	)
-}
-
-// UserFollowSflC0 is the function that constructs a stereotype instance of type
 // UserFollowSflT without hard-wired stereotype dependencies.
-func UserFollowSflC0(
+func UserFollowSflC(
 	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingCreateDaf daf.FollowingCreateDafT,

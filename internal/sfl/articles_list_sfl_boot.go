@@ -7,23 +7,19 @@
 package sfl
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
 )
 
 ///////////////////
 // Config logic
 
-var ArticlesListSflCfgAdapter = func(appCfgSrc config.AppCfgSrc) DefaultSflCfgSrc {
-	return util.Todo[DefaultSflCfgSrc]()
-}
-
 // ArticlesListSflBoot is the function that constructs a stereotype instance of type
 // ArticlesListSflT with configuration information and hard-wired stereotype dependencies.
 func ArticlesListSflBoot(src config.AppCfgSrc) ArticlesListSflT {
 	return ArticlesListSflC(
-		ArticlesListSflCfgAdapter(src),
+		boot.DefaultSflCfgAdapter(src),
 		daf.UserGetByNameDaf,
 		daf.ArticlesListDaf,
 	)

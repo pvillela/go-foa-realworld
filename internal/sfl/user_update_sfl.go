@@ -24,20 +24,8 @@ type UserUpdateSflT = func(
 ) (rpc.UserOut, error)
 
 // UserUpdateSflC is the function that constructs a stereotype instance of type
-// UserUpdateSflT with configuration information and hard-wired stereotype dependencies.
-func UserUpdateSflC(
-	cfgSrc DefaultSflCfgSrc,
-) UserUpdateSflT {
-	return UserUpdateSflC0(
-		cfgSrc,
-		daf.UserGetByNameDaf,
-		daf.UserUpdateDaf,
-	)
-}
-
-// UserUpdateSflC0 is the function that constructs a stereotype instance of type
 // UserUpdateSflT without hard-wired stereotype dependencies.
-func UserUpdateSflC0(
+func UserUpdateSflC(
 	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	userUpdateDaf daf.UserUpdateDafT,

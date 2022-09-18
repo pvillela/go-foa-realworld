@@ -26,20 +26,8 @@ type CommentDeleteSflT = func(
 ) (types.Unit, error)
 
 // CommentDeleteSflC is the function that constructs a stereotype instance of type
-// CommentDeleteSflT with configuration information and hard-wired stereotype dependencies.
-func CommentDeleteSflC(
-	cfgSrc DefaultSflCfgSrc,
-) CommentDeleteSflT {
-	return CommentDeleteSflC0(
-		cfgSrc,
-		fl.ArticleAndUserGetFl,
-		daf.CommentDeleteDaf,
-	)
-}
-
-// CommentDeleteSflC0 is the function that constructs a stereotype instance of type
 // CommentDeleteSflT without hard-wired stereotype dependencies.
-func CommentDeleteSflC0(
+func CommentDeleteSflC(
 	cfgSrc DefaultSflCfgSrc,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	commentDeleteDaf daf.CommentDeleteDafT,

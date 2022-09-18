@@ -26,20 +26,8 @@ type ProfileGetSflT = func(
 ) (rpc.ProfileOut, error)
 
 // ProfileGetSflC is the function that constructs a stereotype instance of type
-// ProfileGetSflT with configuration information and hard-wired stereotype dependencies.
-func ProfileGetSflC(
-	cfgSrc DefaultSflCfgSrc,
-) ProfileGetSflT {
-	return ProfileGetSflC0(
-		cfgSrc,
-		daf.UserGetByNameDaf,
-		daf.FollowingGetDaf,
-	)
-}
-
-// ProfileGetSflC0 is the function that constructs a stereotype instance of type
 // ProfileGetSflT without hard-wired stereotype dependencies.
-func ProfileGetSflC0(
+func ProfileGetSflC(
 	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 	followingGetDaf daf.FollowingGetDafT,
@@ -59,13 +47,13 @@ func ProfileGetSflC0(
 		follows := false
 
 		if username != "" {
-			currUser, _, err = userGetByNameDaf(ctx, tx, username)
+			currUser, err = userGetByNameDaf(ctx, tx, username)
 			if err != nil {
 				return zero, nil
 			}
 		}
 
-		profileUser, _, err = userGetByNameDaf(ctx, tx, profileName)
+		profileUser, err = userGetByNameDaf(ctx, tx, profileName)
 		if err != nil {
 			return zero, nil
 		}

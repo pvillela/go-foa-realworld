@@ -15,8 +15,11 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
+	"github.com/pvillela/go-foa-realworld/internal/bf/bootbf"
+	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
+	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
 	"testing"
 	"time"
 
@@ -67,24 +70,21 @@ var userSources = map[string]rpc.UserRegisterIn0{
 }
 
 ///////////////////
-// Helpers
-
-func makeUserGenTokenHmacBfCfgSrc(key []byte, tokenTtl time.Duration) bf.UserGenTokenHmacBfCfgSrc {
-	return func() ([]byte, time.Duration) {
-		return key, tokenTtl
-	}
-}
-
-///////////////////
 // Tests
 
 func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
+	bootbf.UserGenTokenBfCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, bf.UserGenTokenHmacBfCfgSrc](util.ThunkOf(
+			bf.UserGenTokenHmacBfCfgInfo{
+				Key:             secretKey,
+				TokenTimeToLive: tokenTimeToLive,
+			},
+		))
 
-	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
-	userRegisterSfl := sfl.UserRegisterSflC(makeDefaultSflCfgSrc(ctxDb), userGenTokenBf)
+	boot.UserRegisterSflCfgAdapter =
+		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+
+	userRegisterSfl := boot.UserRegisterSflBoot(nil)
 
 	{
 		msg := "user_register_sfl - valid registration"
@@ -135,7 +135,7 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	assert.NoError(t, err)
 
 	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
-	userAuthenticateSfl := sfl.UserAuthenticateSflBoot(makeDefaultSflCfgSrc(ctxDb), userGenTokenBf)
+	userAuthenticateSfl := boot.UserAuthenticateSflBoot(makeDefaultSflCfgSrc(ctxDb), userGenTokenBf)
 
 	{
 		msg := "user_authenticate_sfl - valid authentication"
@@ -179,7 +179,7 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserFollowSflC(makeDefaultSflCfgSrc(ctxDb))
+	userFollowSfl := boot.UserFollowSflBoot(makeDefaultSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -232,7 +232,7 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userGetCurrentSfl := sfl.UserGetCurrentSflC(makeDefaultSflCfgSrc(ctxDb))
+	userGetCurrentSfl := boot.UserGetCurrentSflBoot(makeDefaultSflCfgSrc(ctxDb))
 
 	{
 		msg := "user_get_current_sfl - valid username"
@@ -273,7 +273,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userFollowSfl := sfl.UserUnfollowSflC(makeDefaultSflCfgSrc(ctxDb))
+	userFollowSfl := boot.UserUnfollowSflBoot(makeDefaultSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -326,7 +326,7 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	ctx, err := ctxDb.SetPool(ctx)
 	assert.NoError(t, err)
 
-	userUpdateSfl := sfl.UserUpdateSflC(makeDefaultSflCfgSrc(ctxDb))
+	userUpdateSfl := boot.UserUpdateSflBoot(makeDefaultSflCfgSrc(ctxDb))
 
 	reqCtx := web.RequestContext{
 		Username: username4,

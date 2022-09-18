@@ -13,6 +13,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
 // UserRegisterSflT is the type of the stereotype instance for the service flow that
@@ -24,21 +25,8 @@ type UserRegisterSflT = func(
 ) (rpc.UserOut, error)
 
 // UserRegisterSflC is the function that constructs a stereotype instance of type
-// UserRegisterSflT with configuration information and hard-wired stereotype dependencies.
-func UserRegisterSflC(
-	cfgSrc DefaultSflCfgSrc,
-	userGenTokenBf bf.UserGenTokenBfT,
-) UserRegisterSflT {
-	return UserRegisterSflC0(
-		cfgSrc,
-		daf.UserCreateDaf,
-		userGenTokenBf,
-	)
-}
-
-// UserRegisterSflC0 is the function that constructs a stereotype instance of type
 // UserRegisterSflT without hard-wired stereotype dependencies.
-func UserRegisterSflC0(
+func UserRegisterSflC(
 	cfgSrc DefaultSflCfgSrc,
 	userCreateDaf daf.UserCreateDafT,
 	userGenTokenBf bf.UserGenTokenBfT,

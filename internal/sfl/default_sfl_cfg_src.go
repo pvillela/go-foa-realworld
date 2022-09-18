@@ -15,4 +15,4 @@ type DefaultSflCfgInfo = dbpgx.Db
 
 // DefaultSflCfgSrc is the type of functions that provide
 // the required config data for service flow types.
-type DefaultSflCfgSrc func() DefaultSflCfgInfo
+type DefaultSflCfgSrc = func() DefaultSflCfgInfo

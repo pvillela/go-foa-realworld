@@ -25,19 +25,8 @@ type UserGetCurrentSflT = func(
 ) (rpc.UserOut, error)
 
 // UserGetCurrentSflC is the function that constructs a stereotype instance of type
-// UserGetCurrentSflT with configuration information and hard-wired stereotype dependencies.
-func UserGetCurrentSflC(
-	cfgSrc DefaultSflCfgSrc,
-) UserGetCurrentSflT {
-	return UserGetCurrentSflC0(
-		cfgSrc,
-		daf.UserGetByNameDaf,
-	)
-}
-
-// UserGetCurrentSflC0 is the function that constructs a stereotype instance of type
 // UserGetCurrentSflT without hard-wired stereotype dependencies.
-func UserGetCurrentSflC0(
+func UserGetCurrentSflC(
 	cfgSrc DefaultSflCfgSrc,
 	userGetByNameDaf daf.UserGetByNameDafT,
 ) UserGetCurrentSflT {

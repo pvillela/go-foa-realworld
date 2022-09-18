@@ -15,7 +15,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 )
 
-// CommentsGetSflC0 is the type of the stereotype instance for the service flow that
+// CommentsGetSflT is the type of the stereotype instance for the service flow that
 // retrieves the comments of an article.
 type CommentsGetSflT = func(
 	ctx context.Context,
@@ -24,19 +24,8 @@ type CommentsGetSflT = func(
 ) (rpc.CommentsOut, error)
 
 // CommentsGetSflC is the function that constructs a stereotype instance of type
-// CommentsGetSflT with configuration information and hard-wired stereotype dependencies.
-func CommentsGetSflC(
-	cfgSrc DefaultSflCfgSrc,
-) CommentsGetSflT {
-	return CommentsGetSflC0(
-		cfgSrc,
-		daf.CommentsGetBySlugDaf,
-	)
-}
-
-// CommentsGetSflC0 is the function that constructs a stereotype instance of type
 // CommentsGetSflT without hard-wired stereotype dependencies.
-func CommentsGetSflC0(
+func CommentsGetSflC(
 	cfgSrc DefaultSflCfgSrc,
 	commentsGetBySlugDaf daf.CommentsGetBySlugDafT,
 ) CommentsGetSflT {

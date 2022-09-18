@@ -1,7 +1,6 @@
 package boot
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
@@ -10,9 +9,7 @@ import (
 ///////////////////
 // Config logic
 
-var ArticleCreateSflCfgAdapter = func(appCfgSrc config.AppCfgSrc) sfl.DefaultSflCfgSrc {
-	return util.Todo[sfl.DefaultSflCfgSrc]()
-}
+var ArticleCreateSflCfgAdapter = DefaultSflCfgAdapter
 
 // ArticleCreateSflBoot is the function that constructs a stereotype instance of type
 // ArticleCreateSflT with configuration information and hard-wired stereotype dependencies.

@@ -28,16 +28,18 @@ func UserGenTokenEcdsaBfC(
 	return userGenTokenBfC[ecdsa.PrivateKey](privateKey, tokenTimeToLive, jwt.SigningMethodES256)
 }
 
-type UserGenTokenHmacBfCfgSrc = func() (
-	key []byte,
-	tokenTimeToLive time.Duration,
-)
+type UserGenTokenHmacBfCfgInfo struct {
+	Key             []byte
+	TokenTimeToLive time.Duration
+}
+
+type UserGenTokenHmacBfCfgSrc = func() UserGenTokenHmacBfCfgInfo
 
 func UserGenTokenHmacBfC(
 	cfgSrc UserGenTokenHmacBfCfgSrc,
 ) UserGenTokenBfT {
-	key, tokenTimeToLive := cfgSrc()
-	return userGenTokenBfC[[]byte](key, tokenTimeToLive, jwt.SigningMethodHS256)
+	info := cfgSrc()
+	return userGenTokenBfC[[]byte](info.Key, info.TokenTimeToLive, jwt.SigningMethodHS256)
 }
 
 func userGenTokenBfC[K any](

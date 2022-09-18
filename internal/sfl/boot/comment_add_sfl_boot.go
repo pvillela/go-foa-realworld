@@ -16,14 +16,14 @@ import (
 ///////////////////
 // Config logic
 
-var ArticleDeleteSflCfgAdapter = DefaultSflCfgAdapter
+var CommentAddSflCfgAdapter = DefaultSflCfgAdapter
 
-// ArticleDeleteSflC is the function that constructs a stereotype instance of type
-// ArticleDeleteSflT with configuration information and hard-wired stereotype dependencies.
-func ArticleDeleteSflC(appCfgSrc config.AppCfgSrc) sfl.ArticleDeleteSflT {
-	return sfl.ArticleDeleteSflC(
-		ArticleDeleteSflCfgAdapter(appCfgSrc),
-		fl.ArticleGetAndCheckOwnerFl,
-		daf.ArticleDeleteDaf,
+// CommentAddSflBoot is the function that constructs a stereotype instance of type
+// CommentAddSflT with configuration information and hard-wired stereotype dependencies.
+func CommentAddSflBoot(src config.AppCfgSrc) sfl.CommentAddSflT {
+	return sfl.CommentAddSflC(
+		CommentAddSflCfgAdapter(src),
+		fl.ArticleAndUserGetFl,
+		daf.CommentCreateDaf,
 	)
 }

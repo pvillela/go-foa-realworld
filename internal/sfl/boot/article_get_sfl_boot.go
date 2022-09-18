@@ -7,7 +7,6 @@
 package boot
 
 import (
-	"github.com/pvillela/go-foa-realworld/internal/arch/util"
 	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/fl"
 	"github.com/pvillela/go-foa-realworld/internal/sfl"
@@ -16,9 +15,7 @@ import (
 ///////////////////
 // Config logic
 
-var ArticleGetSflCfgAdapter = func(appCfg config.AppCfgSrc) sfl.DefaultSflCfgSrc {
-	return util.Todo[sfl.DefaultSflCfgSrc]()
-}
+var ArticleGetSflCfgAdapter = DefaultSflCfgAdapter
 
 // ArticleGetSflC is the function that constructs a stereotype instance of type
 // ArticleGetSflT with configuration information and hard-wired stereotype dependencies.
