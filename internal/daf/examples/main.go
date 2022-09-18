@@ -30,10 +30,6 @@ func main() {
 	pool, err := pgxpool.Connect(ctx, connStr)
 	errx.PanicOnError(err)
 
-	ctxDb := dbpgx.CtxPgx{pool}
-	ctx, err = ctxDb.SetPool(ctx)
-	errx.PanicOnError(err)
-
 	db := dbpgx.Db{pool}
 
 	tx, err := db.BeginTx(ctx)
@@ -43,7 +39,7 @@ func main() {
 	err = tx.Commit(ctx)
 	errx.PanicOnError(err)
 
-	userDafsExample(ctx, ctxDb)
+	userDafsExample(ctx, db)
 	articleDafsExample(ctx, db)
 	tagDafsExample(ctx, db)
 	followingDafsExample(ctx, db)

@@ -15,8 +15,8 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 const (
@@ -52,63 +52,57 @@ var users = []model.User{
 	},
 }
 
-func userDafsExample(ctx context.Context, ctxDb dbpgx.CtxPgx) {
+func userDafsExample(ctx context.Context, db dbpgx.Db) {
 	fmt.Println("********** userDafsExample **********\n")
 
-	ctx, err := ctxDb.BeginTx(ctx)
+	tx, err := db.BeginTx(ctx)
 	errx.PanicOnError(err)
 	//fmt.Println("ctx", ctx)
 
 	for i, _ := range users {
-		recCtx, err := daf.UserCreateDaf(ctx, &users[i])
+		err := daf.UserCreateDaf(ctx, tx, &users[i])
 		errx.PanicOnError(err)
 		_, _ = spew.Printf("user from Create: %v\n", users[i])
-		fmt.Println("recCtx from Create:", recCtx, "\n")
 	}
 
-	userFromDb, recCtx, err := daf.UserGetByNameDaf(ctx, username1)
+	userFromDb, err := daf.UserGetByNameDaf(ctx, tx, username1)
 	// Commented-out lines below were used to daftest forced error due to multiple rows returned
 	//fmt.Println("Error classification:", dbpgx.ClassifyError(err))
 	//uerr := errors.Unwrap(err)
 	//fmt.Printf("Unwrapped error: %+v", uerr)
 	errx.PanicOnError(err)
 	fmt.Println("UserGetByNameDaf:", userFromDb)
-	fmt.Println("recCtx from Read:", recCtx, "\n")
 
-	userFromDb, recCtx, err = daf.UserGetByNameDaf(ctx, "daftest")
+	userFromDb, err = daf.UserGetByNameDaf(ctx, tx, "daftest")
 	fmt.Println("UserGetByNameDaf with invalid username")
 	fmt.Println("Error:", err)
 	fmt.Println("Error classification:", dbpgx.ClassifyError(err), "\n")
 	uerr := errors.Unwrap(err)
 	fmt.Printf("Unwrapped error: %+v\n\n", uerr)
 
-	userFromDb, recCtx, err = daf.UserGetByEmailDaf(ctx, "foo@bar.com")
+	userFromDb, err = daf.UserGetByEmailDaf(ctx, tx, "foo@bar.com")
 	errx.PanicOnError(err)
 	fmt.Println("UserGetByEmailDaf:", userFromDb)
-	fmt.Println("recCtx from Read:", recCtx, "\n")
 
-	tx, err := dbpgx.GetCtxTx(ctx)
-	errx.PanicOnError(err)
 	readManySql := "SELECT * FROM users"
-	pwUsers, err := dbpgx.ReadMany[daf.PwUser](ctx, tx, readManySql, -1, -1)
-	fmt.Println("pwUsers:", pwUsers, "\n")
-	pwUserPtrs, err := dbpgx.ReadMany[*daf.PwUser](ctx, tx, readManySql, -1, -1)
-	fmt.Println("pwUserPtrs:", pwUserPtrs, "\n")
-	fmt.Println("*pwUserPtrs[0]:", *pwUserPtrs[0], "\n")
+	users, err := dbpgx.ReadMany[model.User](ctx, tx, readManySql, -1, -1)
+	fmt.Println("users:", users, "\n")
+	userPtrs, err := dbpgx.ReadMany[*model.User](ctx, tx, readManySql, -1, -1)
+	fmt.Println("userPtrs:", userPtrs, "\n")
+	fmt.Println("*userPtrs[0]:", *userPtrs[0], "\n")
 
-	ctx, err = ctxDb.Commit(ctx)
+	err = tx.Commit(ctx)
 	errx.PanicOnError(err)
 
-	ctx, err = ctxDb.BeginTx(ctx)
+	tx, err = db.BeginTx(ctx)
 	errx.PanicOnError(err)
 
 	user := users[0]
 	user.ImageLink = "https://xyz.com"
-	recCtx, err = daf.UserUpdateDaf(ctx, user, recCtx)
+	err = daf.UserUpdateDaf(ctx, tx, &user)
 	errx.PanicOnError(err)
 	fmt.Println("\nUserUpdateDaf:", user)
-	fmt.Println("recCtx from Update:", recCtx, "\n")
 
-	_, err = ctxDb.Commit(ctx)
+	err = tx.Commit(ctx)
 	errx.PanicOnError(err)
 }
