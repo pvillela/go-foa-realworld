@@ -42,7 +42,7 @@ func ArticleAndUserGetFlC0(
 		slug string,
 		username string,
 	) (model.ArticlePlus, model.User, error) {
-		user, _, err := userGetByNameDaf(ctx, tx, username)
+		user, err := userGetByNameDaf(ctx, tx, username)
 		if err != nil {
 			return model.ArticlePlus{}, model.User{}, err
 		}

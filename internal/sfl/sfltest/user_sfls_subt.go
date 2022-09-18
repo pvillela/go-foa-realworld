@@ -9,7 +9,6 @@ package sfltest
 import (
 	"context"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/pvillela/go-foa-realworld/experimental/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/types"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
@@ -17,6 +16,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/bf/bootbf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
 	"testing"
 	"time"
@@ -71,18 +71,16 @@ var userSources = map[string]rpc.UserRegisterIn0{
 // Tests
 
 func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	bootbf.UserGenTokenBfCfgAdapter = TestCfgAdapter(bf.UserGenTokenHmacBfCfgInfo{
+	bootbf.UserGenTokenBfCfgAdapter = TestCfgAdapterOf(bf.UserGenTokenHmacBfCfgInfo{
 		Key:             secretKey,
 		TokenTimeToLive: tokenTimeToLive,
 	})
-
-	boot.UserRegisterSflCfgAdapter = TestCfgAdapter(db)
-
+	boot.UserRegisterSflCfgAdapter = TestCfgAdapterOf(db)
 	userRegisterSfl := boot.UserRegisterSflBoot(nil)
 
 	{
 		msg := "user_register_sfl - valid registration"
-		for k, _ := range userSources {
+		for k := range userSources {
 			userSrc := userSources[k]
 			in := rpc.UserRegisterIn{userSrc}
 			out, err := userRegisterSfl(ctx, web.RequestContext{}, in)
@@ -109,7 +107,7 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			},
 		}
 
-		for i, _ := range badUserSources {
+		for i := range badUserSources {
 			userSrc := badUserSources[i]
 			in := rpc.UserRegisterIn{userSrc}
 			_, err := userRegisterSfl(ctx, web.RequestContext{}, in)
@@ -124,16 +122,16 @@ func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
-
-	userGenTokenBf := bf.UserGenTokenHmacBfC(makeUserGenTokenHmacBfCfgSrc(secretKey, tokenTimeToLive))
-	userAuthenticateSfl := boot.UserAuthenticateSflBoot(makeDefaultSflCfgSrc(ctxDb), userGenTokenBf)
+	bootbf.UserGenTokenBfCfgAdapter = TestCfgAdapterOf(bf.UserGenTokenHmacBfCfgInfo{
+		Key:             secretKey,
+		TokenTimeToLive: tokenTimeToLive,
+	})
+	boot.UserAuthenticateSflCfgAdapter = TestCfgAdapterOf(db)
+	userAuthenticateSfl := boot.UserAuthenticateSflBoot(nil)
 
 	{
 		msg := "user_authenticate_sfl - valid authentication"
-		for k, _ := range userSources {
+		for k := range userSources {
 			userSrc := userSources[k]
 			in := rpc.UserAuthenticateIn{User: rpc.UserAuthenticateIn0{
 				Email:    userSrc.Email,
@@ -169,11 +167,8 @@ func userAuthenticateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
-
-	userFollowSfl := boot.UserFollowSflBoot(makeDefaultSflCfgSrc(ctxDb))
+	boot.UserFollowSflCfgAdapter = TestCfgAdapterOf(db)
+	userFollowSfl := boot.UserFollowSflBoot(nil)
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -222,11 +217,8 @@ func userFollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
-
-	userGetCurrentSfl := boot.UserGetCurrentSflBoot(makeDefaultSflCfgSrc(ctxDb))
+	boot.UserGetSflCfgAdapter = TestCfgAdapterOf(db)
+	userGetCurrentSfl := boot.UserGetCurrentSflBoot(nil)
 
 	{
 		msg := "user_get_current_sfl - valid username"
@@ -263,11 +255,8 @@ func userGetCurrentSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
-
-	userFollowSfl := boot.UserUnfollowSflBoot(makeDefaultSflCfgSrc(ctxDb))
+	boot.UserUnfollowSflCfgAdapter = TestCfgAdapterOf(db)
+	userUnfollowSfl := boot.UserUnfollowSflBoot(nil)
 
 	reqCtx := web.RequestContext{
 		Username: username1,
@@ -279,7 +268,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		followeeUsername := username2
 
-		out, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		out, err := userUnfollowSfl(ctx, reqCtx, followeeUsername)
 		assert.NoError(t, err)
 
 		assert.Equal(t, followeeUsername, out.Profile.Username, msg+" - output profile username must equal followee username")
@@ -291,7 +280,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		followeeUsername := username2
 
-		_, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		_, err := userUnfollowSfl(ctx, reqCtx, followeeUsername)
 		returnedErrxKind := dbpgx.ClassifyError(err)
 		expectedErrxKind := dbpgx.DbErrRecordNotFound
 		expectedErrMsgPrefix := "DbErrRecordNotFound[user with username"
@@ -305,7 +294,7 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		followeeUsername := "dkdkdkd"
 
-		_, err := userFollowSfl(ctx, reqCtx, followeeUsername)
+		_, err := userUnfollowSfl(ctx, reqCtx, followeeUsername)
 		returnedErrxKind := dbpgx.ClassifyError(err)
 		expectedErrxKind := dbpgx.DbErrRecordNotFound
 		expectedErrMsgPrefix := "DbErrRecordNotFound[user not found for username"
@@ -316,11 +305,8 @@ func userUnfollowSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	ctxDb := dbpgx.CtxPgx{db.Pool}
-	ctx, err := ctxDb.SetPool(ctx)
-	assert.NoError(t, err)
-
-	userUpdateSfl := boot.UserUpdateSflBoot(makeDefaultSflCfgSrc(ctxDb))
+	boot.UserUpdateSflCfgAdapter = TestCfgAdapterOf(db)
+	userUpdateSfl := boot.UserUpdateSflBoot(nil)
 
 	reqCtx := web.RequestContext{
 		Username: username4,

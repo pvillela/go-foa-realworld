@@ -4,12 +4,12 @@
  * that can be found in the LICENSE file.
  */
 
-package sfl
+package boot
 
 import (
 	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
-	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
+	"github.com/pvillela/go-foa-realworld/internal/sfl"
 )
 
 ///////////////////
@@ -17,9 +17,9 @@ import (
 
 // ArticlesListSflBoot is the function that constructs a stereotype instance of type
 // ArticlesListSflT with configuration information and hard-wired stereotype dependencies.
-func ArticlesListSflBoot(src config.AppCfgSrc) ArticlesListSflT {
-	return ArticlesListSflC(
-		boot.DefaultSflCfgAdapter(src),
+func ArticlesListSflBoot(src config.AppCfgSrc) sfl.ArticlesListSflT {
+	return sfl.ArticlesListSflC(
+		DefaultSflCfgAdapter(src),
 		daf.UserGetByNameDaf,
 		daf.ArticlesListDaf,
 	)

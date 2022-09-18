@@ -61,7 +61,7 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleCreateSflCfgAdapter = TestCfgAdapter(db)
+	boot.ArticleCreateSflCfgAdapter = TestCfgAdapterOf(db)
 	articleCreateSfl := boot.ArticleCreateSflBoot(nil)
 
 	{
@@ -137,7 +137,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleDeleteSflCfgAdapter = TestCfgAdapter(db)
+	boot.ArticleDeleteSflCfgAdapter = TestCfgAdapterOf(db)
 	articleDeleteSfl := boot.ArticleDeleteSflC(nil)
 
 	{
@@ -214,7 +214,7 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleFavoriteSflCfgAdapter = TestCfgAdapter(db)
+	boot.ArticleFavoriteSflCfgAdapter = TestCfgAdapterOf(db)
 	articleFavoriteSfl := boot.ArticleFavoriteSflC(nil)
 
 	{
@@ -286,7 +286,7 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleGetSflCfgAdapter = TestCfgAdapter(db)
+	boot.ArticleGetSflCfgAdapter = TestCfgAdapterOf(db)
 	articleGetSfl := boot.ArticleGetSflC(nil)
 
 	{
@@ -335,7 +335,7 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleUnfavoriteSflCfgAdapter = TestCfgAdapter(db)
+	boot.ArticleUnfavoriteSflCfgAdapter = TestCfgAdapterOf(db)
 	articleUnfavoriteSfl := boot.ArticleUnfavoriteSflC(nil)
 
 	{

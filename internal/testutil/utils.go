@@ -35,7 +35,7 @@ func CleanupAllTables(db dbpgx.Db, ctx context.Context) {
 
 func UserGetByName(db dbpgx.Db, ctx context.Context, username string) (model.User, error) {
 	f := func(ctx context.Context, tx pgx.Tx) (model.User, error) {
-		user, _, err := daf.UserGetByNameDaf(ctx, tx, username)
+		user, err := daf.UserGetByNameDaf(ctx, tx, username)
 		return user, err
 	}
 	return dbpgx.WithTransaction(db, ctx, f)
