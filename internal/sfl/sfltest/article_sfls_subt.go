@@ -8,7 +8,6 @@ package sfltest
 
 import (
 	"context"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/rpc"
 	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
 	"testing"
@@ -19,7 +18,6 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/sfl"
 	"github.com/pvillela/go-foa-realworld/internal/testutil"
 	"github.com/stretchr/testify/assert"
 )
@@ -63,8 +61,7 @@ var authorsAndArticles = []AuthorAndArticle{
 // Tests
 
 func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleCreateSflCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	boot.ArticleCreateSflCfgAdapter = TestCfgAdapter(db)
 	articleCreateSfl := boot.ArticleCreateSflBoot(nil)
 
 	{
@@ -140,8 +137,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleDeleteSflCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	boot.ArticleDeleteSflCfgAdapter = TestCfgAdapter(db)
 	articleDeleteSfl := boot.ArticleDeleteSflC(nil)
 
 	{
@@ -218,8 +214,7 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleFavoriteSflCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	boot.ArticleFavoriteSflCfgAdapter = TestCfgAdapter(db)
 	articleFavoriteSfl := boot.ArticleFavoriteSflC(nil)
 
 	{
@@ -291,8 +286,7 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleGetSflCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	boot.ArticleGetSflCfgAdapter = TestCfgAdapter(db)
 	articleGetSfl := boot.ArticleGetSflC(nil)
 
 	{
@@ -341,8 +335,7 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 }
 
 func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	boot.ArticleUnfavoriteSflCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	boot.ArticleUnfavoriteSflCfgAdapter = TestCfgAdapter(db)
 	articleUnfavoriteSfl := boot.ArticleUnfavoriteSflC(nil)
 
 	{

@@ -16,9 +16,7 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/web"
 	"github.com/pvillela/go-foa-realworld/internal/bf"
 	"github.com/pvillela/go-foa-realworld/internal/bf/bootbf"
-	"github.com/pvillela/go-foa-realworld/internal/config"
 	"github.com/pvillela/go-foa-realworld/internal/model"
-	"github.com/pvillela/go-foa-realworld/internal/sfl"
 	"github.com/pvillela/go-foa-realworld/internal/sfl/boot"
 	"testing"
 	"time"
@@ -73,16 +71,12 @@ var userSources = map[string]rpc.UserRegisterIn0{
 // Tests
 
 func userRegisterSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-	bootbf.UserGenTokenBfCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, bf.UserGenTokenHmacBfCfgSrc](util.ThunkOf(
-			bf.UserGenTokenHmacBfCfgInfo{
-				Key:             secretKey,
-				TokenTimeToLive: tokenTimeToLive,
-			},
-		))
+	bootbf.UserGenTokenBfCfgAdapter = TestCfgAdapter(bf.UserGenTokenHmacBfCfgInfo{
+		Key:             secretKey,
+		TokenTimeToLive: tokenTimeToLive,
+	})
 
-	boot.UserRegisterSflCfgAdapter =
-		util.ConstOf[config.AppCfgSrc, sfl.DefaultSflCfgSrc](util.ThunkOf(db))
+	boot.UserRegisterSflCfgAdapter = TestCfgAdapter(db)
 
 	userRegisterSfl := boot.UserRegisterSflBoot(nil)
 
