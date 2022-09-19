@@ -406,104 +406,104 @@ func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	}
 }
 
-//func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
-//	articleUpdateSfl := sfl.ArticleUpdateSflC(makeDefaultSflCfgSrc(db))
-//
-//	{
-//		msg := "article_update_sfl - existing article authored by current user"
-//
-//		aa := authorsAndArticles[2]
-//
-//		authorname := aa.Authorname
-//		reqCtx := web.RequestContext{
-//			Username: authorname,
-//			Token:    &jwt.Token{},
-//		}
-//		article := aa.Article
-//
-//		slug := util.Slug(article.Title)
-//
-//		_, err := articleUpdateSfl(ctx, reqCtx, slug)
-//		assert.NoError(t, err, msg)
-//
-//		_, err = testutil.ArticleGetBySlug(db, ctx, authorname, slug)
-//		returnedErrxKind := dbpgx.ClassifyError(err)
-//		expectedErrxKind := dbpgx.DbErrRecordNotFound
-//		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
-//
-//		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - retrieval of updated article must fail with appropriate error kind when username or email is not unique")
-//		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - retrieval of updated article must fail with appropriate error message when username or email is not unique")
-//	}
-//
-//	{
-//		msg := "article_update_sfl - existing article authored by current user but duplicate slug"
-//
-//		aa := authorsAndArticles[2]
-//
-//		authorname := aa.Authorname
-//		reqCtx := web.RequestContext{
-//			Username: authorname,
-//			Token:    &jwt.Token{},
-//		}
-//		article := aa.Article
-//
-//		slug := util.Slug(article.Title)
-//
-//		_, err := articleUpdateSfl(ctx, reqCtx, slug)
-//		assert.NoError(t, err, msg)
-//
-//		_, err = testutil.ArticleGetBySlug(db, ctx, authorname, slug)
-//		returnedErrxKind := dbpgx.ClassifyError(err)
-//		expectedErrxKind := dbpgx.DbErrRecordNotFound
-//		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
-//
-//		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - retrieval of updated article must fail with appropriate error kind when username or email is not unique")
-//		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - retrieval of updated article must fail with appropriate error message when username or email is not unique")
-//	}
-//
-//	{
-//		msg := "article_update_sfl - inexistenet article"
-//
-//		aa := authorsAndArticles[2]
-//
-//		authorname := aa.Authorname
-//		reqCtx := web.RequestContext{
-//			Username: authorname,
-//			Token:    &jwt.Token{},
-//		}
-//		article := aa.Article
-//
-//		slug := util.Slug(article.Title)
-//
-//		_, err := articleUpdateSfl(ctx, reqCtx, slug)
-//		returnedErrxKind := dbpgx.ClassifyError(err)
-//		expectedErrxKind := dbpgx.DbErrRecordNotFound
-//		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
-//
-//		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
-//		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
-//	}
-//
-//	{
-//		msg := "article_update_sfl - attempted by non-author"
-//
-//		aa := authorsAndArticles[0]
-//
-//		authorname := username1
-//		reqCtx := web.RequestContext{
-//			Username: authorname,
-//			Token:    &jwt.Token{},
-//		}
-//		article := aa.Article
-//
-//		slug := util.Slug(article.Title)
-//
-//		_, err := articleUpdateSfl(ctx, reqCtx, slug)
-//		returnedErrxKind := dbpgx.ClassifyError(err)
-//		expectedErrxKind := bf.ErrUnauthorizedUser
-//		expectedErrMsgPrefix := "ErrUnauthorizedUser[user"
-//
-//		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when username or email is not unique")
-//		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when username or email is not unique")
-//	}
-//}
+func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	boot.ArticleUpdateSflCfgAdapter = TestCfgAdapterOf(db)
+	articleUpdateSfl := boot.ArticleUpdateSflBoot(nil)
+
+	{
+		msg := "article_update_sfl - existing article authored by current user"
+
+		aa := authorsAndArticles[1]
+
+		authorname := aa.Authorname
+		reqCtx := web.RequestContext{
+			Username: authorname,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		in := rpc.ArticleUpdateIn{
+			Article: rpc.ArticleUpdateIn0{
+				Slug:        slug,
+				Title:       util.PointerFromValue("New Title"),
+				Description: util.PointerFromValue("New description"),
+				Body:        util.PointerFromValue("New body"),
+			},
+		}
+
+		_, err := articleUpdateSfl(ctx, reqCtx, in)
+		assert.NoError(t, err, msg)
+
+		retrieved, err := testutil.ArticleGetBySlug(db, ctx, authorname, slug)
+		assert.NoError(t, err, msg)
+
+		assert.Equal(t, *in.Article.Title, retrieved.Title, msg+" - Title attribute of retrieved article must match update")
+		assert.Equal(t, *in.Article.Description, retrieved.Description, msg+" - Description attribute of retrieved article must match update")
+		assert.Equal(t, in.Article.Body, retrieved.Body, msg+" - Body attribute of retrieved article must match update")
+	}
+
+	{
+		msg := "article_update_sfl - inexistenet article"
+
+		aa := authorsAndArticles[1]
+
+		authorname := aa.Authorname
+		reqCtx := web.RequestContext{
+			Username: authorname,
+			Token:    &jwt.Token{},
+		}
+
+		slug := "xxx"
+
+		in := rpc.ArticleUpdateIn{
+			Article: rpc.ArticleUpdateIn0{
+				Slug:        slug,
+				Title:       util.PointerFromValue("New Title"),
+				Description: util.PointerFromValue("New description"),
+				Body:        util.PointerFromValue("New body"),
+			},
+		}
+
+		_, err := articleUpdateSfl(ctx, reqCtx, in)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := dbpgx.DbErrRecordNotFound
+		expectedErrMsgPrefix := "DbErrRecordNotFound[article slug"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when article doesn't exist")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when article doesn't exist")
+	}
+
+	{
+		msg := "article_update_sfl - attempted by non-author"
+
+		aa := authorsAndArticles[0]
+
+		authorname := username1
+		reqCtx := web.RequestContext{
+			Username: authorname,
+			Token:    &jwt.Token{},
+		}
+		article := aa.Article
+
+		slug := util.Slug(article.Title)
+
+		in := rpc.ArticleUpdateIn{
+			Article: rpc.ArticleUpdateIn0{
+				Slug:        slug,
+				Title:       util.PointerFromValue("New Title"),
+				Description: util.PointerFromValue("New description"),
+				Body:        util.PointerFromValue("New body"),
+			},
+		}
+
+		_, err := articleUpdateSfl(ctx, reqCtx, in)
+		returnedErrxKind := dbpgx.ClassifyError(err)
+		expectedErrxKind := bf.ErrUnauthorizedUser
+		expectedErrMsgPrefix := "ErrUnauthorizedUser[user"
+
+		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when update attempt by non-author")
+		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when update attempt by non-author")
+	}
+}

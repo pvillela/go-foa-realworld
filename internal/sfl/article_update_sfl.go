@@ -25,9 +25,9 @@ type ArticleUpdateSflT = func(
 	in rpc.ArticleUpdateIn,
 ) (rpc.ArticleOut, error)
 
-// ArticleUpdateSflC0 is the function that constructs a stereotype instance of type
+// ArticleUpdateSflC is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT without hard-wired stereotype dependencies.
-func ArticleUpdateSflC0(
+func ArticleUpdateSflC(
 	cfgSrc DefaultSflCfgSrc,
 	articleGetAndCheckOwnerFl fl.ArticleGetAndCheckOwnerFlT,
 	articleUpdateDaf daf.ArticleUpdateDafT,

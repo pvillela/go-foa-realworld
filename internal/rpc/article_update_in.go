@@ -9,12 +9,14 @@ package rpc
 import "github.com/pvillela/go-foa-realworld/internal/bf"
 
 type ArticleUpdateIn struct {
-	Article struct {
-		Slug        string
-		Title       *string // optional
-		Description *string // optional
-		Body        *string // optional
-	}
+	Article ArticleUpdateIn0
+}
+
+type ArticleUpdateIn0 struct {
+	Slug        string
+	Title       *string // optional
+	Description *string // optional
+	Body        *string // optional
 }
 
 func (in ArticleUpdateIn) Validate() error {

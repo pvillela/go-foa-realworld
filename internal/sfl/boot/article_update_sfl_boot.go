@@ -21,7 +21,7 @@ var ArticleUpdateSflCfgAdapter = DefaultSflCfgAdapter
 // ArticleUpdateSflBoot is the function that constructs a stereotype instance of type
 // ArticleUpdateSflT with configuration information and hard-wired stereotype dependencies.
 func ArticleUpdateSflBoot(src config.AppCfgSrc) sfl.ArticleUpdateSflT {
-	return sfl.ArticleUpdateSflC0(
+	return sfl.ArticleUpdateSflC(
 		ArticleUpdateSflCfgAdapter(src),
 		fl.ArticleGetAndCheckOwnerFl,
 		daf.ArticleUpdateDaf,
