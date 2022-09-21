@@ -45,7 +45,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
-			FavoritedBy: util.PointerFromValue(users[2].Username),
+			FavoritedBy: util.PointerOf(users[2].Username),
 			Limit:       nil,
 			Offset:      nil,
 		}
@@ -60,7 +60,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
-			FavoritedBy: util.PointerFromValue(users[0].Username),
+			FavoritedBy: util.PointerOf(users[0].Username),
 			Limit:       nil,
 			Offset:      nil,
 		}
@@ -78,7 +78,7 @@ func favoriteDafsExample(ctx context.Context, db dbpgx.Db) {
 		criteria := rpc.ArticleCriteria{
 			Tag:         nil,
 			Author:      nil,
-			FavoritedBy: util.PointerFromValue(users[2].Username),
+			FavoritedBy: util.PointerOf(users[2].Username),
 			Limit:       nil,
 			Offset:      nil,
 		}

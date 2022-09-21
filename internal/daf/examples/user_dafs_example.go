@@ -31,7 +31,7 @@ var users = []model.User{
 		Email:        "foo@bar.com",
 		PasswordHash: "dakfljads0fj",
 		PasswordSalt: "2af8d0b50a",
-		Bio:          util.PointerFromValue("I am me."),
+		Bio:          util.PointerOf("I am me."),
 		ImageLink:    "",
 	},
 	{
@@ -39,7 +39,7 @@ var users = []model.User{
 		Email:        "joe@bloe.com",
 		PasswordHash: "9zdakfljads0",
 		PasswordSalt: "3ba9e9c611",
-		Bio:          util.PointerFromValue("Famous person."),
+		Bio:          util.PointerOf("Famous person."),
 		ImageLink:    "https://myimage.com",
 	},
 	{
@@ -47,7 +47,7 @@ var users = []model.User{
 		Email:        "johndoe@foo.com",
 		PasswordHash: "09fs8asfoasi",
 		PasswordSalt: "0000000000",
-		Bio:          util.PointerFromValue("Average guy."),
+		Bio:          util.PointerOf("Average guy."),
 		ImageLink:    "https://johndooeimage.com",
 	},
 }

@@ -139,7 +139,7 @@ var tagDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pgx
 		currUserId := mdb.UserGetByName(currUsername).Id
 
 		criteria := rpc.ArticleCriteria{
-			Tag:         util.PointerFromValue(tagName1),
+			Tag:         util.PointerOf(tagName1),
 			Author:      nil,
 			FavoritedBy: nil,
 			Limit:       nil,

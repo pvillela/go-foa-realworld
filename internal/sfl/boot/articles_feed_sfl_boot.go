@@ -15,11 +15,13 @@ import (
 ///////////////////
 // Config logic
 
+var ArticlesFeedSflCfgAdapter = DefaultSflCfgAdapter
+
 // ArticlesFeedSflBoot is the function that constructs a stereotype instance of type
 // ArticlesFeedSflT with configuration information and hard-wired stereotype dependencies.
 func ArticlesFeedSflBoot(src config.AppCfgSrc) sfl.ArticlesFeedSflT {
 	return sfl.ArticlesFeedSflC(
-		DefaultSflCfgAdapter(src),
+		ArticlesFeedSflCfgAdapter(src),
 		daf.UserGetByNameDaf,
 		daf.ArticlesFeedDaf,
 	)

@@ -93,6 +93,15 @@ func SliceFilter[S any](xs []S, f func(S) bool) []S {
 	return ts
 }
 
+func SliceReverse[S any](xs []S) []S {
+	length := len(xs)
+	reversed := make([]S, length)
+	for i := range xs {
+		reversed[length-1-i] = xs[i]
+	}
+	return reversed
+}
+
 func MapToSlice[K comparable, V any](m map[K]V) []V {
 	slice := make([]V, len(m))
 	i := 0

@@ -34,7 +34,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			Email:        "foo@bar.com",
 			PasswordHash: "dakfljads0fj",
 			PasswordSalt: "2af8d0b50a",
-			Bio:          util.PointerFromValue("I am me."),
+			Bio:          util.PointerOf("I am me."),
 			ImageLink:    "",
 		},
 		{
@@ -42,7 +42,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			Email:        "joe@bloe.com",
 			PasswordHash: "9zdakfljads0",
 			PasswordSalt: "3ba9e9c611",
-			Bio:          util.PointerFromValue("Famous person."),
+			Bio:          util.PointerOf("Famous person."),
 			ImageLink:    "https://myimage.com",
 		},
 		{
@@ -50,7 +50,7 @@ func setupUsers(ctx context.Context, tx pgx.Tx) {
 			Email:        "johndoe@foo.com",
 			PasswordHash: "09fs8asfoasi",
 			PasswordSalt: "0000000000",
-			Bio:          util.PointerFromValue("Average guy."),
+			Bio:          util.PointerOf("Average guy."),
 			ImageLink:    "https://johndooeimage.com",
 		},
 	}
@@ -179,7 +179,7 @@ var userDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx pg
 		username := username2
 
 		user := mdb.UserGetByName(username)
-		user.Bio = util.PointerFromValue("I'm a really famous person.")
+		user.Bio = util.PointerOf("I'm a really famous person.")
 
 		updUser := user
 		err := daf.UserUpdateDaf(ctx, tx, &updUser)

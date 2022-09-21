@@ -108,7 +108,7 @@ func tagDafsExample(ctx context.Context, db dbpgx.Db) {
 
 	{
 		criteria := rpc.ArticleCriteria{
-			Tag:         util.PointerFromValue("FOOTAG"),
+			Tag:         util.PointerOf("FOOTAG"),
 			Author:      nil,
 			FavoritedBy: nil,
 			Limit:       nil,

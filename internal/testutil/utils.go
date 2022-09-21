@@ -8,6 +8,7 @@ package testutil
 
 import (
 	"context"
+	"github.com/pvillela/go-foa-realworld/internal/rpc"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
@@ -54,6 +55,23 @@ func ArticleGetBySlug(db dbpgx.Db, ctx context.Context, currUsername string, slu
 		}
 		article := articlePlus.ToArticle()
 		return article, err
+	}
+	return dbpgx.WithTransaction(db, ctx, f)
+}
+
+func ArticlesList(db dbpgx.Db, ctx context.Context, currUsername string) ([]model.Article, error) {
+	user, err := UserGetByName(db, ctx, currUsername)
+	if err != nil {
+		return []model.Article{}, err
+	}
+
+	f := func(ctx context.Context, tx pgx.Tx) ([]model.Article, error) {
+		articlePluses, err := daf.ArticlesListDaf(ctx, tx, user.Id, rpc.ArticleCriteria{})
+		if err != nil {
+			return []model.Article{}, err
+		}
+		articles := ArticlePlusesToArticles(articlePluses)
+		return articles, err
 	}
 	return dbpgx.WithTransaction(db, ctx, f)
 }

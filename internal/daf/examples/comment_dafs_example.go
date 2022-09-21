@@ -14,8 +14,8 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 )
 
 func commentDafsExample(ctx context.Context, db dbpgx.Db) {
@@ -28,12 +28,12 @@ func commentDafsExample(ctx context.Context, db dbpgx.Db) {
 		{
 			ArticleId: articles[0].Id,
 			AuthorId:  users[0].Id,
-			Body:      util.PointerFromValue("I thought it was a great article."),
+			Body:      util.PointerOf("I thought it was a great article."),
 		},
 		{
 			ArticleId: articles[0].Id,
 			AuthorId:  users[2].Id,
-			Body:      util.PointerFromValue("What a terrible article."),
+			Body:      util.PointerOf("What a terrible article."),
 		},
 	}
 

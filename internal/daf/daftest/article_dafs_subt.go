@@ -39,7 +39,7 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 				Title:       "An interesting subject",
 				Slug:        slug1,
 				Description: "Story about an interesting subject.",
-				Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
+				Body:        util.PointerOf("I met this interesting subject a long time ago."),
 			},
 		},
 		{
@@ -48,7 +48,7 @@ func setupArticles(ctx context.Context, tx pgx.Tx) {
 				Title:       "A dull story",
 				Slug:        slug2,
 				Description: "Narrative about something dull.",
-				Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
+				Body:        util.PointerOf("This is so dull, bla, bla, bla."),
 			},
 		},
 	}
@@ -85,7 +85,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 
 		existingArticle := mdb.ArticleGetBySlug(slug)
 		changedArticle := existingArticle
-		newBody := util.PointerFromValue(*existingArticle.Body + " And so on and on.")
+		newBody := util.PointerOf(*existingArticle.Body + " And so on and on.")
 		changedArticle.Body = newBody
 
 		err := daf.ArticleUpdateDaf(ctx, tx, &changedArticle)
@@ -152,7 +152,7 @@ var articleDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		msg := "ArticlesListDaf - select tag"
 
 		criteria := rpc.ArticleCriteria{
-			Tag:         util.PointerFromValue("FOOTAG"),
+			Tag:         util.PointerOf("FOOTAG"),
 			Author:      nil,
 			FavoritedBy: nil,
 			Limit:       nil,

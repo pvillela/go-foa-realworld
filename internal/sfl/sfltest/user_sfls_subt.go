@@ -322,9 +322,9 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
 			Email:     &updatedEmail,
-			Password:  util.PointerFromValue("password_" + updatedUsername),
-			Bio:       util.PointerFromValue("I am the 4th user."),
-			ImageLink: util.PointerFromValue("http://foo.com/" + updatedUsername + ".png"),
+			Password:  util.PointerOf("password_" + updatedUsername),
+			Bio:       util.PointerOf("I am the 4th user."),
+			ImageLink: util.PointerOf("http://foo.com/" + updatedUsername + ".png"),
 		}}
 
 		out, err := userUpdateSfl(ctx, reqCtx, in)
@@ -348,10 +348,10 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
-			Email:     util.PointerFromValue(updatedUsername + "@foo.com"),
-			Password:  util.PointerFromValue("password_" + updatedUsername),
-			Bio:       util.PointerFromValue("I am the 4th user."),
-			ImageLink: util.PointerFromValue("http://foo.com/" + updatedUsername + ".png"),
+			Email:     util.PointerOf(updatedUsername + "@foo.com"),
+			Password:  util.PointerOf("password_" + updatedUsername),
+			Bio:       util.PointerOf("I am the 4th user."),
+			ImageLink: util.PointerOf("http://foo.com/" + updatedUsername + ".png"),
 		}}
 
 		_, err := userUpdateSfl(ctx, reqCtx, in)
@@ -370,10 +370,10 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
-			Email:     util.PointerFromValue(userSources[username1].Email),
-			Password:  util.PointerFromValue("password_" + updatedUsername),
-			Bio:       util.PointerFromValue("I am the 4th user."),
-			ImageLink: util.PointerFromValue("http://foo.com/" + updatedUsername + ".png"),
+			Email:     util.PointerOf(userSources[username1].Email),
+			Password:  util.PointerOf("password_" + updatedUsername),
+			Bio:       util.PointerOf("I am the 4th user."),
+			ImageLink: util.PointerOf("http://foo.com/" + updatedUsername + ".png"),
 		}}
 
 		_, err := userUpdateSfl(ctx, reqCtx, in)
@@ -392,10 +392,10 @@ func userUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		in := rpc.UserUpdateIn{User: model.UserPatch{
 			Username:  &updatedUsername,
-			Email:     util.PointerFromValue(updatedUsername + "@foo.com"),
-			Password:  util.PointerFromValue("password_" + updatedUsername),
-			Bio:       util.PointerFromValue("I am the 4th user."),
-			ImageLink: util.PointerFromValue("http://foo.com/" + updatedUsername + ".png"),
+			Email:     util.PointerOf(updatedUsername + "@foo.com"),
+			Password:  util.PointerOf("password_" + updatedUsername),
+			Bio:       util.PointerOf("I am the 4th user."),
+			ImageLink: util.PointerOf("http://foo.com/" + updatedUsername + ".png"),
 		}}
 
 		out, err := userUpdateSfl(ctx, reqCtx, in)

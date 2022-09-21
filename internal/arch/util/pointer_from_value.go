@@ -6,6 +6,6 @@
 
 package util
 
-func PointerFromValue[T any](v T) *T {
+func PointerOf[T any](v T) *T {
 	return &v
 }

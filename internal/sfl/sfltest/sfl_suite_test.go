@@ -33,6 +33,8 @@ func TestSflSuite(t *testing.T) {
 			{Name: "userFollowSflSubt", Func: userFollowSflSubt},
 			{Name: "userGetCurrentSflSubt", Func: userGetCurrentSflSubt},
 			{Name: "userUnfollowSflSubt", Func: userUnfollowSflSubt},
+			// Undo above unfollow action to enable subsequent tests
+			{Name: "userFollowSflSubt", Func: userFollowSflSubt},
 			{Name: "userUpdateSflSubt", Func: userUpdateSflSubt},
 			{Name: "articleCreateSflSubt", Func: articleCreateSflSubt},
 			{Name: "articleDeleteSflSubt", Func: articleDeleteSflSubt},
@@ -40,7 +42,8 @@ func TestSflSuite(t *testing.T) {
 			{Name: "articleGetSflSubt", Func: articleGetSflSubt},
 			{Name: "articleUnfavoriteSflSubt", Func: articleUnfavoriteSflSubt},
 			{Name: "articleUpdateSflSubt", Func: articleUpdateSflSubt},
-			//{Name: "articlesListSflSubt", Func: articlesListSflSubt},
+			{Name: "articlesFeedSflSubt", Func: articlesFeedSflSubt},
+			{Name: "articlesListSflSubt", Func: articlesListSflSubt},
 			//{Name: "commentSflsSubt", Func: commentSflsSubt},
 			//{Name: "profileSflsSubt", Func: profileSflsSubt},
 			//{Name: "tagSflsSubt", Func: tagSflsSubt},

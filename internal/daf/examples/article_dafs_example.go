@@ -27,13 +27,13 @@ var articles = []model.Article{
 		Title:       "An interesting subject",
 		Slug:        slug1,
 		Description: "Story about an interesting subject.",
-		Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
+		Body:        util.PointerOf("I met this interesting subject a long time ago."),
 	},
 	{
 		Title:       "A dull story",
 		Slug:        slug2,
 		Description: "Narrative about something dull.",
-		Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
+		Body:        util.PointerOf("This is so dull, bla, bla, bla."),
 	},
 }
 
@@ -70,7 +70,7 @@ func articleDafsExample(ctx context.Context, db dbpgx.Db) {
 	fmt.Println("\narticlesListDaf - by author:", articlePluses, "\n")
 
 	criteria = rpc.ArticleCriteria{
-		Tag:         util.PointerFromValue("FOOTAG"),
+		Tag:         util.PointerOf("FOOTAG"),
 		Author:      nil,
 		FavoritedBy: nil,
 		Limit:       nil,

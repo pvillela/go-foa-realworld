@@ -13,8 +13,8 @@ import (
 	"github.com/pvillela/go-foa-realworld/internal/arch/db/dbpgx/dbpgxtest"
 	"github.com/pvillela/go-foa-realworld/internal/arch/errx"
 	"github.com/pvillela/go-foa-realworld/internal/arch/util"
-	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/pvillela/go-foa-realworld/internal/daf"
+	"github.com/pvillela/go-foa-realworld/internal/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -49,7 +49,7 @@ var commentDafsSubt = dbpgxtest.TestWithTransaction(func(ctx context.Context, tx
 		comment := model.Comment{
 			ArticleId: mdb.ArticleGetBySlug(src.slug).Id,
 			AuthorId:  mdb.UserGetByName(src.username).Id,
-			Body:      util.PointerFromValue(src.body),
+			Body:      util.PointerOf(src.body),
 		}
 		return src.username, src.slug, comment
 	}

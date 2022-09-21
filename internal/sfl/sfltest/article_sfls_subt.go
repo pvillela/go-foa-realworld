@@ -36,7 +36,7 @@ var authorsAndArticles = []AuthorAndArticle{
 		Article: model.Article{
 			Title:       "An interesting subject",
 			Description: "Story about an interesting subject.",
-			Body:        util.PointerFromValue("I met this interesting subject a long time ago."),
+			Body:        util.PointerOf("I met this interesting subject a long time ago."),
 		},
 	},
 	{
@@ -44,7 +44,7 @@ var authorsAndArticles = []AuthorAndArticle{
 		Article: model.Article{
 			Title:       "A dull story",
 			Description: "Narrative about something dull.",
-			Body:        util.PointerFromValue("This is so dull, bla, bla, bla."),
+			Body:        util.PointerOf("This is so dull, bla, bla, bla."),
 		},
 	},
 	{
@@ -52,7 +52,7 @@ var authorsAndArticles = []AuthorAndArticle{
 		Article: model.Article{
 			Title:       "An article to be deleted",
 			Description: "Stuff about an article to be deleted.",
-			Body:        util.PointerFromValue("This is an article to be deleted, bla, bla, bla."),
+			Body:        util.PointerOf("This is an article to be deleted, bla, bla, bla."),
 		},
 	},
 }
@@ -67,7 +67,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	{
 		msg := "article_create_sfl - valid article"
 
-		for _, aa := range authorsAndArticles {
+		for _, aa := range util.SliceReverse(authorsAndArticles) {
 			authorname := aa.Authorname
 			reqCtx := web.RequestContext{
 				Username: authorname,
@@ -121,7 +121,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 			in := rpc.ArticleCreateIn{Article: rpc.ArticleCreateIn0{
 				Title:       article.Title,
 				Description: "dummy description",
-				Body:        util.PointerFromValue("dummy body"),
+				Body:        util.PointerOf("dummy body"),
 				TagList:     nil,
 			}}
 
@@ -144,15 +144,14 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_delete_sfl - existing article authored by current user"
 
 		aa := authorsAndArticles[2]
-
+		article := aa.Article
+		slug := util.Slug(article.Title)
 		authorname := aa.Authorname
+
 		reqCtx := web.RequestContext{
 			Username: authorname,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		_, err := articleDeleteSfl(ctx, reqCtx, slug)
 		assert.NoError(t, err, msg)
@@ -170,15 +169,14 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_delete_sfl - inexistenet article"
 
 		aa := authorsAndArticles[2]
-
+		article := aa.Article
+		slug := util.Slug(article.Title)
 		authorname := aa.Authorname
+
 		reqCtx := web.RequestContext{
 			Username: authorname,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		_, err := articleDeleteSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -193,15 +191,14 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_delete_sfl - attempted by non-author"
 
 		aa := authorsAndArticles[0]
-
+		article := aa.Article
+		slug := util.Slug(article.Title)
 		authorname := username1
+
 		reqCtx := web.RequestContext{
 			Username: authorname,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		_, err := articleDeleteSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -222,14 +219,13 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		currUsername := username1
 		aa := authorsAndArticles[0]
+		article := aa.Article
+		slug := util.Slug(article.Title)
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		out, err := articleFavoriteSfl(ctx, reqCtx, slug)
 		assert.NoError(t, err, msg)
@@ -245,14 +241,13 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		currUsername := username1
 		aa := authorsAndArticles[0]
+		article := aa.Article
+		slug := util.Slug(article.Title)
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		_, err := articleFavoriteSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -267,13 +262,12 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_favorite_sfl - inexistent article"
 
 		currUsername := username1
+		slug := "dkdkddkd"
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-
-		slug := "dkdkddkd"
 
 		_, err := articleFavoriteSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -294,14 +288,13 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		currUsername := username1
 		aa := authorsAndArticles[0]
+		article := aa.Article
+		slug := util.Slug(article.Title)
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		out, err := articleGetSfl(ctx, reqCtx, slug)
 		assert.NoError(t, err, msg)
@@ -316,13 +309,12 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_get_sfl - inexistent article"
 
 		currUsername := username1
+		slug := "dkdkddkd"
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-
-		slug := "dkdkddkd"
 
 		_, err := articleGetSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -343,14 +335,13 @@ func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		currUsername := username1
 		aa := authorsAndArticles[0]
+		article := aa.Article
+		slug := util.Slug(article.Title)
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		out, err := articleUnfavoriteSfl(ctx, reqCtx, slug)
 		assert.NoError(t, err, msg)
@@ -366,14 +357,13 @@ func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		currUsername := username1
 		aa := authorsAndArticles[0]
+		article := aa.Article
+		slug := util.Slug(article.Title)
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		_, err := articleUnfavoriteSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -388,13 +378,12 @@ func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_unfavorite_sfl - inexistent article"
 
 		currUsername := username1
+		slug := "dkdkddkd"
 
 		reqCtx := web.RequestContext{
 			Username: currUsername,
 			Token:    &jwt.Token{},
 		}
-
-		slug := "dkdkddkd"
 
 		_, err := articleUnfavoriteSfl(ctx, reqCtx, slug)
 		returnedErrxKind := dbpgx.ClassifyError(err)
@@ -414,22 +403,21 @@ func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_update_sfl - existing article authored by current user"
 
 		aa := authorsAndArticles[1]
-
+		article := aa.Article
+		slug := util.Slug(article.Title)
 		authorname := aa.Authorname
+
 		reqCtx := web.RequestContext{
 			Username: authorname,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		in := rpc.ArticleUpdateIn{
 			Article: rpc.ArticleUpdateIn0{
 				Slug:        slug,
-				Title:       util.PointerFromValue("New Title"),
-				Description: util.PointerFromValue("New description"),
-				Body:        util.PointerFromValue("New body"),
+				Title:       util.PointerOf("New Title"),
+				Description: util.PointerOf("New description"),
+				Body:        util.PointerOf("New body"),
 			},
 		}
 
@@ -448,21 +436,20 @@ func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_update_sfl - inexistenet article"
 
 		aa := authorsAndArticles[1]
-
+		slug := "xxx"
 		authorname := aa.Authorname
+
 		reqCtx := web.RequestContext{
 			Username: authorname,
 			Token:    &jwt.Token{},
 		}
 
-		slug := "xxx"
-
 		in := rpc.ArticleUpdateIn{
 			Article: rpc.ArticleUpdateIn0{
 				Slug:        slug,
-				Title:       util.PointerFromValue("New Title"),
-				Description: util.PointerFromValue("New description"),
-				Body:        util.PointerFromValue("New body"),
+				Title:       util.PointerOf("New Title"),
+				Description: util.PointerOf("New description"),
+				Body:        util.PointerOf("New body"),
 			},
 		}
 
@@ -479,22 +466,21 @@ func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 		msg := "article_update_sfl - attempted by non-author"
 
 		aa := authorsAndArticles[0]
+		article := aa.Article
+		slug := util.Slug(article.Title)
 
 		authorname := username1
 		reqCtx := web.RequestContext{
 			Username: authorname,
 			Token:    &jwt.Token{},
 		}
-		article := aa.Article
-
-		slug := util.Slug(article.Title)
 
 		in := rpc.ArticleUpdateIn{
 			Article: rpc.ArticleUpdateIn0{
 				Slug:        slug,
-				Title:       util.PointerFromValue("New Title"),
-				Description: util.PointerFromValue("New description"),
-				Body:        util.PointerFromValue("New body"),
+				Title:       util.PointerOf("New Title"),
+				Description: util.PointerOf("New description"),
+				Body:        util.PointerOf("New body"),
 			},
 		}
 
@@ -505,5 +491,108 @@ func articleUpdateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 		assert.Equal(t, expectedErrxKind, returnedErrxKind, msg+" - must fail with appropriate error kind when update attempt by non-author")
 		assert.ErrorContains(t, err, expectedErrMsgPrefix, msg+" - must fail with appropriate error message when update attempt by non-author")
+	}
+}
+
+func articlesFeedSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	boot.ArticlesFeedSflCfgAdapter = TestCfgAdapterOf(db)
+	articlesFeedSfl := boot.ArticlesFeedSflBoot(nil)
+
+	{
+		msg := "articles_feed_sfl - without limit and offset"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		in := rpc.ArticlesFeedIn{}
+
+		out, err := articlesFeedSfl(ctx, reqCtx, in)
+		assert.NoError(t, err, msg)
+		assert.Equal(t, 2, len(out.Articles), msg+" - expected list with 2 articles")
+	}
+
+	{
+		msg := "articles_feed_sfl - with limit and offset"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		in := rpc.ArticlesFeedIn{
+			Limit:  util.PointerOf(1),
+			Offset: util.PointerOf(1),
+		}
+
+		out, err := articlesFeedSfl(ctx, reqCtx, in)
+		assert.NoError(t, err, msg)
+		assert.Equal(t, 1, len(out.Articles), msg+" - expected list with one article")
+
+		feedArticlce := out.Articles[0].Article.ToArticle()
+
+		allArticles, err := testutil.ArticlesList(db, ctx, currUsername)
+		assert.NoError(t, err, msg)
+		assert.Equal(t, 2, len(allArticles), msg+" - retrieving all articles, expected list with 2 article")
+		expectedArticle := allArticles[1]
+		assert.Equal(t, expectedArticle, feedArticlce, msg+" - article from SFL must match second item in the list of all articles")
+	}
+}
+
+func articlesListSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
+	boot.ArticlesListSflCfgAdapter = TestCfgAdapterOf(db)
+	articlesListSfl := boot.ArticlesListSflBoot(nil)
+
+	{
+		msg := "articles_list_sfl - without limit and offset"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		in := rpc.ArticleCriteria{
+			Author: util.PointerOf(username2),
+		}
+
+		out, err := articlesListSfl(ctx, reqCtx, in)
+		assert.NoError(t, err, msg)
+		assert.Equal(t, 2, len(out.Articles), msg+" - expected list with 2 articles")
+	}
+
+	{
+		msg := "articles_list_sfl - with limit and offset"
+
+		currUsername := username1
+
+		reqCtx := web.RequestContext{
+			Username: currUsername,
+			Token:    &jwt.Token{},
+		}
+
+		in := rpc.ArticleCriteria{
+			Author: util.PointerOf(username2),
+			Limit:  util.PointerOf(1),
+			Offset: util.PointerOf(1),
+		}
+
+		out, err := articlesListSfl(ctx, reqCtx, in)
+		assert.NoError(t, err, msg)
+		assert.Equal(t, 1, len(out.Articles), msg+" - expected list with one article")
+
+		feedArticlce := out.Articles[0].Article.ToArticle()
+
+		allArticles, err := testutil.ArticlesList(db, ctx, currUsername)
+		assert.NoError(t, err, msg)
+		assert.Equal(t, 2, len(allArticles), msg+" - retrieving all articles, expected list with 2 article")
+		expectedArticle := allArticles[1]
+		assert.Equal(t, expectedArticle, feedArticlce, msg+" - article from SFL must match second item in the list of all articles")
 	}
 }
