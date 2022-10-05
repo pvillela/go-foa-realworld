@@ -44,6 +44,7 @@ func TestSflSuite(t *testing.T) {
 			{Name: "articleUpdateSflSubt", Func: articleUpdateSflSubt},
 			{Name: "articlesFeedSflSubt", Func: articlesFeedSflSubt},
 			{Name: "articlesListSflSubt", Func: articlesListSflSubt},
+			{Name: "commentAddSflSubt", Func: commentAddSflSubt},
 			//{Name: "commentSflsSubt", Func: commentSflsSubt},
 			//{Name: "profileSflsSubt", Func: profileSflsSubt},
 			//{Name: "tagSflsSubt", Func: tagSflsSubt},

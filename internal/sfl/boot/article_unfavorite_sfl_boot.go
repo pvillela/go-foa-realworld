@@ -18,9 +18,9 @@ import (
 
 var ArticleUnfavoriteSflCfgAdapter = DefaultSflCfgAdapter
 
-// ArticleUnfavoriteSflC is the function that constructs a stereotype instance of type
+// ArticleUnfavoriteSflBoot is the function that constructs a stereotype instance of type
 // ArticleUnfavoriteSflT with configuration information and hard-wired stereotype dependencies.
-func ArticleUnfavoriteSflC(src config.AppCfgSrc) sfl.ArticleUnfavoriteSflT {
+func ArticleUnfavoriteSflBoot(src config.AppCfgSrc) sfl.ArticleUnfavoriteSflT {
 	return sfl.ArticleUnfavoriteSflC(
 		ArticleUnfavoriteSflCfgAdapter(src),
 		fl.ArticleAndUserGetFl,

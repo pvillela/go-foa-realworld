@@ -17,9 +17,9 @@ import (
 
 var ArticleGetSflCfgAdapter = DefaultSflCfgAdapter
 
-// ArticleGetSflC is the function that constructs a stereotype instance of type
+// ArticleGetSflBoot is the function that constructs a stereotype instance of type
 // ArticleGetSflT with configuration information and hard-wired stereotype dependencies.
-func ArticleGetSflC(src config.AppCfgSrc) sfl.ArticleGetSflT {
+func ArticleGetSflBoot(src config.AppCfgSrc) sfl.ArticleGetSflT {
 	return sfl.ArticleGetSflC(
 		ArticleGetSflCfgAdapter(src),
 		fl.ArticleAndUserGetFl,

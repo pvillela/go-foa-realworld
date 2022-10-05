@@ -13,10 +13,10 @@ import (
 
 type CommentAddIn struct {
 	Slug    string
-	Comment commentAddIn0
+	Comment CommentAddIn0
 }
 
-type commentAddIn0 struct {
+type CommentAddIn0 struct {
 	Body *string // mandatory
 }
 

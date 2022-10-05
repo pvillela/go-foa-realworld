@@ -67,6 +67,9 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	{
 		msg := "article_create_sfl - valid article"
 
+		// SliceReverse is used below to cause articles to be listed in
+		// the original order when the Articles SFLs are used as those
+		// SFLs list articles in reverse chronological order.
 		for _, aa := range util.SliceReverse(authorsAndArticles) {
 			authorname := aa.Authorname
 			reqCtx := web.RequestContext{
@@ -138,7 +141,7 @@ func articleCreateSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	boot.ArticleDeleteSflCfgAdapter = TestCfgAdapterOf(db)
-	articleDeleteSfl := boot.ArticleDeleteSflC(nil)
+	articleDeleteSfl := boot.ArticleDeleteSflBoot(nil)
 
 	{
 		msg := "article_delete_sfl - existing article authored by current user"
@@ -212,7 +215,7 @@ func articleDeleteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	boot.ArticleFavoriteSflCfgAdapter = TestCfgAdapterOf(db)
-	articleFavoriteSfl := boot.ArticleFavoriteSflC(nil)
+	articleFavoriteSfl := boot.ArticleFavoriteSflBoot(nil)
 
 	{
 		msg := "article_favorite_sfl - existing article, not yet favorited"
@@ -281,7 +284,7 @@ func articleFavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	boot.ArticleGetSflCfgAdapter = TestCfgAdapterOf(db)
-	articleGetSfl := boot.ArticleGetSflC(nil)
+	articleGetSfl := boot.ArticleGetSflBoot(nil)
 
 	{
 		msg := "article_get_sfl - existing article"
@@ -328,7 +331,7 @@ func articleGetSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 
 func articleUnfavoriteSflSubt(db dbpgx.Db, ctx context.Context, t *testing.T) {
 	boot.ArticleUnfavoriteSflCfgAdapter = TestCfgAdapterOf(db)
-	articleUnfavoriteSfl := boot.ArticleUnfavoriteSflC(nil)
+	articleUnfavoriteSfl := boot.ArticleUnfavoriteSflBoot(nil)
 
 	{
 		msg := "article_unfavorite_sfl - existing article, previously favorited"
